@@ -8,6 +8,8 @@ app.use(express.json());
 
 app.post("/journey/generate", (req, res) => {
 
+    console.log(req.body);
+
     const { userType, careerGoal, experienceLevel, weeklyTimeCommitment } = req.body;
 
     res.json({
