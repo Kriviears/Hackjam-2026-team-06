@@ -1,114 +1,180 @@
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import type { JourneyRequest } from "../types/journey";
-import { generateJourney } from "../services/journeyApi";
+import "./OnboardingPage.css";
 
-// OnboardingPage component that handles user input and journey generation
-export default function OnboardingPage() {
-    const navigate = useNavigate();
+type OnboardingData = {
+  userType: string;
+  careerGoal: string;
+  experienceLevel: string;
+  weeklyTimeCommitment: string;
+  currentSkills: string[];
+  supportNeeds: string[];
+};
 
-    // State to hold the form data for the journey request
-    const [formData, setFormData] = useState<JourneyRequest>({
-        userType: "",
-        careerGoal: "",
-        experienceLevel: "",
-        weeklyTimeCommitment: ""
-    });
+function OnboardingPage() {
+  const navigate = useNavigate();
 
-    // Function to handle changes in the form inputs and update the state accordingly
-    const handleChange = (
-        event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
-        const { name, value } = event.target;
+  const [formData, setFormData] = useState<OnboardingData>({
+    userType: "",
+    careerGoal: "",
+    experienceLevel: "",
+    weeklyTimeCommitment: "",
+    currentSkills: [],
+    supportNeeds: [],
+  });
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
+  function handleChange(e: ChangeEvent<HTMLSelectElement>) {
+    const { name, value } = e.target;
 
-    // Function to handle form submission, generate the journey, and navigate to the dashboard
-    const handleSubmit = async () => {
-        const journey = await generateJourney(formData);
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
 
-        navigate("/dashboard", {
-            state: { journey }
-        });
-    };
-return (
-    <main>
-        <section>
-            <p>Compass Career GPS</p>
-            <h1>Build Your Personalized Path</h1>
-            <p>Start by telling us where you are in the Per Scholas journey.</p>
+  function handleCheckboxChange(e: ChangeEvent<HTMLInputElement>) {
+    const { name, value, checked } = e.target;
 
-            <label>
-                Which best describes you?
-                <select
-                    name="userType"
-                    value={formData.userType}
-                    onChange={handleChange}
-                >
-                    <option value="">Select one</option>
-                    <option value="prospect">Prospective Candidate</option>
-                    <option value="currentLearner">Current Learner</option>
-                    <option value="alumni">Alumni</option>
-                </select>
-            </label>
+    setFormData((prev) => ({
+      ...prev,
+      [name]: checked
+        ? [...prev[name as keyof OnboardingData] as string[], value]
+        : (prev[name as keyof OnboardingData] as string[]).filter(
+            (item) => item !== value
+          ),
+    }));
+  }
 
-            <label>
-                Career Goal
-                <select
-                    name="careerGoal"
-                    value={formData.careerGoal}
-                    onChange={handleChange}
-                >
-                    <option value="">Select one</option>
-                    <option value="Gain entrance into Per Scholas">
-                        Gain entrance into Per Scholas
-                    </option>
-                    <option value="Graduate successfully">
-                        Graduate successfully
-                    </option>
-                    <option value="Gain employment">
-                        Gain employment
-                    </option>
-                </select>
-            </label>
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
 
-            <label>
-                Experience Level
-                <select
-                    name="experienceLevel"
-                    value={formData.experienceLevel}
-                    onChange={handleChange}
-                >
-                    <option value="">Select one</option>
-                    <option value="beginner">Beginner</option>
-                    <option value="some experience">Some experience</option>
-                    <option value="comfortable">Comfortable</option>
-                </select>
-            </label>
+    try {
+      const response = await fetch("http://localhost:5000/journey/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-            <label>
-                Weekly Time Commitment
-                <select
-                    name="weeklyTimeCommitment"
-                    value={formData.weeklyTimeCommitment}
-                    onChange={handleChange}
-                >
-                    <option value="">Select one</option>
-                    <option value="1-3 hours">1-3 hours</option>
-                    <option value="4-6 hours">4-6 hours</option>
-                    <option value="7-10 hours">7-10 hours</option>
-                    <option value="10+ hours">10+ hours</option>
-                </select>
-            </label>
+      if (!response.ok) {
+        throw new Error("Failed to generate roadmap");
+      }
 
-            <button onClick={handleSubmit}>
-                Generate Journey
-            </button>
-        </section>
+      const roadmapData = await response.json();
+
+      navigate("/dashboard", {
+        state: { roadmap: roadmapData },
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong generating your roadmap.");
+    }
+  }
+
+  return (
+    <main className="onboarding-page">
+      <section className="onboarding-card">
+        <h1>Start Your Compass Journey</h1>
+        <p>
+          Tell us where you are, where you want to go, and Compass will generate
+          your first career roadmap.
+        </p>
+
+        <form onSubmit={handleSubmit}>
+          <label>
+            Who are you right now?
+            <select name="userType" value={formData.userType} onChange={handleChange} required>
+              <option value="">Select one</option>
+              <option value="current_learner">Current Learner</option>
+              <option value="career_changer">Career Changer</option>
+              <option value="early_career">Early Career / Recent Graduate</option>
+            </select>
+          </label>
+
+          <label>
+            Career Goal
+            <select name="careerGoal" value={formData.careerGoal} onChange={handleChange} required>
+              <option value="">Select a goal</option>
+              <option value="Frontend Developer">Frontend Developer</option>
+              <option value="Backend Developer">Backend Developer</option>
+              <option value="Full Stack Developer">Full Stack Developer</option>
+              <option value="Data Analyst">Data Analyst</option>
+              <option value="AI Solutions Developer">AI Solutions Developer</option>
+              <option value="UX/UI Designer">UX/UI Designer</option>
+            </select>
+          </label>
+
+          <label>
+            Experience Level
+            <select name="experienceLevel" value={formData.experienceLevel} onChange={handleChange} required>
+              <option value="">Select level</option>
+              <option value="beginner">Beginner</option>
+              <option value="some_experience">Some Experience</option>
+              <option value="intermediate">Intermediate</option>
+            </select>
+          </label>
+
+          <label>
+            Weekly Time Commitment
+            <select
+              name="weeklyTimeCommitment"
+              value={formData.weeklyTimeCommitment}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select time</option>
+              <option value="0-5">0–5 hours</option>
+              <option value="6-10">6–10 hours</option>
+              <option value="11-15">11–15 hours</option>
+              <option value="16+">16+ hours</option>
+            </select>
+          </label>
+
+          <div className="form-group">
+            <h3>Current Skills</h3>
+            {["HTML", "CSS", "JavaScript", "React", "Node.js", "Python", "SQL", "Git/GitHub"].map((skill) => (
+              <label className="checkbox-label" key={skill}>
+                <input
+                  type="checkbox"
+                  name="currentSkills"
+                  value={skill}
+                  checked={formData.currentSkills.includes(skill)}
+                  onChange={handleCheckboxChange}
+                />
+                {skill}
+              </label>
+            ))}
+          </div>
+
+          <div className="form-group">
+            <h3>Support Needed</h3>
+            {[
+              "Skill building",
+              "Project ideas",
+              "Portfolio guidance",
+              "Interview prep",
+              "Job search strategy",
+              "Confidence and accountability",
+            ].map((support) => (
+              <label className="checkbox-label" key={support}>
+                <input
+                  type="checkbox"
+                  name="supportNeeds"
+                  value={support}
+                  checked={formData.supportNeeds.includes(support)}
+                  onChange={handleCheckboxChange}
+                />
+                {support}
+              </label>
+            ))}
+          </div>
+
+          <button type="submit">Generate My Roadmap</button>
+        </form>
+      </section>
     </main>
-);
+  );
 }
+
+export default OnboardingPage;
