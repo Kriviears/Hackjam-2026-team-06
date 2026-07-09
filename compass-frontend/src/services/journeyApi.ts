@@ -18,7 +18,7 @@ export async function generateJourney(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to generate journey");
+    throw new Error("Not wired yet");
   }
 
   return response.json();
