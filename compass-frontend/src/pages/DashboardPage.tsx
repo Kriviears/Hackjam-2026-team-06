@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import type { JourneyResponse } from "../types/journey";
 
+// DashboardPage component that displays the user's journey and progress
 export default function DashboardPage() {
   const location = useLocation();
   const journey = location.state?.journey as JourneyResponse | undefined;

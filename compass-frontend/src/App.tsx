@@ -1,13 +1,14 @@
-
+import { Routes, Route } from "react-router-dom";
+import OnboardingPage from "./pages/OnboardingPage";
+import DashboardPage from "./pages/DashboardPage";
 
 function App() {
- 
-
   return (
-    <>
-   Let's build a compass app!
-    </>
-  )
+    <Routes>
+      <Route path="/" element={<OnboardingPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;
