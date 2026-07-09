@@ -1,3 +1,4 @@
+// Request interface for initiating a new journey
 export interface JourneyRequest {
   userType: string;
   careerGoal: string;
@@ -5,6 +6,7 @@ export interface JourneyRequest {
   weeklyTimeCommitment: string;
 }
 
+// Interface for each waypoint in the journey   
 export interface Waypoint {
   title: string;
   description: string;
@@ -12,6 +14,7 @@ export interface Waypoint {
   status: "complete" | "current" | "locked";
 }
 
+// Response interface for the journey, including progress and waypoints
 export interface JourneyResponse {
   destination: string;
   currentStage: string;

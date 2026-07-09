@@ -1,5 +1,6 @@
 // Import the necessary types for the journey request and response
-import type { JourneyRequest, JourneyResponse } from "../types/journey";
+import type { JourneyRequest, JourneyResponse} from "../types/journey";
+
 
 // Function to generate a journey based on the provided request data
 export async function generateJourney(
