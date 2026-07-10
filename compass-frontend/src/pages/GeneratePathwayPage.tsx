@@ -22,16 +22,17 @@ import {
 import type {
   JourneyRequest,
   JourneyResponse,
+  Waypoint,
 } from "../types/journey";
-
 import techLandscape from "../assets/tech-landscape.png";
-import compassLogo from "../assets/compass-logo.png";
+import compassLogo from "../assets/compass-logo-loading.png";
 import pathwayCompass from "../assets/pathwaycompass.png";
 
 import "./GeneratePathwayPage.css";
 
 interface GeneratingLocationState {
   formData?: JourneyRequest;
+  roadmap?: JourneyResponse;
 }
 
 interface GenerationStep {
@@ -45,37 +46,37 @@ const generationSteps: GenerationStep[] = [
   {
     id: 1,
     title: "Understanding Your Goals",
-    description: "Reviewing your desired career destination.",
+    description: "Analyzing your career aspirations...",
     icon: BrainCircuit,
   },
   {
     id: 2,
-    title: "Assessing Your Experience",
-    description: "Evaluating your current skills and experience.",
+    title: "Assessing Your Current Skills",
+    description: "Reviewing your experience and strengths...",
     icon: CircleUserRound,
   },
   {
     id: 3,
-    title: "Identifying Your Starting Point",
-    description: "Determining where your learning journey begins.",
+    title: "Identifying Your Career Destination",
+    description: "Finding the best career fit for you...",
     icon: Target,
   },
   {
     id: 4,
-    title: "Mapping Your Learning Path",
-    description: "Creating your personalized sequence of milestones.",
+    title: "Mapping Learning Pathway",
+    description: "Creating your step-by-step learning journey...",
     icon: Map,
   },
   {
     id: 5,
     title: "Finding Recommended Resources",
-    description: "Selecting resources that support your goals.",
+    description: "Curating the best courses, tools, and materials...",
     icon: Route,
   },
   {
     id: 6,
-    title: "Connecting Career Opportunities",
-    description: "Matching projects and career-building experiences.",
+    title: "Connecting Projects & Opportunities",
+    description: "Matching real-world projects and opportunities...",
     icon: BriefcaseBusiness,
   },
 ];
@@ -90,79 +91,78 @@ const navItems = [
   { label: "Settings", icon: Settings },
 ];
 
-const mockJourneyResponse: JourneyResponse = {
+const previewFallbackWaypoints: Waypoint[] = [
+  {
+    title: "Get Your Bearings",
+    description:
+      "Review your current skills, goals, experience, and available learning time.",
+    category: "Orientation",
+    status: "in-progress",
+  },
+  {
+    title: "Build Core Skills",
+    description:
+      "Develop foundational knowledge in the tools and concepts for your chosen path.",
+    category: "Technical Skills",
+    status: "pending",
+  },
+  {
+    title: "Create Real-World Projects",
+    description:
+      "Apply your skills through portfolio projects and practical challenges.",
+    category: "Portfolio",
+    status: "pending",
+  },
+  {
+    title: "Prepare for Your Career",
+    description:
+      "Strengthen your resume, portfolio, interview skills, and professional presence.",
+    category: "Career Preparation",
+    status: "pending",
+  },
+];
+
+const fallbackRoadmap: JourneyResponse = {
+  id: "preview-roadmap",
   destination: "Data Analyst",
   currentStage: "Get Your Bearings",
   progressPercent: 0,
-  nextStep: "Complete your first SQL fundamentals lesson",
-  waypoints: [
-    {
-      title: "Get Your Bearings",
-      description:
-        "Review your current skills, goals, experience, and available learning time.",
-      category: "Orientation",
-      status: "current",
-    },
-    {
-      title: "Build Core Skills",
-      description:
-        "Develop foundational knowledge in SQL, Excel, Python, and data analysis.",
-      category: "Technical Skills",
-      status: "locked",
-    },
-    {
-      title: "Create Real-World Projects",
-      description:
-        "Apply your skills through portfolio projects and practical challenges.",
-      category: "Portfolio",
-      status: "locked",
-    },
-    {
-      title: "Gain Practical Experience",
-      description:
-        "Build experience through collaboration, volunteer work, or internships.",
-      category: "Experience",
-      status: "locked",
-    },
-    {
-      title: "Prepare for Your Career",
-      description:
-        "Strengthen your résumé, portfolio, interview skills, and professional presence.",
-      category: "Career Preparation",
-      status: "locked",
-    },
-    {
-      title: "Launch Your Career",
-      description:
-        "Begin applying for opportunities while continuing to grow your skills.",
-      category: "Career Launch",
-      status: "locked",
-    },
-  ],
+  nextStep: "Complete your first learning milestone",
+  waypoints: previewFallbackWaypoints,
 };
 
-function mockGenerateRoadmap(
-  requestData?: JourneyRequest
+async function generateRoadmap(
+  formData?: JourneyRequest,
+  initialRoadmap?: JourneyResponse
 ): Promise<JourneyResponse> {
-  console.log("Generating roadmap from:", requestData);
+  if (initialRoadmap) {
+    return initialRoadmap;
+  }
 
-  return new Promise((resolve) => {
-    window.setTimeout(() => {
-      resolve({
-        ...mockJourneyResponse,
-        destination:
-          requestData?.careerGoal.trim() ||
-          mockJourneyResponse.destination,
-      });
-    }, 9000);
+  if (!formData) {
+    return fallbackRoadmap;
+  }
+
+  const response = await fetch("http://localhost:8000/journey/generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formData),
   });
+
+  if (!response.ok) {
+    throw new Error("Failed to generate roadmap.");
+  }
+
+  return response.json();
 }
 
 export default function GeneratePathwayPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { formData } =
+  const { formData, roadmap: initialRoadmap } =
     (location.state as GeneratingLocationState | null) ?? {};
 
   const [progress, setProgress] = useState(4);
@@ -178,7 +178,10 @@ export default function GeneratePathwayPage() {
 
     async function buildRoadmap() {
       try {
-        const response = await mockGenerateRoadmap(formData);
+        const [response] = await Promise.all([
+          generateRoadmap(formData, initialRoadmap),
+          new Promise((resolve) => window.setTimeout(resolve, 9000)),
+        ]);
 
         if (!isMounted) {
           return;
@@ -206,7 +209,7 @@ export default function GeneratePathwayPage() {
     return () => {
       isMounted = false;
     };
-  }, [formData]);
+  }, [formData, initialRoadmap]);
 
   useEffect(() => {
     if (isComplete || errorMessage) {
@@ -281,20 +284,21 @@ export default function GeneratePathwayPage() {
   }, [isComplete, errorMessage]);
 
   const previewWaypoints =
-    roadmap?.waypoints ?? mockJourneyResponse.waypoints;
+    roadmap?.waypoints ??
+    initialRoadmap?.waypoints ??
+    previewFallbackWaypoints;
 
   const currentStatus = getStatusMessage(progress, isComplete);
 
-  function handleViewDashboard() {
+  function handleViewRoadmap() {
     if (!roadmap) {
       return;
     }
 
-    navigate("/dashboard", {
+    navigate("/roadmap", {
       replace: true,
       state: {
-        roadmap,
-        formData,
+        journey: roadmap,
       },
     });
   }
@@ -448,13 +452,24 @@ export default function GeneratePathwayPage() {
               {currentStatus}
             </p>
 
+            {errorMessage && (
+              <div className="generate-inline-error" role="alert">
+                <strong>We lost our direction.</strong>
+                <span>{errorMessage}</span>
+
+                <button type="button" onClick={handleTryAgain}>
+                  Try Again
+                </button>
+              </div>
+            )}
+
             {isComplete && (
               <button
                 type="button"
-                className="generate-dashboard-button"
-                onClick={handleViewDashboard}
+                className="generate-roadmap-button"
+                onClick={handleViewRoadmap}
               >
-                View My Dashboard
+                View My RoadMap
                 <Route size={19} />
               </button>
             )}
@@ -550,17 +565,6 @@ export default function GeneratePathwayPage() {
             </div>
           </section>
         </section>
-
-        {errorMessage && (
-          <section className="generate-error" role="alert">
-            <h2>We lost our direction.</h2>
-            <p>{errorMessage}</p>
-
-            <button type="button" onClick={handleTryAgain}>
-              Try Again
-            </button>
-          </section>
-        )}
       </main>
     </div>
   );

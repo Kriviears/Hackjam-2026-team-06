@@ -24,6 +24,11 @@ function App() {
         path="/dashboard"
         element={<DashboardPage />}
       />
+
+      <Route
+        path="/roadmap"
+        element={<DashboardPage />}
+      />
     </Routes>
   );
 }

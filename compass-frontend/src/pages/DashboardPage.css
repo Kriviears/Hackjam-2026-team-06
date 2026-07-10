@@ -1,0 +1,123 @@
+.dashboard-page {
+  position: relative;
+  min-height: 100vh;
+  padding: 56px;
+  overflow: hidden;
+  color: #082b66;
+  background-position: center bottom;
+  background-size: cover;
+  isolation: isolate;
+}
+
+.dashboard-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 48% 20%, rgba(255, 255, 255, 0.86), transparent 36%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.18));
+}
+
+.dashboard-motion-background {
+  position: fixed;
+  left: -18%;
+  right: -18%;
+  bottom: -34%;
+  z-index: -2;
+  height: 86vh;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  background:
+    radial-gradient(ellipse at 50% 104%, rgba(18, 143, 235, 0.4), transparent 58%),
+    linear-gradient(88deg, transparent 0 24%, rgba(47, 173, 246, 0.18) 32%, transparent 42%),
+    linear-gradient(92deg, transparent 0 54%, rgba(255, 255, 255, 0.34) 61%, transparent 72%),
+    linear-gradient(90deg, transparent 0 40%, rgba(19, 136, 226, 0.2) 48%, transparent 56%);
+  filter: blur(0.2px);
+  opacity: 0.72;
+  transform: perspective(900px) rotateX(62deg) translate3d(0, 32px, 0) scale3d(1, 1, 1);
+  backface-visibility: hidden;
+  animation: dashboardHorizonApproach 22s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+.dashboard-motion-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 86%, rgba(255, 255, 255, 0.54), transparent 34%),
+    linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.34) 52%, rgba(4, 93, 170, 0.22) 100%);
+  opacity: 0.82;
+}
+
+.dashboard-panel {
+  position: relative;
+  z-index: 1;
+  width: min(780px, 100%);
+  margin-bottom: 24px;
+  padding: 26px;
+  border: 1px solid rgba(80, 154, 213, 0.24);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 22px 55px rgba(27, 93, 147, 0.14);
+  backdrop-filter: blur(16px);
+}
+
+.dashboard-panel h1,
+.dashboard-panel h2,
+.dashboard-waypoint h3,
+.dashboard-panel p {
+  margin-top: 0;
+}
+
+.dashboard-panel h1,
+.dashboard-panel h2 {
+  color: #082b73;
+}
+
+.dashboard-waypoint {
+  padding: 16px 0;
+  border-top: 1px solid rgba(7, 123, 199, 0.14);
+}
+
+.dashboard-waypoint:first-of-type {
+  border-top: 0;
+}
+
+.dashboard-empty {
+  display: grid;
+  place-items: center;
+}
+
+@keyframes dashboardHorizonApproach {
+  from {
+    opacity: 0.58;
+    transform: perspective(900px) rotateX(62deg) translate3d(0, 42px, 0) scale3d(0.98, 0.98, 1);
+  }
+
+  to {
+    opacity: 0.82;
+    transform: perspective(900px) rotateX(62deg) translate3d(0, -24px, 0) scale3d(1.16, 1.16, 1);
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-page {
+    padding: 24px 16px;
+  }
+
+  .dashboard-motion-background {
+    left: -28%;
+    right: -28%;
+    height: 70vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-motion-background {
+    animation: none;
+    transform: perspective(900px) rotateX(62deg) translate3d(0, 0, 0) scale(1);
+  }
+}

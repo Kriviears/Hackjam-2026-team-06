@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
-import compassLogoLanding from "../assets/compass-logo-loading.png";
+import compassLandingLogo from "../assets/compass-landing-logo.png";
 import landscapeImage from "../assets/tech-landscape.png";
 import "./LandingPage.css";
 
@@ -93,16 +93,19 @@ function LandingPage() {
   return (
     <main className="landing-page">
       <section className="hero-section">
+        <div className="hero-background" aria-hidden="true">
+          <img src={landscapeImage} alt="" />
+        </div>
+
         <div className="hero-tech-lines hero-tech-lines-left" />
         <div className="hero-tech-lines hero-tech-lines-right" />
 
         <div className="hero-content">
           <div className="compass-wrapper">
             <div className="compass-glow" />
-            {/* <CompassLogo /> */}
             <img
               className="compass-landing-image"
-              src={compassLogoLanding}
+              src={compassLandingLogo}
               alt="Compass digital navigation logo"
             />
           </div>

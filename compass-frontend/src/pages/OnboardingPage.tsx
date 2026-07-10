@@ -1,27 +1,11 @@
-import { useState, type ChangeEvent, type CSSProperties, type FormEvent } from "react";
+import { useState, type ChangeEvent, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import techLandscape from "../assets/tech-landscape.png";
-import compassLogo from "../assets/compass-logo.png";
+import compassLogo from "../assets/compass-logo-loading.png";
+
+
+import type { JourneyRequest } from "../types/journey";
 import "./OnboardingPage.css";
-
-import {
-    UserRound,
-    GraduationCap,
-    BriefcaseBusiness,
-    Check,
-} from "lucide-react";
-
-type OnboardingFormData = {
-    userType: string;
-    experienceLevel: string;
-    careerGoal: string;
-    weeklyTimeCommitment: string;
-    existingSkills: string[];
-    learningInterests: string[];
-    targetTimeline: string;
-    biggestChallenge: string;
-    additionalNotes: string;
-};
 
 const skillOptions = [
     "HTML",
@@ -47,10 +31,10 @@ const interestOptions = [
 function OnboardingPage() {
     const navigate = useNavigate();
 
-    const [formData, setFormData] = useState<OnboardingFormData>({
+    const [formData, setFormData] = useState<JourneyRequest>({
         userType: "",
-        experienceLevel: "",
         careerGoal: "",
+        experienceLevel: "",
         weeklyTimeCommitment: "",
         existingSkills: [],
         learningInterests: [],
@@ -89,18 +73,17 @@ function OnboardingPage() {
             };
         });
     };
-    
-const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    const handleSubmit = (
+        event: FormEvent<HTMLFormElement>
+    ) => {
+        event.preventDefault();
 
-    console.log("Onboarding form data:", formData);
-
-    navigate("/generating-path", {
-        state: {
-            formData,
-        },
-    });
-};
+        navigate("/generating-path", {
+            state: {
+                formData,
+            },
+        });
+    };
 
     return (
         <main
@@ -153,63 +136,59 @@ const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
                         <IntroCompassSvg />
                     </div>
 
+                    <blockquote className="intro-quote">
+                        <span className="quote-mark">&ldquo;</span>
+
+                        <p>The best way to predict the future is to create it.</p>
+
+                        <cite>— Peter Drucker</cite>
+                    </blockquote>
                 </aside>
 
                 <section className="onboarding-card">
                     <nav className="step-sidebar" aria-label="Onboarding progress">
                         <StepItem
                             number={1}
-                            title="About You"
+                            title="Tell Us About Yourself"
                             active
                         />
 
                         <StepItem
                             number={2}
-                            title="Career Direction"
-                            active
+                            title="Your Goals & Interests"
                         />
 
                         <StepItem
                             number={3}
-                            title="Skills & Interests"
-                            active
+                            title="Your Experience & Skills"
                         />
 
                         <StepItem
                             number={4}
-                            title="Pace & Support"
-                            active
+                            title="Review & Generate"
                         />
 
                         <div className="privacy-note">
                             <span className="privacy-icon">♢</span>
                             <p>Your information is secure and private.</p>
                         </div>
-
-                        <blockquote className="intro-quote rail-quote">
-                            <span className="quote-mark">&ldquo;</span>
-
-                            <p>The best way to predict the future is to create it.</p>
-
-                            <cite>— Peter Drucker</cite>
-                        </blockquote>
                     </nav>
 
                     <form className="onboarding-form" onSubmit={handleSubmit}>
                         <div className="form-heading-row">
                             <div>
                                 <div className="form-title">
-                                    <span className="section-number">✦</span>
+                                    <span className="section-number">1</span>
 
                                     <div>
-                                        <h2>Build Your Roadmap Profile</h2>
-                                        <p>Share the context Compass needs to personalize your path.</p>
+                                        <h2>Tell Us About Yourself</h2>
+                                        <p>This helps us understand where you are today.</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="top-progress">
-                                <span>Single-page setup</span>
+                                <span>Step 1 of 4</span>
 
                                 <div className="progress-track">
                                     <span className="progress-fill" />
@@ -222,232 +201,173 @@ const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
                         </div>
 
                         <div className="form-grid">
-                            <section className="form-section full-width">
-                                <SectionHeader number={1} title="About You" />
-
-                                <FormField htmlFor="userType">
-                                    <fieldset className="form-group user-type-fieldset">
-                                        <legend className="section-label">
-                                            Which best describes you?
-                                        </legend>
-
-                                        <div className="user-type-grid">
-                                            {[
-                                                {
-                                                    value: "prospectiveLearner",
-                                                    label: "Prospective Learner",
-                                                    icon: UserRound,
-                                                },
-                                                {
-                                                    value: "currentLearner",
-                                                    label: "Current Learner",
-                                                    icon: GraduationCap,
-                                                },
-                                                {
-                                                    value: "alumna",
-                                                    label: "Alumna",
-                                                    icon: BriefcaseBusiness,
-                                                },
-                                            ].map((option) => {
-                                                const Icon = option.icon;
-                                                const selected =
-                                                    formData.userType === option.value;
-
-                                                return (
-                                                    <label
-                                                        key={option.value}
-                                                        className={`user-type-card ${
-                                                            selected ? "selected" : ""
-                                                        }`}
-                                                    >
-                                                        <input
-                                                            type="radio"
-                                                            name="userType"
-                                                            value={option.value}
-                                                            checked={selected}
-                                                            onChange={handleChange}
-                                                            required
-                                                        />
-
-                                                        <span className="user-type-icon-wrap">
-                                                            <Icon size={40} />
-
-                                                            {selected && (
-                                                                <span className="checkmark">
-                                                                    <Check size={16} />
-                                                                </span>
-                                                            )}
-                                                        </span>
-
-                                                        <span>{option.label}</span>
-                                                    </label>
-                                                );
-                                            })}
-                                        </div>
-                                    </fieldset>
-                                </FormField>
-
-                                <FormField
-                                    label="My experience level is..."
-                                    htmlFor="experienceLevel"
+                            <FormField
+                                label="I am a..."
+                                htmlFor="userType"
+                            >
+                                <select
+                                    id="userType"
+                                    name="userType"
+                                    value={formData.userType}
+                                    onChange={handleChange}
+                                    required
                                 >
-                                    <select
-                                        id="experienceLevel"
-                                        name="experienceLevel"
-                                        value={formData.experienceLevel}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                        <option value="">Select your experience level</option>
-                                        <option value="beginner">Beginner</option>
-                                        <option value="someExperience">Some experience</option>
-                                        <option value="intermediate">Intermediate</option>
-                                        <option value="advanced">Advanced</option>
-                                    </select>
-                                </FormField>
-                            </section>
+                                    <option value="">Select your current status</option>
+                                    <option value="prospectiveLearner">Prospective Learner</option>
+                                    <option value="currentLearner">Current Learner</option>
+                                    <option value="alumna">Alumna</option>
+                                </select>
+                            </FormField>
 
-                            <section className="form-section full-width">
-                                <SectionHeader number={2} title="Career Direction" />
-
-                                <FormField
-                                    label="What is your ultimate career goal?"
-                                    htmlFor="careerGoal"
+                            <FormField
+                                label="My experience level is..."
+                                htmlFor="experienceLevel"
+                            >
+                                <select
+                                    id="experienceLevel"
+                                    name="experienceLevel"
+                                    value={formData.experienceLevel}
+                                    onChange={handleChange}
+                                    required
                                 >
-                                    <input
-                                        id="careerGoal"
-                                        name="careerGoal"
-                                        type="text"
-                                        value={formData.careerGoal}
-                                        onChange={handleChange}
-                                        placeholder="e.g. Data Scientist, Full-Stack Developer, UX Designer"
-                                        required
-                                    />
-                                </FormField>
-                            </section>
+                                    <option value="">Select your experience level</option>
+                                    <option value="beginner">Beginner</option>
+                                    <option value="someExperience">Some experience</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </FormField>
 
-                            <section className="form-section full-width">
-                                <SectionHeader number={3} title="Skills & Interests" />
+                            <FormField
+                                label="What is your ultimate career goal?"
+                                htmlFor="careerGoal"
+                                fullWidth
+                            >
+                                <input
+                                    id="careerGoal"
+                                    name="careerGoal"
+                                    type="text"
+                                    value={formData.careerGoal}
+                                    onChange={handleChange}
+                                    placeholder="e.g. Data Scientist, Full-Stack Developer, UX Designer"
+                                    required
+                                />
+                            </FormField>
 
-                                <CheckboxGroup
-                                    title="What skills do you already have?"
-                                    helperText="Select all that apply"
-                                    options={skillOptions}
-                                    selectedValues={formData.existingSkills}
-                                    onToggle={(value) =>
-                                        handleCheckboxChange("existingSkills", value)
+                            <FormField
+                                label="How much time can you commit to learning each week?"
+                                htmlFor="weeklyTimeCommitment"
+                                fullWidth
+                            >
+                                <select
+                                    id="weeklyTimeCommitment"
+                                    name="weeklyTimeCommitment"
+                                    value={formData.weeklyTimeCommitment}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Select your time commitment</option>
+                                    <option value="1-4 hours">1–4 hours</option>
+                                    <option value="5-10 hours">5–10 hours</option>
+                                    <option value="11-20 hours">11–20 hours</option>
+                                    <option value="20+ hours">More than 20 hours</option>
+                                </select>
+                            </FormField>
+
+                            <CheckboxGroup
+                                title="What skills do you already have?"
+                                helperText="Select all that apply"
+                                options={skillOptions}
+                                selectedValues={formData.existingSkills}
+                                onToggle={(value) =>
+                                    handleCheckboxChange("existingSkills", value)
+                                }
+                            />
+
+                            <CheckboxGroup
+                                title="What are you most interested in learning?"
+                                helperText="Select up to 3"
+                                options={interestOptions}
+                                selectedValues={formData.learningInterests}
+                                onToggle={(value) => {
+                                    const isAlreadySelected =
+                                        formData.learningInterests.includes(value);
+
+                                    if (
+                                        !isAlreadySelected &&
+                                        formData.learningInterests.length >= 3
+                                    ) {
+                                        return;
                                     }
-                                />
 
-                                <CheckboxGroup
-                                    title="What are you most interested in learning?"
-                                    helperText="Select up to 3"
-                                    options={interestOptions}
-                                    selectedValues={formData.learningInterests}
-                                    onToggle={(value) => {
-                                        const isAlreadySelected =
-                                            formData.learningInterests.includes(value);
+                                    handleCheckboxChange("learningInterests", value);
+                                }}
+                            />
 
-                                        if (
-                                            !isAlreadySelected &&
-                                            formData.learningInterests.length >= 3
-                                        ) {
-                                            return;
-                                        }
-
-                                        handleCheckboxChange("learningInterests", value);
-                                    }}
-                                />
-                            </section>
-
-                            <section className="form-section full-width">
-                                <SectionHeader number={4} title="Pace & Support" />
-
-                                <div className="two-column-fields">
-                                    <FormField
-                                        label="How much time can you commit each week?"
-                                        htmlFor="weeklyTimeCommitment"
-                                    >
-                                        <select
-                                            id="weeklyTimeCommitment"
-                                            name="weeklyTimeCommitment"
-                                            value={formData.weeklyTimeCommitment}
-                                            onChange={handleChange}
-                                            required
-                                        >
-                                            <option value="">Select your time commitment</option>
-                                            <option value="1-4 hours">1–4 hours</option>
-                                            <option value="5-10 hours">5–10 hours</option>
-                                            <option value="11-20 hours">11–20 hours</option>
-                                            <option value="20+ hours">More than 20 hours</option>
-                                        </select>
-                                    </FormField>
-
-                                    <FormField
-                                        label="What is your target timeline?"
-                                        htmlFor="targetTimeline"
-                                    >
-                                        <select
-                                            id="targetTimeline"
-                                            name="targetTimeline"
-                                            value={formData.targetTimeline}
-                                            onChange={handleChange}
-                                            required
-                                        >
-                                            <option value="">Select your timeline</option>
-                                            <option value="3 months">Within 3 months</option>
-                                            <option value="6 months">Within 6 months</option>
-                                            <option value="12 months">Within 12 months</option>
-                                            <option value="flexible">My timeline is flexible</option>
-                                        </select>
-                                    </FormField>
-                                </div>
-
-                                <FormField
-                                    label="What is your biggest challenge right now?"
-                                    htmlFor="biggestChallenge"
+                            <FormField
+                                label="What is your target timeline?"
+                                htmlFor="targetTimeline"
+                            >
+                                <select
+                                    id="targetTimeline"
+                                    name="targetTimeline"
+                                    value={formData.targetTimeline}
+                                    onChange={handleChange}
+                                    required
                                 >
-                                    <select
-                                        id="biggestChallenge"
-                                        name="biggestChallenge"
-                                        value={formData.biggestChallenge}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                        <option value="">Select your biggest challenge</option>
-                                        <option value="knowingWhereToStart">
-                                            Knowing where to start
-                                        </option>
-                                        <option value="choosingSkills">
-                                            Choosing the right skills
-                                        </option>
-                                        <option value="stayingConsistent">
-                                            Staying consistent
-                                        </option>
-                                        <option value="buildingExperience">
-                                            Building real-world experience
-                                        </option>
-                                        <option value="findingOpportunities">
-                                            Finding job opportunities
-                                        </option>
-                                    </select>
-                                </FormField>
+                                    <option value="">Select your timeline</option>
+                                    <option value="3 months">Within 3 months</option>
+                                    <option value="6 months">Within 6 months</option>
+                                    <option value="12 months">Within 12 months</option>
+                                    <option value="flexible">My timeline is flexible</option>
+                                </select>
+                            </FormField>
 
-                                <FormField
-                                    label="Anything else we should know?"
-                                    optional
-                                    htmlFor="additionalNotes"
+                            <FormField
+                                label="What is your biggest challenge right now?"
+                                htmlFor="biggestChallenge"
+                            >
+                                <select
+                                    id="biggestChallenge"
+                                    name="biggestChallenge"
+                                    value={formData.biggestChallenge}
+                                    onChange={handleChange}
+                                    required
                                 >
-                                    <textarea
-                                        id="additionalNotes"
-                                        name="additionalNotes"
-                                        value={formData.additionalNotes}
-                                        onChange={handleChange}
-                                        placeholder="Share any additional context, goals, or circumstances that might help us personalize your path..."
-                                        rows={4}
-                                    />
-                                </FormField>
-                            </section>
+                                    <option value="">Select your biggest challenge</option>
+                                    <option value="knowingWhereToStart">
+                                        Knowing where to start
+                                    </option>
+                                    <option value="choosingSkills">
+                                        Choosing the right skills
+                                    </option>
+                                    <option value="stayingConsistent">
+                                        Staying consistent
+                                    </option>
+                                    <option value="buildingExperience">
+                                        Building real-world experience
+                                    </option>
+                                    <option value="findingOpportunities">
+                                        Finding job opportunities
+                                    </option>
+                                </select>
+                            </FormField>
+
+                            <FormField
+                                label="Anything else we should know?"
+                                optional
+                                htmlFor="additionalNotes"
+                                fullWidth
+                            >
+                                <textarea
+                                    id="additionalNotes"
+                                    name="additionalNotes"
+                                    value={formData.additionalNotes}
+                                    onChange={handleChange}
+                                    placeholder="Share any additional context, goals, or circumstances that might help us personalize your path..."
+                                    rows={4}
+                                />
+                            </FormField>
                         </div>
 
                         <div className="form-actions">
@@ -509,20 +429,6 @@ function StepItem({ number, title, active = false }: StepItemProps) {
     );
 }
 
-type SectionHeaderProps = {
-    number: number;
-    title: string;
-};
-
-function SectionHeader({ number, title }: SectionHeaderProps) {
-    return (
-        <div className="inline-section-heading">
-            <span>{number}</span>
-            <h3>{title}</h3>
-        </div>
-    );
-}
-
 function IntroCompassSvg() {
     return (
         <svg
@@ -547,17 +453,19 @@ type FormFieldProps = {
     label?: string;
     htmlFor: string;
     optional?: boolean;
-    children: React.ReactNode;
+    fullWidth?: boolean;
+    children: ReactNode;
 };
 
 function FormField({
     label,
     htmlFor,
     optional = false,
+    fullWidth = false,
     children,
 }: FormFieldProps) {
     return (
-        <div className="form-field">
+        <div className={`form-field ${fullWidth ? "full-width" : ""}`}>
             {label && (
                 <label htmlFor={htmlFor}>
                     {label}

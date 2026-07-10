@@ -9,6 +9,12 @@ export interface JourneyRequest {
   careerGoal: string;
   experienceLevel: string;
   weeklyTimeCommitment: string;
+
+  existingSkills: string[];
+  learningInterests: string[];
+  targetTimeline: string;
+  biggestChallenge: string;
+  additionalNotes: string;
 }
 
 // Interface for each waypoint in the journey   
@@ -16,11 +22,12 @@ export interface Waypoint {
   title: string;
   description: string;
   category: string;
-  status: "complete" | "current" | "locked";
+   status: "pending" | "in-progress" | "completed";
 }
 
 // Response interface for the journey, including progress and waypoints
 export interface JourneyResponse {
+  id: string;
   destination: string;
   currentStage: string;
   progressPercent: number;

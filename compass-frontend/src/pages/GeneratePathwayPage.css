@@ -114,7 +114,7 @@
   min-width: 0;
   min-height: 100vh;
   padding: 34px 36px 18px 42px;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .generate-page::before {
@@ -268,12 +268,12 @@
   margin: 30px auto 0;
   display: grid;
   grid-template-columns:
-    minmax(224px, 254px)
-    minmax(500px, 548px)
-    minmax(224px, 254px);
+    minmax(204px, 254px)
+    minmax(360px, 548px)
+    minmax(204px, 254px);
   align-items: center;
   justify-content: center;
-  gap: 40px;
+  gap: clamp(20px, 2.8vw, 40px);
 }
 
 .generate-steps {
@@ -403,7 +403,7 @@
   position: relative;
   width: 545px;
   max-width: 100%;
-  min-width: 500px;
+  min-width: 0;
   aspect-ratio: 3 / 2;
   display: grid;
   place-items: center;
@@ -545,7 +545,7 @@
   text-align: center;
 }
 
-.generate-dashboard-button {
+.generate-roadmap-button {
   margin-top: 21px;
   padding: 13px 22px;
   display: inline-flex;
@@ -564,9 +564,48 @@
     box-shadow 200ms ease;
 }
 
-.generate-dashboard-button:hover {
+.generate-roadmap-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 17px 34px rgba(8, 111, 190, 0.3);
+}
+
+.generate-inline-error {
+  width: min(360px, 100%);
+  margin-top: 21px;
+  padding: 14px 16px;
+  display: grid;
+  gap: 8px;
+  text-align: center;
+  border: 1px solid rgba(199, 76, 76, 0.22);
+  border-radius: 8px;
+  color: #742222;
+  background: rgba(255, 241, 241, 0.92);
+  box-shadow: 0 14px 30px rgba(126, 35, 35, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.generate-inline-error strong {
+  color: #6f1d1d;
+}
+
+.generate-inline-error span {
+  color: #8a3434;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.generate-inline-error button {
+  justify-self: center;
+  margin-top: 2px;
+  padding: 9px 15px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: #0a71c8;
 }
 
 .generate-lower-grid {
@@ -940,7 +979,7 @@
   }
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1360px) {
   .generate-shell {
     grid-template-columns: 1fr;
   }
@@ -970,6 +1009,7 @@
 
   .generate-workspace {
     grid-template-columns: 1fr 1fr;
+    max-width: 920px;
   }
 
   .generate-center {
