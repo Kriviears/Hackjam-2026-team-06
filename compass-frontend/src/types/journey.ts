@@ -1,8 +1,11 @@
 // Request interface for initiating a new journey
 export interface JourneyRequest {
-  userType: "prospect" | "currentLearner" | "alumni" | "";
-  // fullName: string;
-  // email: string;
+  userType:
+    | "prospective_learner"
+    | "current_learner"
+    | "alumna"
+    | "";
+
   careerGoal: string;
   experienceLevel: string;
   weeklyTimeCommitment: string;
