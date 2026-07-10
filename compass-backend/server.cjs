@@ -326,7 +326,7 @@ app.use((req, res) => {
   (check the port number, which may have changed)
 */
 app.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT}`);
-  console.log(`📝 POST /journey/generate - Generate a learning roadmap`);
-  console.log(`📖 GET /roadmap/1234 - Retrieve roadmap 1234`);
+  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`POST /journey/generate - Generate a learning roadmap`);
+  console.log(`GET /roadmap/1234 - Retrieve roadmap 1234`);
 });
