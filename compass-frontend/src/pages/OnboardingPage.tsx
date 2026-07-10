@@ -1,7 +1,16 @@
-import { useState, type ChangeEvent, type CSSProperties, type FormEvent, type ReactNode } from "react";
+import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import techLandscape from "../assets/tech-landscape.png";
-import compassLogo from "../assets/compass-logo-loading.png";
+import {
+    BarChart3,
+    BriefcaseBusiness,
+    Check,
+    ClipboardCheck,
+    GraduationCap,
+    ShieldCheck,
+    Target,
+    UserRound,
+} from "lucide-react";
 
 
 import type { JourneyRequest } from "../types/journey";
@@ -42,6 +51,7 @@ function OnboardingPage() {
         biggestChallenge: "",
         additionalNotes: "",
     });
+    const [validationMessage, setValidationMessage] = useState("");
 
     const handleChange = (
         event: ChangeEvent<
@@ -54,6 +64,7 @@ function OnboardingPage() {
             ...previousData,
             [name]: value,
         }));
+        setValidationMessage("");
     };
 
     const handleCheckboxChange = (
@@ -72,11 +83,40 @@ function OnboardingPage() {
                 [field]: updatedValues,
             };
         });
+        setValidationMessage("");
     };
+
+    const getMissingRequiredFields = () => {
+        const requiredFields = [
+            { label: "which best describes you", value: formData.userType },
+            { label: "your experience level", value: formData.experienceLevel },
+            { label: "your career goal", value: formData.careerGoal },
+            {
+                label: "your weekly time commitment",
+                value: formData.weeklyTimeCommitment,
+            },
+            { label: "your target timeline", value: formData.targetTimeline },
+            { label: "your biggest challenge", value: formData.biggestChallenge },
+        ];
+
+        return requiredFields
+            .filter((field) => !field.value.trim())
+            .map((field) => field.label);
+    };
+
     const handleSubmit = (
         event: FormEvent<HTMLFormElement>
     ) => {
         event.preventDefault();
+
+        const missingFields = getMissingRequiredFields();
+
+        if (missingFields.length > 0) {
+            setValidationMessage(
+                `Please complete ${missingFields.join(", ")} before navigating your path.`
+            );
+            return;
+        }
 
         navigate("/generating-path", {
             state: {
@@ -96,26 +136,9 @@ function OnboardingPage() {
         ), url(${techLandscape})`,
             }}
         >
-            <header className="onboarding-header">
-                <div className="brand">
-                    <img
-                        className="brand-logo"
-                        src={compassLogo}
-                        alt="Compass logo"
-                    />
-
-                    <span className="brand-name">COMPASS</span>
-                </div>
-            </header>
-
             <div className="onboarding-layout">
-                <aside
-                    className="onboarding-intro"
-                    style={{ "--intro-cityscape": `url(${techLandscape})` } as CSSProperties}
-                >
+                <aside className="onboarding-intro" aria-label="Onboarding introduction">
                     <div className="intro-content">
-                        <p className="intro-eyebrow">Personalized AI Career Navigation</p>
-
                         <h1>
                             Let&apos;s Build
                             <span>Your Path</span>
@@ -129,12 +152,12 @@ function OnboardingPage() {
                         </p>
                     </div>
 
-                    <div className="compass-illustration">
-                        <div className="compass-ring compass-ring-large" />
-                        <div className="compass-ring compass-ring-small" />
-
-                        <IntroCompassSvg />
-                    </div>
+                    {/* <img
+                        className="onboarding-intro-logo"
+                        src={compassLogo}
+                        alt=""
+                        aria-hidden="true"
+                    /> */}
 
                     <blockquote className="intro-quote">
                         <span className="quote-mark">&ldquo;</span>
@@ -150,31 +173,37 @@ function OnboardingPage() {
                         <StepItem
                             number={1}
                             title="Tell Us About Yourself"
+                            icon={<UserRound size={25} />}
                             active
                         />
 
                         <StepItem
                             number={2}
                             title="Your Goals & Interests"
+                            icon={<Target size={24} />}
                         />
 
                         <StepItem
                             number={3}
                             title="Your Experience & Skills"
+                            icon={<BarChart3 size={24} />}
                         />
 
                         <StepItem
                             number={4}
                             title="Review & Generate"
+                            icon={<ClipboardCheck size={24} />}
                         />
 
                         <div className="privacy-note">
-                            <span className="privacy-icon">♢</span>
+                            <span className="privacy-icon">
+                                <ShieldCheck size={26} />
+                            </span>
                             <p>Your information is secure and private.</p>
                         </div>
                     </nav>
 
-                    <form className="onboarding-form" onSubmit={handleSubmit}>
+                    <form className="onboarding-form" onSubmit={handleSubmit} noValidate>
                         <div className="form-heading-row">
                             <div>
                                 <div className="form-title">
@@ -200,28 +229,89 @@ function OnboardingPage() {
                             </div>
                         </div>
 
-                        <div className="form-grid">
-                            <FormField
-                                label="I am a..."
-                                htmlFor="userType"
-                            >
-                                <select
-                                    id="userType"
-                                    name="userType"
-                                    value={formData.userType}
-                                    onChange={handleChange}
-                                    required
+                        {validationMessage && (
+                            <div className="validation-popup" role="alert">
+                                <div>
+                                    <strong>Almost there</strong>
+                                    <p>{validationMessage}</p>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    aria-label="Dismiss validation message"
+                                    onClick={() => setValidationMessage("")}
                                 >
-                                    <option value="">Select your current status</option>
-                                    <option value="prospectiveLearner">Prospective Learner</option>
-                                    <option value="currentLearner">Current Learner</option>
-                                    <option value="alumna">Alumna</option>
-                                </select>
+                                    ×
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="form-grid">
+                            <FormField htmlFor="userType" fullWidth>
+                                <fieldset className="form-group user-type-fieldset">
+                                    <legend className="section-label">
+                                        Which best describes you?
+                                    </legend>
+
+                                    <div className="user-type-grid">
+                                        {[
+                                            {
+                                                value: "prospectiveLearner",
+                                                label: "Prospective Learner",
+                                                icon: UserRound,
+                                            },
+                                            {
+                                                value: "currentLearner",
+                                                label: "Current Learner",
+                                                icon: GraduationCap,
+                                            },
+                                            {
+                                                value: "alumna",
+                                                label: "Alumna",
+                                                icon: BriefcaseBusiness,
+                                            },
+                                        ].map((option) => {
+                                            const Icon = option.icon;
+                                            const selected =
+                                                formData.userType === option.value;
+
+                                            return (
+                                                <label
+                                                    key={option.value}
+                                                    className={`user-type-card ${selected ? "selected" : ""
+                                                        }`}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="userType"
+                                                        value={option.value}
+                                                        checked={selected}
+                                                        onChange={handleChange}
+                                                        required
+                                                    />
+
+                                                    <span className="user-type-icon-wrap">
+                                                        <Icon size={34} />
+
+                                                        {selected && (
+                                                            <span className="checkmark">
+                                                                <Check size={15} />
+                                                            </span>
+                                                        )}
+                                                    </span>
+
+                                                    <span>{option.label}</span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </fieldset>
                             </FormField>
 
                             <FormField
                                 label="My experience level is..."
                                 htmlFor="experienceLevel"
+                                fullWidth
                             >
                                 <select
                                     id="experienceLevel"
@@ -372,7 +462,7 @@ function OnboardingPage() {
 
                         <div className="form-actions">
                             <button type="submit" className="continue-button">
-                                Save &amp; Continue
+                                Navigate My Path
                                 <span aria-hidden="true">→</span>
                             </button>
                         </div>
@@ -382,7 +472,6 @@ function OnboardingPage() {
 
             <footer className="onboarding-footer">
                 <div className="footer-brand">
-                    <img src={compassLogo} alt="" />
                     <div>
                         <strong>COMPASS</strong>
                         <span>Find Your Direction in Tech</span>
@@ -414,38 +503,23 @@ function OnboardingPage() {
 type StepItemProps = {
     number: number;
     title: string;
+    icon: ReactNode;
     active?: boolean;
 };
 
-function StepItem({ number, title, active = false }: StepItemProps) {
+function StepItem({ number, title, icon, active = false }: StepItemProps) {
     return (
         <div className={`step-item ${active ? "active" : ""}`}>
             <div className="step-marker">
                 <span>{number}</span>
             </div>
 
+            <span className="onboarding-step-icon" aria-hidden="true">
+                {icon}
+            </span>
+
             <p>{title}</p>
         </div>
-    );
-}
-
-function IntroCompassSvg() {
-    return (
-        <svg
-            className="intro-compass-svg"
-            viewBox="0 0 220 220"
-            aria-hidden="true"
-        >
-            <circle className="intro-compass-glow" cx="110" cy="110" r="92" />
-            <circle className="intro-compass-outer" cx="110" cy="110" r="82" />
-            <circle className="intro-compass-inner" cx="110" cy="110" r="56" />
-
-            <path className="intro-compass-axis" d="M110 20v180M20 110h180" />
-            <path className="intro-compass-star-long" d="M110 18l17 75 75 17-75 17-17 75-17-75-75-17 75-17z" />
-            <path className="intro-compass-star-short" d="M60 60l43 31 7 19-19-7-31-43zM160 60l-31 43-19 7 7-19 43-31zM160 160l-43-31-7-19 19 7 31 43zM60 160l31-43 19-7-7 19-43 31z" />
-            <circle className="intro-compass-hub-outer" cx="110" cy="110" r="12" />
-            <circle className="intro-compass-hub-inner" cx="110" cy="110" r="5" />
-        </svg>
     );
 }
 

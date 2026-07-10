@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
+import { ArrowRight, Home } from "lucide-react";
 import compassLandingLogo from "../assets/compass-landing-logo.png";
 import landscapeImage from "../assets/tech-landscape.png";
 import "./LandingPage.css";
@@ -96,6 +97,18 @@ function LandingPage() {
         <div className="hero-background" aria-hidden="true">
           <img src={landscapeImage} alt="" />
         </div>
+
+        <nav className="landing-top-nav" aria-label="Landing page navigation">
+          <button type="button" onClick={() => navigate("/")}>
+            <Home size={16} />
+            <span>Home</span>
+          </button>
+
+          <button type="button" onClick={startJourney}>
+            <span>Start My Journey</span>
+            <ArrowRight size={16} />
+          </button>
+        </nav>
 
         <div className="hero-tech-lines hero-tech-lines-left" />
         <div className="hero-tech-lines hero-tech-lines-right" />

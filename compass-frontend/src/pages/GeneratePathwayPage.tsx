@@ -1,20 +1,15 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Bell,
+  ArrowRight,
   BrainCircuit,
   BriefcaseBusiness,
   Check,
   CircleUserRound,
-  Compass,
   Home,
   LoaderCircle,
   Map,
-  Settings,
-  UserRound,
-  Library,
   Route,
-  ChartNoAxesColumnIncreasing,
   Sparkles,
   Target,
 } from "lucide-react";
@@ -22,17 +17,14 @@ import {
 import type {
   JourneyRequest,
   JourneyResponse,
-  Waypoint,
 } from "../types/journey";
 import techLandscape from "../assets/tech-landscape.png";
-import compassLogo from "../assets/compass-logo-loading.png";
 import pathwayCompass from "../assets/pathwaycompass.png";
 
 import "./GeneratePathwayPage.css";
 
 interface GeneratingLocationState {
   formData?: JourneyRequest;
-  roadmap?: JourneyResponse;
 }
 
 interface GenerationStep {
@@ -81,69 +73,13 @@ const generationSteps: GenerationStep[] = [
   },
 ];
 
-const navItems = [
-  { label: "Dashboard", icon: Home },
-  { label: "My Roadmap", icon: Route },
-  { label: "Skills & Progress", icon: ChartNoAxesColumnIncreasing },
-  { label: "Resources", icon: Library },
-  { label: "AI Assistant", icon: Sparkles },
-  { label: "Profile", icon: UserRound },
-  { label: "Settings", icon: Settings },
-];
+const JOURNEY_GENERATE_ENDPOINT = "http://localhost:8000/journey/generate";
+const MIN_GENERATION_TIME_MS = 7000;
 
-const previewFallbackWaypoints: Waypoint[] = [
-  {
-    title: "Get Your Bearings",
-    description:
-      "Review your current skills, goals, experience, and available learning time.",
-    category: "Orientation",
-    status: "in-progress",
-  },
-  {
-    title: "Build Core Skills",
-    description:
-      "Develop foundational knowledge in the tools and concepts for your chosen path.",
-    category: "Technical Skills",
-    status: "pending",
-  },
-  {
-    title: "Create Real-World Projects",
-    description:
-      "Apply your skills through portfolio projects and practical challenges.",
-    category: "Portfolio",
-    status: "pending",
-  },
-  {
-    title: "Prepare for Your Career",
-    description:
-      "Strengthen your resume, portfolio, interview skills, and professional presence.",
-    category: "Career Preparation",
-    status: "pending",
-  },
-];
-
-const fallbackRoadmap: JourneyResponse = {
-  id: "preview-roadmap",
-  destination: "Data Analyst",
-  currentStage: "Get Your Bearings",
-  progressPercent: 0,
-  nextStep: "Complete your first learning milestone",
-  waypoints: previewFallbackWaypoints,
-};
-
-async function generateRoadmap(
-  formData?: JourneyRequest,
-  initialRoadmap?: JourneyResponse
+async function requestRoadmap(
+  formData: JourneyRequest
 ): Promise<JourneyResponse> {
-  if (initialRoadmap) {
-    return initialRoadmap;
-  }
-
-  if (!formData) {
-    return fallbackRoadmap;
-  }
-
-  const response = await fetch("http://localhost:8000/journey/generate", {
+  const response = await fetch(JOURNEY_GENERATE_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -152,7 +88,7 @@ async function generateRoadmap(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to generate roadmap.");
+    throw new Error(`Request failed with status ${response.status}`);
   }
 
   return response.json();
@@ -162,7 +98,7 @@ export default function GeneratePathwayPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { formData, roadmap: initialRoadmap } =
+  const { formData } =
     (location.state as GeneratingLocationState | null) ?? {};
 
   const [progress, setProgress] = useState(4);
@@ -171,26 +107,40 @@ export default function GeneratePathwayPage() {
   const [visibleWaypoints, setVisibleWaypoints] = useState(0);
   const [roadmap, setRoadmap] = useState<JourneyResponse | null>(null);
   const [isComplete, setIsComplete] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    if (!formData) {
+      setErrorMessage(
+        "No onboarding information was found. Please complete onboarding again."
+      );
+      return;
+    }
+
     let isMounted = true;
+    const onboardingData = formData;
 
     async function buildRoadmap() {
       try {
-        const [response] = await Promise.all([
-          generateRoadmap(formData, initialRoadmap),
-          new Promise((resolve) => window.setTimeout(resolve, 9000)),
+        setIsLoading(true);
+        setErrorMessage("");
+
+        const [generatedRoadmap] = await Promise.all([
+          requestRoadmap(onboardingData),
+          new Promise((resolve) =>
+            window.setTimeout(resolve, MIN_GENERATION_TIME_MS)
+          ),
         ]);
 
         if (!isMounted) {
           return;
         }
 
-        setRoadmap(response);
+        setRoadmap(generatedRoadmap);
         setCompletedSteps(generationSteps.map((step) => step.id));
         setActiveStep(generationSteps.length);
-        setVisibleWaypoints(response.waypoints.length);
+        setVisibleWaypoints(generatedRoadmap.waypoints.length);
         setProgress(100);
         setIsComplete(true);
       } catch (error) {
@@ -201,6 +151,10 @@ export default function GeneratePathwayPage() {
             "Compass could not generate your roadmap. Please try again."
           );
         }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -209,7 +163,7 @@ export default function GeneratePathwayPage() {
     return () => {
       isMounted = false;
     };
-  }, [formData, initialRoadmap]);
+  }, [formData]);
 
   useEffect(() => {
     if (isComplete || errorMessage) {
@@ -283,10 +237,7 @@ export default function GeneratePathwayPage() {
     };
   }, [isComplete, errorMessage]);
 
-  const previewWaypoints =
-    roadmap?.waypoints ??
-    initialRoadmap?.waypoints ??
-    previewFallbackWaypoints;
+  const previewWaypoints = roadmap?.waypoints ?? [];
 
   const currentStatus = getStatusMessage(progress, isComplete);
 
@@ -296,9 +247,8 @@ export default function GeneratePathwayPage() {
     }
 
     navigate("/roadmap", {
-      replace: true,
       state: {
-        journey: roadmap,
+        roadmap,
       },
     });
   }
@@ -319,61 +269,19 @@ export default function GeneratePathwayPage() {
         `,
       }}
     >
-      <aside className="generate-sidebar">
-        <div className="generate-brand">
-          <img
-            src={compassLogo}
-            alt="Compass"
-            className="generate-brand-logo"
-          />
-
-          <div>
-            <p className="generate-brand-name">COMPASS</p>
-            <p className="generate-brand-tagline">
-              Find Your Direction in Tech
-            </p>
-          </div>
-        </div>
-
-        <nav className="generate-nav" aria-label="Compass navigation">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <a href="#" key={item.label}>
-                <Icon size={21} strokeWidth={1.9} />
-                <span>{item.label}</span>
-              </a>
-            );
-          })}
-        </nav>
-
-        <section className="generate-ai-note">
-          <p className="generate-ai-note-title">
-            <Sparkles size={17} />
-            AI is working for you
-          </p>
-
-          <p>
-            Compass is analyzing your goals, skills, and interests to
-            create a personalized path designed for your success.
-          </p>
-
-          <Compass className="generate-ai-note-compass" strokeWidth={1.1} />
-        </section>
-      </aside>
-
       <main className="generate-page">
         <header className="generate-header">
-          <div className="generate-profile">
-            <button type="button" aria-label="Notifications">
-              <Bell size={21} />
+          <nav className="generate-top-nav" aria-label="Generate pathway navigation">
+            <button type="button" onClick={() => navigate("/")}>
+              <Home size={16} />
+              <span>Home</span>
             </button>
 
-            <div className="generate-avatar">FA</div>
-
-            <span>Fabiola A.</span>
-          </div>
+            <button type="button" onClick={() => navigate("/onboarding")}>
+              <span>Restart My Journey</span>
+              <ArrowRight size={16} />
+            </button>
+          </nav>
         </header>
 
         <section className="generate-intro">
@@ -384,8 +292,9 @@ export default function GeneratePathwayPage() {
           </h1>
 
           <p>
-            Our AI Compass is analyzing your information and building a
-            personalized roadmap just for you.
+            {roadmap
+              ? `Compass mapped your path toward ${roadmap.destination}.`
+              : "Our AI Compass is analyzing your information and building a personalized roadmap just for you."}
           </p>
         </section>
 
@@ -431,7 +340,9 @@ export default function GeneratePathwayPage() {
             <p className="generate-current-status">
               {isComplete
                 ? "Your personalized roadmap is complete"
-                : "Building your personalized roadmap..."}
+                : isLoading
+                  ? "Building your personalized roadmap..."
+                  : "Preparing your personalized roadmap..."}
             </p>
 
             <strong className="generate-progress-number">
@@ -469,7 +380,7 @@ export default function GeneratePathwayPage() {
                 className="generate-roadmap-button"
                 onClick={handleViewRoadmap}
               >
-                View My RoadMap
+                View My Roadmap
                 <Route size={19} />
               </button>
             )}
@@ -516,7 +427,25 @@ export default function GeneratePathwayPage() {
             </p>
 
             <div className="waypoint-timeline">
-              {previewWaypoints.slice(0, 4).map((waypoint, index) => {
+              {previewWaypoints.length === 0 && (
+                <article className="waypoint-preview-card waypoint-preview-hidden">
+                  <div className="waypoint-preview-number">1</div>
+
+                  <div>
+                    <p className="waypoint-discovered-label">
+                      Waiting for backend response
+                    </p>
+
+                    <h3>Compass is mapping your path</h3>
+
+                    <p className="waypoint-preview-description">
+                      Your returned waypoints will appear here when generation is complete.
+                    </p>
+                  </div>
+                </article>
+              )}
+
+              {previewWaypoints.map((waypoint, index) => {
                 const isVisible = index < visibleWaypoints;
 
                 return (

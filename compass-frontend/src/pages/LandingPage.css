@@ -110,22 +110,7 @@ button {
 }
 
 .hero-section::after {
-  position: absolute;
-  top: 18px;
-  left: 50%;
-  width: min(650px, 82vw);
-  aspect-ratio: 1;
-  pointer-events: none;
-  content: "";
-  border-radius: 50%;
-  opacity: 0.075;
-  background:
-    repeating-radial-gradient(circle, transparent 0 42px, var(--compass-cyan) 43px 44px, transparent 45px 76px),
-    radial-gradient(circle at 50% 50%, var(--compass-cyan) 0 3px, transparent 4px),
-    linear-gradient(90deg, transparent calc(50% - 1px), var(--compass-cyan) 50%, transparent calc(50% + 1px)),
-    linear-gradient(0deg, transparent calc(50% - 1px), var(--compass-cyan) 50%, transparent calc(50% + 1px));
-  transform: translateX(-50%);
-  mask-image: radial-gradient(circle, black 0 58%, transparent 78%);
+  display: none;
 }
 
 .hero-background {
@@ -143,6 +128,49 @@ button {
   opacity: 0.38;
   filter: saturate(1.05) brightness(1.18);
   mask-image: linear-gradient(to bottom, transparent 0%, black 34%, black 78%, transparent 100%);
+}
+
+.landing-top-nav {
+  position: absolute;
+  top: 18px;
+  right: clamp(18px, 4vw, 54px);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.landing-top-nav button {
+  min-height: 34px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(80, 154, 213, 0.24);
+  border-radius: 999px;
+  color: rgba(8, 43, 102, 0.82);
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 750;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.landing-top-nav button:hover {
+  border-color: rgba(8, 125, 195, 0.34);
+  color: var(--compass-navy);
+  background: rgba(255, 255, 255, 0.68);
+  transform: translateY(-1px);
+}
+
+.landing-top-nav button:focus-visible {
+  outline: 3px solid rgba(24, 166, 231, 0.28);
+  outline-offset: 3px;
 }
 
 .hero-content {
@@ -177,7 +205,18 @@ button {
 }
 
 .compass-wrapper::after {
-  display: none;
+  inset: 50%;
+  z-index: 0;
+  width: clamp(430px, 45vw, 650px);
+  aspect-ratio: 1;
+  opacity: 0.075;
+  background:
+    repeating-radial-gradient(circle, transparent 0 42px, var(--compass-cyan) 43px 44px, transparent 45px 76px),
+    radial-gradient(circle at 50% 50%, var(--compass-cyan) 0 3px, transparent 4px),
+    linear-gradient(90deg, transparent calc(50% - 1px), var(--compass-cyan) 50%, transparent calc(50% + 1px)),
+    linear-gradient(0deg, transparent calc(50% - 1px), var(--compass-cyan) 50%, transparent calc(50% + 1px));
+  mask-image: radial-gradient(circle, black 0 58%, transparent 78%);
+  transform: translate(-50%, -50%);
 }
 
 .compass-glow {
@@ -838,6 +877,18 @@ button {
   .hero-section {
     min-height: 740px;
     padding: 56px 16px 66px;
+  }
+
+  .landing-top-nav {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    justify-content: center;
+  }
+
+  .landing-top-nav button {
+    min-height: 32px;
+    padding: 0 10px;
   }
 
   .compass-wrapper {
