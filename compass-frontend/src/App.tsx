@@ -6,6 +6,7 @@ import GeneratePathwayPage from "./pages/GeneratePathwayPage";
 import DashboardPage from "./pages/DashboardPage";
 import RoadmapPage from "./pages/RoadmapPage";
 
+
 function App() {
   return (
     <Routes>
@@ -30,7 +31,12 @@ function App() {
         path="/roadmap"
         element={<RoadmapPage />}
       />
+
+      <Route path="/roadmap" element={<RoadmapPage />} />
+
     </Routes>
+
+    
   );
 }
 
