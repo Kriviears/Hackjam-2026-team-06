@@ -1,7 +1,7 @@
 .generate-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 254px 1fr;
+  grid-template-columns: 1fr;
   color: #082b66;
   background-position: center bottom;
   background-size: cover;
@@ -113,7 +113,7 @@
   position: relative;
   min-width: 0;
   min-height: 100vh;
-  padding: 34px 36px 18px 42px;
+  padding: 34px 36px 18px;
   overflow-x: hidden;
 }
 
@@ -168,6 +168,46 @@
   align-items: center;
   gap: 18px;
   min-height: 52px;
+}
+
+.generate-top-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.generate-top-nav button {
+  min-height: 34px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(80, 154, 213, 0.24);
+  border-radius: 999px;
+  color: rgba(8, 43, 102, 0.82);
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 750;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.generate-top-nav button:hover {
+  border-color: rgba(8, 125, 195, 0.34);
+  color: #082b73;
+  background: rgba(255, 255, 255, 0.68);
+  transform: translateY(-1px);
+}
+
+.generate-top-nav button:focus-visible {
+  outline: 3px solid rgba(24, 166, 231, 0.28);
+  outline-offset: 3px;
 }
 
 .generate-header-status {

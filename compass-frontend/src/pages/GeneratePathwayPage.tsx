@@ -238,8 +238,10 @@ export default function GeneratePathwayPage() {
   }, [isComplete, errorMessage]);
 
   const previewWaypoints = roadmap?.waypoints ?? [];
+  const displayProgress = isComplete ? 100 : progress;
 
-  const currentStatus = getStatusMessage(progress, isComplete);
+  const currentStatus = getStatusMessage(displayProgress, isComplete);
+  const canViewRoadmap = isComplete && displayProgress === 100 && Boolean(roadmap);
 
   function handleViewRoadmap() {
     if (!roadmap) {
@@ -346,16 +348,16 @@ export default function GeneratePathwayPage() {
             </p>
 
             <strong className="generate-progress-number">
-              {progress}%
+              {displayProgress}%
             </strong>
 
             <div
               className="generate-progress-track"
-              aria-label={`${progress}% complete`}
+              aria-label={`${displayProgress}% complete`}
             >
               <div
                 className="generate-progress-fill"
-                style={{ width: `${progress}%` }}
+                style={{ width: `${displayProgress}%` }}
               />
             </div>
 
@@ -374,7 +376,7 @@ export default function GeneratePathwayPage() {
               </div>
             )}
 
-            {isComplete && (
+            {canViewRoadmap && (
               <button
                 type="button"
                 className="generate-roadmap-button"

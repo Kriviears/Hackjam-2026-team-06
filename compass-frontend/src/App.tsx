@@ -4,6 +4,7 @@ import LandingPage from "./pages/LandingPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import GeneratePathwayPage from "./pages/GeneratePathwayPage";
 import DashboardPage from "./pages/DashboardPage";
+import RoadmapPage from "./pages/RoadmapPage";
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
 
       <Route
         path="/roadmap"
-        element={<DashboardPage />}
+        element={<RoadmapPage />}
       />
     </Routes>
   );
