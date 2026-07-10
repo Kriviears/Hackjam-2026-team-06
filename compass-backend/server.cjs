@@ -18,7 +18,6 @@ app.use(express.json());
 */
 const RequestSchema = {
   userType: String,              // e.g., "student", "professional", "career-changer"
-  startingPoint: String,         // e.g., "complete beginner", "has some experience"
   careerGoal: String,            // e.g., "become a full-stack developer"
   experienceLevel: String,       // e.g., "beginner", "intermediate", "advanced"
   weeklyTimeCommitment: String,  // e.g., "5 hours", "10 hours", "20 hours"
@@ -80,7 +79,6 @@ app.post("/journey/generate", (req, res) => {
     // Extract the request data from the request body
     const {
       userType,
-      startingPoint,
       careerGoal,
       experienceLevel,
       weeklyTimeCommitment,
@@ -104,7 +102,6 @@ app.post("/journey/generate", (req, res) => {
     // Generate a personalized roadmap based on user input
     const roadmap = generatePersonalizedRoadmap({
       userType,
-      startingPoint,
       careerGoal,
       experienceLevel,
       weeklyTimeCommitment,
