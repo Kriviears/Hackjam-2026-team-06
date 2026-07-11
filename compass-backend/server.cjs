@@ -10,13 +10,12 @@ app.use(cors());
 app.use(express.json());
 // ----------------------------------------------------------------------------
 // Prepare to call an AI model.
-const OpenAI = require('openai');
-const apiKey = process.env.OPENAI_API_KEY;
-
+const apiKey = process.env.GOOGLE_API_KEY;
 if (!apiKey) {
-  throw new Error('OPENAI_API_KEY environment variable is not set');
+  throw new Error('GOOGLE_API_KEY environment variable is not set');
 }
-const openai = new OpenAI({apiKey});
+const { GoogleGenAI } = require("@google/genai");
+const ai = new GoogleGenAI({apiKey});
 // ============================================
 // REQUEST SCHEMA DEFINITION
 // ============================================
@@ -221,21 +220,15 @@ async function generatePersonalizedRoadmap(userInput) {
         }
     `
     // Call an AI model.
-    const response = await openai.chat.completions.create
+    const interaction = await ai.interactions.create
     (
         {
-            model: 'gpt-5-nano',
-            messages:
-            [
-                {
-                    role: 'user',
-                    content: prompt
-                }
-            ]
+            model: "gemini-3.5-flash",
+            input: prompt,
         }
     );
     // Translate the text into a dictionary.
-    const roadmap = await JSON.parse(response.choices[0].message.content);
+    const roadmap = await JSON.parse(interaction.output_text);
 
     return roadmap;
 }
