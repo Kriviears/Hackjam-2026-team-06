@@ -61,10 +61,32 @@ const ResponseSchema = {
       title: String,             // e.g., "Learn JavaScript Basics"
       description: String,       // e.g., "Master variables, functions, and control flow"
       category: String,          // e.g., "fundamentals", "practice", "project"
-      status: String             // e.g., "pending", "in-progress", "completed"
+      status: String,            // e.g., "locked", "in-progress", "completed"
+      tasks: [
+        {
+          title: String,         // e.g., "Prepare for admissions interview"
+          completed: Boolean     // e.g., false
+        }
+      ]
     }
   ]
 };
+
+const VALID_WAYPOINT_STATUSES = new Set([
+  "completed",
+  "in-progress",
+  "locked",
+  "not-started",
+  "pending"
+]);
+
+class RoadmapValidationError extends Error {
+  constructor(details) {
+    super("AI roadmap response failed schema validation");
+    this.name = "RoadmapValidationError";
+    this.details = details;
+  }
+}
 
 // ============================================
 // EXAMPLE DATA - In-memory storage (for demo purposes)
@@ -90,7 +112,7 @@ let roadmapGlobalId = 1;
   3. Generates a personalized roadmap based on the input
   4. Sends back the roadmap in ResponseSchema format
 */
-app.post("/journey/generate", (req, res) => {
+app.post("/journey/generate", async (req, res) => {
   try {
     // Extract the request data from the request body
     const {
@@ -115,37 +137,49 @@ app.post("/journey/generate", (req, res) => {
     // Generate a unique ID for this roadmap (in a real app, use a database)
     const roadmapId = `roadmap_${roadmapGlobalId}`;
 
-    async function runAndWaitForCodeRelatedToAI() {
+    // Generate a personalized roadmap based on user input
+    const roadmap = await generatePersonalizedRoadmap({
+      userType,
+      careerGoal,
+      experienceLevel,
+      weeklyTimeCommitment,
+      existingSkills,
+      learningInterests,
+      targetTimeline,
+      biggestChallenge,
+      additionalNotes
+    });
 
-      // Generate a personalized roadmap based on user input
-      const roadmap = await generatePersonalizedRoadmap({
-        userType,
-        careerGoal,
-        experienceLevel,
-        weeklyTimeCommitment,
-        existingSkills,
-        learningInterests,
-        targetTimeline,
-        biggestChallenge,
-        additionalNotes
-      });
+    // Store the roadmap in memory (in a real app, save to database)
+    userRoadmaps[roadmapGlobalId] = roadmap;
+    roadmapGlobalId += 1;
 
-      // Store the roadmap in memory (in a real app, save to database)
-      userRoadmaps[roadmapGlobalId] = roadmap;
-      roadmapGlobalId += 1;
-
-      // Send the response back to the client
-      res.status(200).json({
-        id: roadmapId,
-        ...roadmap
-      });
-    }
-
-    runAndWaitForCodeRelatedToAI();
+    // Send the response back to the client
+    res.status(200).json({
+      id: roadmapId,
+      ...roadmap
+    });
 
   } catch (error) {
     // Handle any errors that occur
     console.error('Error generating roadmap:', error);
+
+    if (isRateLimitError(error)) {
+      const waitSeconds = getRateLimitWaitSeconds(error);
+
+      return res.status(429).json({
+        error: `Our Path Roadmap Generator is temporarily unavailable. Please try again in ${waitSeconds} seconds`,
+        retryAfterSeconds: waitSeconds
+      });
+    }
+
+    if (error instanceof RoadmapValidationError) {
+      return res.status(502).json({
+        error: "Roadmap generator returned an invalid response. Please try again.",
+        details: error.details
+      });
+    }
+
     res.status(500).json({
       error: 'Failed to generate roadmap. Please try again.'
     });
@@ -205,8 +239,8 @@ User Type: ${u.userType}
 Career Goal: ${u.careerGoal}
 Experience Level: ${u.experienceLevel}
 Weekly Time Commitment: ${u.weeklyTimeCommitment}
-Existing Skills: ${u.existingSkills}
-Learning Interests: ${u.learningInterests}
+Existing Skills: ${JSON.stringify(u.existingSkills ?? [])}
+Learning Interests: ${JSON.stringify(u.learningInterests ?? [])}
 Target Timeline: ${u.targetTimeline}
 Biggest Challenge: ${u.biggestChallenge}
 Additional Notes: ${u.additionalNotes}
@@ -221,9 +255,179 @@ Additional Notes: ${u.additionalNotes}
       }
     );
   // Translate the text into a dictionary.
-  const roadmap = await JSON.parse(interaction.output_text);
+  const roadmap = parseRoadmapResponse(interaction.output_text);
+  validateRoadmapResponse(roadmap);
   console.log("Roadmap generated:", roadmap);
   return roadmap;
+}
+
+function parseRoadmapResponse(outputText) {
+  const trimmedOutput = String(outputText ?? "").trim();
+  const unfencedOutput = trimmedOutput
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+  const jsonStart = unfencedOutput.indexOf("{");
+  const jsonEnd = unfencedOutput.lastIndexOf("}");
+
+  if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
+    throw new RoadmapValidationError(["Response did not contain a JSON object"]);
+  }
+
+  try {
+    return JSON.parse(unfencedOutput.slice(jsonStart, jsonEnd + 1));
+  } catch (error) {
+    throw new RoadmapValidationError([`Response was not valid JSON: ${error.message}`]);
+  }
+}
+
+function isNonEmptyString(value) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function validateRoadmapResponse(roadmap) {
+  const errors = [];
+
+  if (!roadmap || typeof roadmap !== "object" || Array.isArray(roadmap)) {
+    throw new RoadmapValidationError(["Response must be a JSON object"]);
+  }
+
+  ["destination", "currentStage", "nextStep"].forEach((fieldName) => {
+    if (!isNonEmptyString(roadmap[fieldName])) {
+      errors.push(`${fieldName} must be a non-empty string`);
+    }
+  });
+
+  if (!Array.isArray(roadmap.waypoints)) {
+    errors.push("waypoints must be an array");
+  } else {
+    if (roadmap.waypoints.length < 3 || roadmap.waypoints.length > 6) {
+      errors.push("waypoints must include between 3 and 6 items");
+    }
+
+    roadmap.waypoints.forEach((waypoint, waypointIndex) => {
+      const waypointLabel = `waypoints[${waypointIndex}]`;
+
+      if (!waypoint || typeof waypoint !== "object" || Array.isArray(waypoint)) {
+        errors.push(`${waypointLabel} must be an object`);
+        return;
+      }
+
+      ["title", "description", "category"].forEach((fieldName) => {
+        if (!isNonEmptyString(waypoint[fieldName])) {
+          errors.push(`${waypointLabel}.${fieldName} must be a non-empty string`);
+        }
+      });
+
+      if (!VALID_WAYPOINT_STATUSES.has(waypoint.status)) {
+        errors.push(
+          `${waypointLabel}.status must be one of ${Array.from(VALID_WAYPOINT_STATUSES).join(", ")}`
+        );
+      }
+
+      if (!Array.isArray(waypoint.tasks)) {
+        errors.push(`${waypointLabel}.tasks must be an array`);
+        return;
+      }
+
+      if (waypoint.tasks.length < 3 || waypoint.tasks.length > 6) {
+        errors.push(`${waypointLabel}.tasks must include between 3 and 6 items`);
+      }
+
+      waypoint.tasks.forEach((task, taskIndex) => {
+        const taskLabel = `${waypointLabel}.tasks[${taskIndex}]`;
+
+        if (!task || typeof task !== "object" || Array.isArray(task)) {
+          errors.push(`${taskLabel} must be an object`);
+          return;
+        }
+
+        if (!isNonEmptyString(task.title)) {
+          errors.push(`${taskLabel}.title must be a non-empty string`);
+        }
+
+        if (typeof task.completed !== "boolean") {
+          errors.push(`${taskLabel}.completed must be a boolean`);
+        }
+      });
+    });
+  }
+
+  if (errors.length > 0) {
+    throw new RoadmapValidationError(errors);
+  }
+}
+
+function isRateLimitError(error) {
+  return (
+    error?.status === 429 ||
+    error?.statusCode === 429 ||
+    error?.code === 429 ||
+    error?.code === "429" ||
+    /429|rate limit|quota/i.test(String(error?.message ?? ""))
+  );
+}
+
+function getHeaderValue(headers, headerName) {
+  if (!headers) {
+    return undefined;
+  }
+
+  if (typeof headers.get === "function") {
+    return headers.get(headerName);
+  }
+
+  return headers[headerName] ?? headers[headerName.toLowerCase()];
+}
+
+function parseRetryAfterSeconds(retryAfter) {
+  if (!retryAfter) {
+    return undefined;
+  }
+
+  const numericRetryAfter = Number.parseFloat(retryAfter);
+
+  if (Number.isFinite(numericRetryAfter)) {
+    return numericRetryAfter;
+  }
+
+  const retryDate = Date.parse(retryAfter);
+
+  if (Number.isFinite(retryDate)) {
+    return Math.max(0, (retryDate - Date.now()) / 1000);
+  }
+
+  return undefined;
+}
+
+function getRateLimitWaitSeconds(error) {
+  const retryAfter =
+    getHeaderValue(error?.headers, "retry-after") ??
+    getHeaderValue(error?.response?.headers, "retry-after");
+  const retryAfterSeconds = parseRetryAfterSeconds(retryAfter);
+
+  if (typeof retryAfterSeconds === "number") {
+    return Math.round(retryAfterSeconds) + 5;
+  }
+
+  const retryDelay =
+    error?.retryDelay ??
+    error?.error?.retryDelay ??
+    error?.details?.retryDelay;
+
+  if (typeof retryDelay === "number" && Number.isFinite(retryDelay)) {
+    return Math.round(retryDelay) + 5;
+  }
+
+  if (typeof retryDelay === "string") {
+    const retryDelaySeconds = Number.parseFloat(retryDelay);
+
+    if (Number.isFinite(retryDelaySeconds)) {
+      return Math.round(retryDelaySeconds) + 5;
+    }
+  }
+
+  return 65;
 }
 
 // ============================================

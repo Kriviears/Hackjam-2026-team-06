@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -b",
     "lint": "eslint .",
-    "server": "nodemon server.js"
+    "server": "nodemon server.cjs"
   },
   "dependencies": {
     "@google/genai": "^2.11.0",

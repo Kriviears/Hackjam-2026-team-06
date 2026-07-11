@@ -10,11 +10,21 @@ import type { RoadmapData } from "../../types/roadmap";
 import RoadmapControls from "./RoadmapControls";
 import RoadmapWaypoint from "./RoadmapWaypoint";
 
+interface RoadmapPosition {
+    left: string;
+    bottom: string;
+    roadProgressPercent: number;
+}
+
 interface RoadmapCanvasProps {
     roadmap: RoadmapData;
     userProfile?: UserProfile;
-    selectedWaypointId: number;
-    onSelectWaypoint: (id: number) => void;
+    selectedWaypointId: number | null;
+    highlightedWaypointId: number | null;
+    highlightTone: "current" | "preview" | null;
+    travelerPosition: RoadmapPosition;
+    onSelectWaypoint: (id: number | null) => void;
+    onHoverWaypoint: (id: number | null) => void;
 }
 
 function getDestinationMessage(userType: RoadmapData["userType"]) {
@@ -45,7 +55,11 @@ function RoadmapCanvas({
     roadmap,
     userProfile,
     selectedWaypointId,
+    highlightedWaypointId,
+    highlightTone,
+    travelerPosition,
     onSelectWaypoint,
+    onHoverWaypoint,
 }: RoadmapCanvasProps) {
     const navigate = useNavigate();
     const cardRefs = useRef<Record<number, HTMLButtonElement | null>>({});
@@ -54,15 +68,18 @@ function RoadmapCanvas({
     const destinationMessage = getDestinationMessage(roadmap.userType);
     const personalizedDestination = getPersonalizedDestination(roadmap.userType);
     const firstName = userProfile?.firstName.trim();
-    const completedWaypoints = roadmap.waypoints.filter(
-        (waypoint) => waypoint.status === "completed",
-    ).length;
-    const totalWaypoints = roadmap.waypoints.length;
-    const journeyProgressPercent =
-        totalWaypoints > 0
-            ? Math.round((completedWaypoints / totalWaypoints) * 100)
-            : 0;
+    const journeyProgressPercent = roadmap.progressPercent;
+    const roadProgressPercent = travelerPosition.roadProgressPercent;
+    const travelerStyle = {
+        "--traveler-left": travelerPosition.left,
+        "--traveler-bottom": travelerPosition.bottom,
+    } as CSSProperties;
+
     useEffect(() => {
+        if (selectedWaypointId === null) {
+            return;
+        }
+
         cardRefs.current[selectedWaypointId]?.scrollIntoView({
             behavior: "smooth",
             block: "nearest",
@@ -153,7 +170,7 @@ function RoadmapCanvas({
                             fill="none"
                             pathLength={100}
                             style={{
-                                strokeDasharray: `${journeyProgressPercent} 100`,
+                                strokeDasharray: `${roadProgressPercent} 100`,
                             }}
                             d="
                 M 295 910
@@ -177,7 +194,11 @@ function RoadmapCanvas({
                         />
                     </svg>
 
-                    <div className="roadmap-traveler" aria-hidden="true">
+                    <div
+                        className="roadmap-traveler roadmap-traveler--on-road"
+                        style={travelerStyle}
+                        aria-hidden="true"
+                    >
                         <img src={roadmapAvatar} alt="" />
                     </div>
 
@@ -198,9 +219,16 @@ function RoadmapCanvas({
                         <RoadmapWaypoint
                             key={waypoint.id}
                             waypoint={waypoint}
-                            isSelected={waypoint.id === selectedWaypointId}
+                            highlightTone={
+                                waypoint.id === highlightedWaypointId
+                                    ? highlightTone
+                                    : null
+                            }
                             isFinal={waypoint.id === roadmap.waypoints.length}
                             onSelect={() => onSelectWaypoint(waypoint.id)}
+                            onHoverChange={(isHovered) =>
+                                onHoverWaypoint(isHovered ? waypoint.id : null)
+                            }
                             cardRef={(element) => {
                                 cardRefs.current[waypoint.id] = element;
                             }}
@@ -214,7 +242,7 @@ function RoadmapCanvas({
                     <div
                         className="roadmap-map-progress-chart"
                         style={{
-                            background: `conic-gradient(#0879e8 ${journeyProgressPercent}%, rgba(209, 226, 243, 0.88) 0)`,
+                            background: `conic-gradient(#00a676 ${journeyProgressPercent}%, rgba(219, 229, 238, 0.9) 0)`,
                         }}
                         aria-hidden="true"
                     >

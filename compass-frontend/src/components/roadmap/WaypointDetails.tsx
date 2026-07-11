@@ -16,52 +16,56 @@ interface WaypointDetailsProps {
   roadmap: RoadmapData;
   waypoint: RoadmapWaypoint;
   totalWaypoints: number;
+  highlightedWaypointId: number | null;
+  highlightTone: "current" | "preview" | null;
+  onToggleTask: (waypointId: number, taskIndex: number) => void;
 }
 
 function WaypointDetails({
   roadmap,
   waypoint,
   totalWaypoints,
+  highlightedWaypointId,
+  highlightTone,
+  onToggleTask,
 }: WaypointDetailsProps) {
-  const progressByStatus = {
-    completed: 100,
-    "in-progress": 60,
-    "not-started": 0,
-    locked: 0,
-  };
-
-  const skills = [
-    `${waypoint.category} Basics`,
-    waypoint.title,
-    "Practice milestone",
-    "Portfolio evidence",
-    "Reflection notes",
-  ];
-
-  const completedSkills =
-    waypoint.status === "completed"
-      ? skills.length
-      : waypoint.status === "in-progress"
-        ? 2
-        : 0;
-
-  const progress = progressByStatus[waypoint.status];
+  const completedWaypoints = roadmap.waypoints.filter(
+    (roadmapWaypoint) => roadmapWaypoint.status === "completed",
+  ).length;
+  const journeyProgressPercent = roadmap.progressPercent;
+  const tasks = waypoint.tasks;
+  const isLocked = waypoint.status === "locked";
+  const visibleTasks = isLocked
+    ? tasks.map((task) => ({
+        ...task,
+        completed: false,
+      }))
+    : tasks;
+  const completedTasks = visibleTasks.filter((task) => task.completed).length;
+  const progress =
+    isLocked
+      ? 0
+      : tasks.length > 0
+      ? Math.round((completedTasks / tasks.length) * 100)
+      : 0;
   const estimatedTime =
     waypoint.status === "completed"
       ? "Complete"
       : waypoint.status === "locked"
         ? "Locked"
         : "4 weeks";
-  const completedWaypoints = roadmap.waypoints.filter(
-    (roadmapWaypoint) => roadmapWaypoint.status === "completed",
-  ).length;
-  const journeyProgressPercent =
-    totalWaypoints > 0
-      ? Math.round((completedWaypoints / totalWaypoints) * 100)
-      : 0;
+  const isHighlighted = waypoint.id === highlightedWaypointId;
+  const panelHighlightClass =
+    isHighlighted && highlightTone
+      ? `waypoint-panel--highlight-${highlightTone}`
+      : "";
 
   return (
-    <aside className="waypoint-panel">
+    <aside
+      className={`waypoint-panel ${
+        isHighlighted ? "waypoint-panel--highlighted" : ""
+      } ${panelHighlightClass}`}
+    >
       <section className="waypoint-journey-progress-card">
         <span>Journey Progress</span>
         <strong>
@@ -108,30 +112,40 @@ function WaypointDetails({
 
             <div>
               <CalendarDays size={18} />
-              <span>Skills to Master</span>
-              <strong>{skills.length} skills</strong>
+              <span>Tasks to Complete</span>
+              <strong>{tasks.length} tasks</strong>
             </div>
           </div>
         </div>
       </section>
 
       <section className="waypoint-panel-card">
-        <h3>Skills Checklist</h3>
+        <h3>Waypoint Checklist</h3>
 
         <div className="skills-checklist">
-          {skills.map((skill, index) => {
-            const isComplete = index < completedSkills;
-
+          {visibleTasks.map((task, taskIndex) => {
             return (
-              <div className="skill-check-row" key={skill}>
-                {isComplete ? (
-                  <CheckCircle2 size={18} />
-                ) : (
-                  <Circle size={18} />
-                )}
-
-                <span>{skill}</span>
-              </div>
+              <label
+                className={`skill-check-row ${
+                  isLocked ? "skill-check-row--disabled" : ""
+                }`}
+                key={`${task.title}-${taskIndex}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  disabled={isLocked}
+                  onChange={() => onToggleTask(waypoint.id, taskIndex)}
+                />
+                <span className="skill-toggle" aria-hidden="true">
+                  {task.completed ? (
+                    <CheckCircle2 size={18} />
+                  ) : (
+                    <Circle size={18} />
+                  )}
+                </span>
+                <span>{task.title}</span>
+              </label>
             );
           })}
         </div>
@@ -183,8 +197,8 @@ function WaypointDetails({
           {waypoint.status === "completed"
             ? "Great work completing this stage. Review your notes before moving into the next waypoint."
             : waypoint.status === "locked"
-              ? "This stage will unlock once the previous waypoint is complete. Keep your focus on the active step."
-              : `Great progress. Focus on ${skills[2]} before moving deeper into ${waypoint.category.toLowerCase()}.`}
+              ? "This stage is locked until you choose to inspect it. Click its roadmap card to view the details here."
+              : `Great progress. Focus on ${visibleTasks.find((task) => !task.completed)?.title ?? waypoint.title} before moving deeper into ${waypoint.category.toLowerCase()}.`}
         </p>
       </section>
 

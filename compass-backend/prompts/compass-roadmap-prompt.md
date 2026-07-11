@@ -64,39 +64,87 @@ Make the destination, currentStage, nextStep, and waypoints reflect
 the user's specific userType goal instead of giving generic career
 advice.
 
-Your response should be only the following JSON dictionary,
+Your response should be only valid JSON matching the following dictionary,
 but replace the values of the dictionary by appropriate advice.
+Use double quotes around every key and string value. Do not wrap the
+JSON in markdown fences and do not include any text before or after it.
 The frontend roadmap expects multiple waypoint cards, so force
 the model to return waypoints as a structured array instead of
 a single sentence or object.
 The waypoints field must be a JSON array with no fewer than 3
 and no more than 6 waypoint objects. Do not return waypoints as
 a string. Each waypoint object must include title, description,
-category, and status. Use "in-progress" for the first waypoint
-and "locked" for the remaining waypoints unless a waypoint is
-already completed.
+category, status, and tasks. The tasks field must be a JSON array
+with 3 to 6 concrete skill or to-do objects that are specific to
+that waypoint and userType goal. Each task object must include
+title and completed. Use these tasks to represent the actual work
+or skills the learner must complete for that waypoint. Use
+"in-progress" for the first waypoint and "locked" for the remaining
+waypoints unless a waypoint is already completed.
 {
-    destination: "What is a possible career for the user?",
-    currentStage: "How much job experience might the user have?",
-    nextStep: "What should the user do next?",
-    waypoints: [
-      {
-        title: "The title of the first learning milestone",
-        description: "A short explanation of what the user should do for this milestone",
-        category: "A short category such as Orientation, Foundations, Technical Skills, Projects, Advanced Skills, or Career Launch",
-        status: "in-progress"
-      },
-      {
-        title: "The title of the next learning milestone",
-        description: "A short explanation of what the user should do for this milestone",
-        category: "A short category such as Orientation, Foundations, Technical Skills, Projects, Advanced Skills, or Career Launch",
-        status: "locked"
-      },
-      {
-        title: "The title of the final learning milestone",
-        description: "A short explanation of what the user should do for this milestone",
-        category: "A short category such as Orientation, Foundations, Technical Skills, Projects, Advanced Skills, or Career Launch",
-        status: "locked"
-      }
-    ]
+  "destination": "What is a possible career for the user?",
+  "currentStage": "How much job experience might the user have?",
+  "nextStep": "What should the user do next?",
+  "waypoints": [
+    {
+      "title": "The title of the first learning milestone",
+      "description": "A short explanation of what the user should do for this milestone",
+      "category": "A short category such as Orientation, Foundations, Technical Skills, Projects, Advanced Skills, or Career Launch",
+      "status": "in-progress",
+      "tasks": [
+        {
+          "title": "A concrete skill or to-do item for this waypoint",
+          "completed": true
+        },
+        {
+          "title": "Another concrete skill or to-do item for this waypoint",
+          "completed": false
+        },
+        {
+          "title": "Another concrete skill or to-do item for this waypoint",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "title": "The title of the next learning milestone",
+      "description": "A short explanation of what the user should do for this milestone",
+      "category": "A short category such as Orientation, Foundations, Technical Skills, Projects, Advanced Skills, or Career Launch",
+      "status": "locked",
+      "tasks": [
+        {
+          "title": "A concrete skill or to-do item for this waypoint",
+          "completed": false
+        },
+        {
+          "title": "Another concrete skill or to-do item for this waypoint",
+          "completed": false
+        },
+        {
+          "title": "Another concrete skill or to-do item for this waypoint",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "title": "The title of the final learning milestone",
+      "description": "A short explanation of what the user should do for this milestone",
+      "category": "A short category such as Orientation, Foundations, Technical Skills, Projects, Advanced Skills, or Career Launch",
+      "status": "locked",
+      "tasks": [
+        {
+          "title": "A concrete skill or to-do item for this waypoint",
+          "completed": false
+        },
+        {
+          "title": "Another concrete skill or to-do item for this waypoint",
+          "completed": false
+        },
+        {
+          "title": "Another concrete skill or to-do item for this waypoint",
+          "completed": false
+        }
+      ]
+    }
+  ]
 }

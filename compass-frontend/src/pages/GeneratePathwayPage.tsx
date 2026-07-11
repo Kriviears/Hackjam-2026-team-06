@@ -79,36 +79,29 @@ const generationSteps: GenerationStep[] = [
 const JOURNEY_GENERATE_ENDPOINT = "http://localhost:8000/journey/generate";
 const MIN_GENERATION_TIME_MS = 7000;
 
-console.log("JOURNEY_GENERATE_ENDPOINT:", JOURNEY_GENERATE_ENDPOINT);
 type RawWaypoint = {
   title?: unknown;
   description?: unknown;
   category?: unknown;
   status?: unknown;
+  tasks?: unknown;
+};
+
+type RawWaypointTask = {
+  title?: unknown;
+  completed?: unknown;
 };
 
 type RawJourneyResponse = Partial<Omit<JourneyResponse, "waypoints">> & {
   waypoints?: unknown;
 };
 
+type ApiErrorResponse = {
+  error?: unknown;
+};
+
 function asText(value: unknown, fallback: string) {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
-}
-
-function asNumber(value: unknown, fallback: number) {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    const numericValue = Number.parseInt(value, 10);
-
-    if (Number.isFinite(numericValue)) {
-      return numericValue;
-    }
-  }
-
-  return fallback;
 }
 
 function normalizeWaypointStatus(
@@ -130,18 +123,87 @@ function normalizeWaypointStatus(
   return index === 0 ? "in-progress" : "locked";
 }
 
+function normalizeTaskCompletion(completed: unknown, waypointStatus: Waypoint["status"]) {
+  if (typeof completed === "boolean") {
+    return completed;
+  }
+
+  if (typeof completed === "string") {
+    return completed.toLowerCase() === "true";
+  }
+
+  return waypointStatus === "completed";
+}
+
+function createFallbackTasks(waypointTitle: string, waypointStatus: Waypoint["status"]) {
+  return [
+    {
+      title: `Review requirements for ${waypointTitle}`,
+      completed: waypointStatus === "completed" || waypointStatus === "in-progress",
+    },
+    {
+      title: `Complete the main action for ${waypointTitle}`,
+      completed: waypointStatus === "completed",
+    },
+    {
+      title: `Document progress for ${waypointTitle}`,
+      completed: waypointStatus === "completed",
+    },
+  ];
+}
+
+function normalizeWaypointTasks(
+  rawTasks: unknown,
+  waypointTitle: string,
+  waypointStatus: Waypoint["status"]
+) {
+  if (!Array.isArray(rawTasks) || rawTasks.length === 0) {
+    return createFallbackTasks(waypointTitle, waypointStatus);
+  }
+
+  const normalizedTasks = rawTasks.slice(0, 6).map((rawTask, index) => {
+    const task =
+      rawTask && typeof rawTask === "object"
+        ? (rawTask as RawWaypointTask)
+        : {};
+
+    return {
+      title: asText(task.title, `${waypointTitle} task ${index + 1}`),
+      completed: normalizeTaskCompletion(task.completed, waypointStatus),
+    };
+  });
+
+  if (normalizedTasks.length >= 3) {
+    return normalizedTasks;
+  }
+
+  return [
+    ...normalizedTasks,
+    ...createFallbackTasks(waypointTitle, waypointStatus).slice(
+      normalizedTasks.length,
+      3
+    ),
+  ];
+}
+
 function normalizeWaypoints(rawWaypoints: unknown, formData: JourneyRequest) {
-  const waypointArray = Array.isArray(rawWaypoints) ? rawWaypoints : [];
+  const waypointArray = Array.isArray(rawWaypoints)
+    ? rawWaypoints.slice(0, 6)
+    : [];
   const fallbackCategory =
     formData.learningInterests[0] ?? formData.careerGoal ?? "Career Skills";
 
   if (waypointArray.length === 0) {
+    const status = "in-progress" as const;
+    const title = "Start Your Learning Path";
+
     return [
       {
-        title: "Start Your Learning Path",
+        title,
         description: `Begin building the skills needed for ${formData.careerGoal || "your target career"}.`,
         category: fallbackCategory,
-        status: "in-progress" as const,
+        status,
+        tasks: createFallbackTasks(title, status),
       },
     ];
   }
@@ -152,16 +214,37 @@ function normalizeWaypoints(rawWaypoints: unknown, formData: JourneyRequest) {
         ? (rawWaypoint as RawWaypoint)
         : {};
 
+    const title = asText(waypoint.title, `Waypoint ${index + 1}`);
+    const status = normalizeWaypointStatus(waypoint.status, index);
+
     return {
-      title: asText(waypoint.title, `Waypoint ${index + 1}`),
+      title,
       description: asText(
         waypoint.description,
         "Complete this milestone to keep moving toward your career goal."
       ),
       category: asText(waypoint.category, fallbackCategory),
-      status: normalizeWaypointStatus(waypoint.status, index),
+      status,
+      tasks: normalizeWaypointTasks(waypoint.tasks, title, status),
     };
   });
+}
+
+function calculateJourneyProgress(waypoints: Waypoint[]) {
+  const taskTotals = waypoints.reduce(
+    (totals, waypoint) => {
+      totals.total += waypoint.tasks.length;
+      totals.completed += waypoint.tasks.filter((task) => task.completed).length;
+      return totals;
+    },
+    { completed: 0, total: 0 }
+  );
+
+  if (taskTotals.total === 0) {
+    return 0;
+  }
+
+  return Math.round((taskTotals.completed / taskTotals.total) * 100);
 }
 
 function normalizeGeneratedRoadmap(
@@ -178,10 +261,7 @@ function normalizeGeneratedRoadmap(
     id: asText(rawRoadmap.id, `roadmap-${Date.now()}`),
     destination: asText(rawRoadmap.destination, formData.careerGoal),
     currentStage: asText(rawRoadmap.currentStage, currentWaypoint.title),
-    progressPercent: Math.max(
-      0,
-      Math.min(100, asNumber(rawRoadmap.progressPercent, 0))
-    ),
+    progressPercent: calculateJourneyProgress(waypoints),
     nextStep: asText(rawRoadmap.nextStep, currentWaypoint.title),
     userType: formData.userType,
     weeklyCommitment: formData.weeklyTimeCommitment,
@@ -201,7 +281,19 @@ async function requestRoadmap(
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    let message = `Request failed with status ${response.status}`;
+
+    try {
+      const errorBody = (await response.json()) as ApiErrorResponse;
+
+      if (typeof errorBody.error === "string" && errorBody.error.trim()) {
+        message = errorBody.error.trim();
+      }
+    } catch {
+      // If the server did not send JSON, keep the status-based fallback.
+    }
+
+    throw new Error(message);
   }
 
   const rawRoadmap = (await response.json()) as RawJourneyResponse;
@@ -273,7 +365,9 @@ export default function GeneratePathwayPage() {
 
         if (isMounted) {
           setErrorMessage(
-            "Compass could not generate your roadmap. Please try again."
+            error instanceof Error && error.message
+              ? error.message
+              : "Compass could not generate your roadmap. Please try again."
           );
         }
       } finally {

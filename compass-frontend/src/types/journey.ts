@@ -28,11 +28,17 @@ export interface JourneyRequest {
 }
 
 // Interface for each waypoint in the journey   
+export interface WaypointTask {
+  title: string;
+  completed: boolean;
+}
+
 export interface Waypoint {
   title: string;
   description: string;
   category: string;
   status: "pending" | "not-started" | "locked" | "in-progress" | "completed";
+  tasks: WaypointTask[];
 }
 
 // Response interface for the journey, including progress and waypoints
