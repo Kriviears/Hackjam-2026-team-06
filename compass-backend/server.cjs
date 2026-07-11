@@ -210,7 +210,7 @@ async function generatePersonalizedRoadmap(userInput) {
 
         Give advice to the user.
 
-        Your repsonse should be only the following JSON dictionary,
+        Your response should be only the following JSON dictionary,
         but replace the values of the dictionary by appropriate advice.
         {
             destination: "What is a possible career for the user?",
