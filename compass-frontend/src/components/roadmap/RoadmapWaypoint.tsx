@@ -1,39 +1,28 @@
 import {
-  BarChart3,
-  BriefcaseBusiness,
   Check,
-  Code2,
-  Compass,
-  Database,
+  Laptop,
   Lock,
-  Rocket,
 } from "lucide-react";
 import type { RoadmapWaypoint as RoadmapWaypointType } from "../../types/roadmap";
 
 interface RoadmapWaypointProps {
   waypoint: RoadmapWaypointType;
   isSelected: boolean;
+  isCurrent: boolean;
   isFinal?: boolean;
   onSelect: () => void;
+  cardRef?: (element: HTMLButtonElement | null) => void;
 }
-
-const iconMap = {
-  Orientation: Compass,
-  Foundations: Database,
-  "Technical Skills": Code2,
-  Projects: BriefcaseBusiness,
-  "Advanced Skills": BarChart3,
-  "Career Launch": Rocket,
-};
 
 function RoadmapWaypoint({
   waypoint,
   isSelected,
+  isCurrent,
   isFinal = false,
   onSelect,
+  cardRef,
 }: RoadmapWaypointProps) {
-  const Icon =
-    iconMap[waypoint.category as keyof typeof iconMap] ?? Compass;
+  const Icon = isCurrent ? Laptop : Lock;
 
   return (
     <article
@@ -52,14 +41,17 @@ function RoadmapWaypoint({
         className="roadmap-node"
         onClick={onSelect}
         aria-label={`Open ${waypoint.title}`}
+        aria-pressed={isSelected}
       >
         {waypoint.id}
       </button>
 
       <button
+        ref={cardRef}
         type="button"
         className="roadmap-waypoint-card"
         onClick={onSelect}
+        aria-pressed={isSelected}
       >
         <span className="roadmap-waypoint-icon">
           <Icon size={24} />

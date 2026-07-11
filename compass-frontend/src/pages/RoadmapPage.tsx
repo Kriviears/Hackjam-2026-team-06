@@ -201,7 +201,7 @@ function RoadmapPage() {
 
   return (
     <main className="roadmap-page">
-      <RoadmapSidebar roadmap={roadmap} />
+      <RoadmapSidebar roadmap={roadmap} userProfile={userProfile} />
 
       <RoadmapCanvas
         roadmap={roadmap}
@@ -211,6 +211,7 @@ function RoadmapPage() {
       />
 
       <WaypointDetails
+        roadmap={roadmap}
         waypoint={selectedWaypoint}
         totalWaypoints={roadmap.waypoints.length}
       />

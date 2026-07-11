@@ -10,14 +10,16 @@ import {
   FileSpreadsheet,
   Sparkles,
 } from "lucide-react";
-import type { RoadmapWaypoint } from "../../types/roadmap";
+import type { RoadmapData, RoadmapWaypoint } from "../../types/roadmap";
 
 interface WaypointDetailsProps {
+  roadmap: RoadmapData;
   waypoint: RoadmapWaypoint;
   totalWaypoints: number;
 }
 
 function WaypointDetails({
+  roadmap,
   waypoint,
   totalWaypoints,
 }: WaypointDetailsProps) {
@@ -50,9 +52,24 @@ function WaypointDetails({
       : waypoint.status === "locked"
         ? "Locked"
         : "4 weeks";
+  const completedWaypoints = roadmap.waypoints.filter(
+    (roadmapWaypoint) => roadmapWaypoint.status === "completed",
+  ).length;
+  const journeyProgressPercent =
+    totalWaypoints > 0
+      ? Math.round((completedWaypoints / totalWaypoints) * 100)
+      : 0;
 
   return (
     <aside className="waypoint-panel">
+      <section className="waypoint-journey-progress-card">
+        <span>Journey Progress</span>
+        <strong>
+          {completedWaypoints} of {totalWaypoints} waypoints complete ·{" "}
+          {journeyProgressPercent}%
+        </strong>
+      </section>
+
       <section className="waypoint-summary-card">
         <p className="waypoint-eyebrow">
           Waypoint {waypoint.id} of {totalWaypoints}

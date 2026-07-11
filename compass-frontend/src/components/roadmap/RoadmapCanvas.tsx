@@ -1,9 +1,8 @@
 import {
-    Bell,
     List,
     PartyPopper,
-    Share2,
 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import roadmapAvatar from "../../assets/roadmap-avatar1.png";
 import type { UserProfile } from "../../types/journey";
 import type { RoadmapData } from "../../types/roadmap";
@@ -29,24 +28,52 @@ function getDestinationMessage(userType: RoadmapData["userType"]) {
     return "You're Admitted!";
 }
 
+function getPersonalizedDestination(userType: RoadmapData["userType"]) {
+    if (userType === "alumna") {
+        return "getting your dream job";
+    }
+
+    if (userType === "currentLearner" || userType === "current_learner") {
+        return "graduating from Per Scholas";
+    }
+
+    return "becoming a Per Scholian";
+}
+
 function RoadmapCanvas({
     roadmap,
     userProfile,
     selectedWaypointId,
     onSelectWaypoint,
 }: RoadmapCanvasProps) {
+    const cardRefs = useRef<Record<number, HTMLButtonElement | null>>({});
     const destinationMessage = getDestinationMessage(roadmap.userType);
+    const personalizedDestination = getPersonalizedDestination(roadmap.userType);
     const firstName = userProfile?.firstName.trim();
-    const lastName = userProfile?.lastName.trim();
-    const displayName =
-        firstName && lastName
-            ? `${firstName} ${lastName.charAt(0)}.`
-            : firstName || "Your Profile";
-    const initials =
-        firstName || lastName
-            ? `${firstName?.charAt(0) ?? ""}${lastName?.charAt(0) ?? ""}`.toUpperCase()
-            : "YP";
-    const possessiveName = firstName ? `${firstName}'s` : "Your";
+    const completedWaypoints = roadmap.waypoints.filter(
+        (waypoint) => waypoint.status === "completed",
+    ).length;
+    const totalWaypoints = roadmap.waypoints.length;
+    const journeyProgressPercent =
+        totalWaypoints > 0
+            ? Math.round((completedWaypoints / totalWaypoints) * 100)
+            : 0;
+    const currentWaypointId =
+        roadmap.waypoints.find(
+            (waypoint) =>
+                waypoint.status === "in-progress" ||
+                waypoint.title === roadmap.currentStage,
+        )?.id ??
+        roadmap.waypoints.find((waypoint) => waypoint.status !== "completed")?.id ??
+        selectedWaypointId;
+
+    useEffect(() => {
+        cardRefs.current[selectedWaypointId]?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "nearest",
+        });
+    }, [selectedWaypointId]);
 
     return (
         <section className="roadmap-main">
@@ -58,32 +85,13 @@ function RoadmapCanvas({
                         <span>Full Roadmap</span>
                     </nav>
 
-                    <h1>{possessiveName} Full Roadmap</h1>
+                    <h1>{firstName ? `Welcome ${firstName}!` : "Welcome!"}</h1>
 
                     <p>
-                        {firstName ? `${firstName}'s` : "Your"} personalized path from where you are today to your
-                        dream career.
+                        Here is your personalized roadmap from where you are today to your
+                        {" "}
+                        {personalizedDestination}.
                     </p>
-                </div>
-
-                <div className="roadmap-header-actions">
-                    <button type="button" className="roadmap-outline-button">
-                        <Share2 size={18} />
-                        Share Roadmap
-                    </button>
-
-                    <button
-                        type="button"
-                        className="roadmap-icon-button"
-                        aria-label="Notifications"
-                    >
-                        <Bell size={20} />
-                    </button>
-
-                    <button type="button" className="roadmap-profile-button">
-                        <span className="roadmap-avatar">{initials}</span>
-                        <span>{displayName}</span>
-                    </button>
                 </div>
             </header>
 
@@ -128,6 +136,22 @@ function RoadmapCanvas({
                         />
 
                         <path
+                            className="roadmap-path-progress"
+                            fill="none"
+                            pathLength={100}
+                            style={{
+                                strokeDasharray: `${journeyProgressPercent} 100`,
+                            }}
+                            d="
+                M 295 910
+                C 250 850, 260 770, 385 720
+                C 560 642, 590 545, 430 475
+                C 270 405, 300 300, 495 248
+                C 650 206, 710 126, 635 40
+              "
+                        />
+
+                        <path
                             className="roadmap-path-center"
                             fill="none"
                             d="
@@ -162,10 +186,33 @@ function RoadmapCanvas({
                             key={waypoint.id}
                             waypoint={waypoint}
                             isSelected={waypoint.id === selectedWaypointId}
+                            isCurrent={waypoint.id === currentWaypointId}
                             isFinal={waypoint.id === roadmap.waypoints.length}
                             onSelect={() => onSelectWaypoint(waypoint.id)}
+                            cardRef={(element) => {
+                                cardRefs.current[waypoint.id] = element;
+                            }}
                         />
                     ))}
+                </div>
+
+                <div className="roadmap-map-progress" aria-label={`Journey progress ${journeyProgressPercent}%`}>
+                    <span className="roadmap-map-progress-title">Journey Progress</span>
+
+                    <div
+                        className="roadmap-map-progress-chart"
+                        style={{
+                            background: `conic-gradient(#0879e8 ${journeyProgressPercent}%, rgba(209, 226, 243, 0.88) 0)`,
+                        }}
+                        aria-hidden="true"
+                    >
+                        <span>{journeyProgressPercent}%</span>
+                    </div>
+
+                    <p>
+                        Every waypoint you finish brings you closer to your tech career.
+                        <strong>Keep going!</strong>
+                    </p>
                 </div>
 
                 <RoadmapControls />
