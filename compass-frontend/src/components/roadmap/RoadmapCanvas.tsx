@@ -1,8 +1,10 @@
 import {
     Bell,
     List,
+    PartyPopper,
     Share2,
 } from "lucide-react";
+import roadmapAvatar from "../../assets/roadmap-avatar1.png";
 import techLandscape from "../../assets/tech-landscape.png";
 import type { RoadmapData } from "../../types/roadmap";
 import RoadmapControls from "./RoadmapControls";
@@ -14,11 +16,25 @@ interface RoadmapCanvasProps {
     onSelectWaypoint: (id: number) => void;
 }
 
+function getDestinationMessage(userType: RoadmapData["userType"]) {
+    if (userType === "alumna") {
+        return "You're Hired!";
+    }
+
+    if (userType === "currentLearner" || userType === "current_learner") {
+        return "You Graduated!";
+    }
+
+    return "You're Admitted!";
+}
+
 function RoadmapCanvas({
     roadmap,
     selectedWaypointId,
     onSelectWaypoint,
 }: RoadmapCanvasProps) {
+    const destinationMessage = getDestinationMessage(roadmap.userType);
+
     return (
         <section className="roadmap-main">
             <header className="roadmap-header">
@@ -87,52 +103,52 @@ function RoadmapCanvas({
                 >
                     <path
                         className="roadmap-path-glow"
+                        fill="none"
                         d="
-              M 280 950
-              C 380 880, 230 810, 355 740
-              C 470 675, 250 610, 360 545
-              C 475 475, 315 420, 420 350
-              C 525 280, 390 220, 520 145
-              C 590 105, 610 70, 625 20
+              M 295 910
+              C 250 850, 260 770, 385 720
+              C 560 642, 590 545, 430 475
+              C 270 405, 300 300, 495 248
+              C 650 206, 710 126, 635 40
             "
                     />
 
                     <path
                         className="roadmap-path-base"
+                        fill="none"
                         d="
-              M 280 950
-              C 380 880, 230 810, 355 740
-              C 470 675, 250 610, 360 545
-              C 475 475, 315 420, 420 350
-              C 525 280, 390 220, 520 145
-              C 590 105, 610 70, 625 20
+              M 295 910
+              C 250 850, 260 770, 385 720
+              C 560 642, 590 545, 430 475
+              C 270 405, 300 300, 495 248
+              C 650 206, 710 126, 635 40
             "
                     />
 
                     <path
                         className="roadmap-path-center"
+                        fill="none"
                         d="
-              M 280 950
-              C 380 880, 230 810, 355 740
-              C 470 675, 250 610, 360 545
-              C 475 475, 315 420, 420 350
-              C 525 280, 390 220, 520 145
-              C 590 105, 610 70, 625 20
+              M 295 910
+              C 250 850, 260 770, 385 720
+              C 560 642, 590 545, 430 475
+              C 270 405, 300 300, 495 248
+              C 650 206, 710 126, 635 40
             "
                     />
                 </svg>
 
-                <div className="roadmap-you-are-here">
-                    <span>You are</span>
-                    <strong>here</strong>
+                <div className="roadmap-traveler" aria-hidden="true">
+                    <img src={roadmapAvatar} alt="" />
                 </div>
 
-                <div className="roadmap-traveler" aria-hidden="true">
-                    <div className="traveler-head" />
-                    <div className="traveler-body" />
-                    <div className="traveler-backpack" />
-                    <div className="traveler-leg traveler-leg-left" />
-                    <div className="traveler-leg traveler-leg-right" />
+                <div className="roadmap-destination-badge">
+                    <span className="roadmap-destination-icon">
+                        <PartyPopper size={20} />
+                    </span>
+
+                    <span>Congratulations!</span>
+                    <strong>{destinationMessage}</strong>
                 </div>
 
                 {roadmap.waypoints.map((waypoint) => (

@@ -16,6 +16,14 @@ export interface JourneyResponse {
   currentStage: string;
   progressPercent: number;
   nextStep: string;
+  userType?:
+    | "prospective_learner"
+    | "current_learner"
+    | "prospectiveLearner"
+    | "currentLearner"
+    | "alumna"
+    | "";
+  weeklyCommitment?: string;
   waypoints: JourneyWaypoint[];
 }
 
