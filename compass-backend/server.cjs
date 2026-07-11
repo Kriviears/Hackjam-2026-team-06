@@ -5,6 +5,8 @@ require('dotenv').config();
 
 const PORT = 8000;
 
+const { readFile } = require("fs/promises");
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -17,7 +19,13 @@ if (!apiKey) {
   throw new Error('GOOGLE_API_KEY environment variable is not set');
 }
 const { GoogleGenAI } = require("@google/genai");
-const ai = new GoogleGenAI({apiKey});
+const ai = new GoogleGenAI({ apiKey });
+const ROADMAP_PROMPT_PATH = path.resolve(
+  __dirname,
+  "prompts",
+  "compass-roadmap-prompt.md"
+);
+let roadmapPromptTemplate = "";
 // ============================================
 // REQUEST SCHEMA DEFINITION
 // ============================================
@@ -47,7 +55,6 @@ const RequestSchema = {
 const ResponseSchema = {
   destination: String,           // e.g., "Full-Stack JavaScript Developer"
   currentStage: String,          // e.g., "Foundation Building"
-  progressPercent: Number,       // e.g., 15 (represents 15%)
   nextStep: String,              // e.g., "Complete JavaScript fundamentals course"
   waypoints: [
     {
@@ -188,51 +195,35 @@ app.get('/roadmap/:id', (req, res) => {
 */
 async function generatePersonalizedRoadmap(userInput) {
 
-    const u = userInput;
+  const u = userInput;
 
-    // Create a prompt for an AI model.
-    const prompt = `
+  const prompt = `${roadmapPromptTemplate}
 
-        A user has specific job skills and wants to learn other jobs skills.
+Generate a roadmap for the following learner:
 
-        The following JSON dictionary has information about the user:
+User Type: ${u.userType}
+Career Goal: ${u.careerGoal}
+Experience Level: ${u.experienceLevel}
+Weekly Time Commitment: ${u.weeklyTimeCommitment}
+Existing Skills: ${u.existingSkills}
+Learning Interests: ${u.learningInterests}
+Target Timeline: ${u.targetTimeline}
+Biggest Challenge: ${u.biggestChallenge}
+Additional Notes: ${u.additionalNotes}
+`;
 
-        {
-          userType: "${u.userType}",
-          careerGoal: "${u.careerGoal}",
-          experienceLevel: "${u.experienceLevel}",
-          weeklyTimeCommitment: "${u.weeklyTimeCommitment}",
-          existingSkills: "${u.existingSkills}",
-          learningInterests: "${u.learningInterests}",
-          targetTimeline: "${u.targetTimeline}",
-          biggestChallenge: "${u.biggestChallenge}",
-          additionalNotes: "${u.additionalNotes}"
-        }
-
-        Give advice to the user.
-
-        Your response should be only the following JSON dictionary,
-        but replace the values of the dictionary by appropriate advice.
-        {
-            destination: "What is a possible career for the user?",
-            currentStage: "How much job experience might the user have?",
-            progressPercent: "How close is the user to getting a new job?",
-            nextStep: "What should the user do next?",
-            waypoints: "What learning milestones should the user do?"
-        }
-    `
-    // Call an AI model.
-    const interaction = await ai.interactions.create
+  // Call an AI model.
+  const interaction = await ai.interactions.create
     (
-        {
-            model: "gemini-3.5-flash",
-            input: prompt,
-        }
+      {
+        model: "gemini-3.5-flash",
+        input: prompt,
+      }
     );
-    // Translate the text into a dictionary.
-    const roadmap = await JSON.parse(interaction.output_text);
-
-    return roadmap;
+  // Translate the text into a dictionary.
+  const roadmap = await JSON.parse(interaction.output_text);
+  console.log("Roadmap generated:", roadmap);
+  return roadmap;
 }
 
 // ============================================
@@ -253,8 +244,17 @@ app.use((req, res) => {
 /*
   This starts the server on the specified PORT.
 */
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-  console.log(`POST /journey/generate - Generate a learning roadmap`);
-  console.log(`GET /roadmap/1234 - Retrieve roadmap 1234`);
+async function startServer() {
+  roadmapPromptTemplate = await readFile(ROADMAP_PROMPT_PATH, "utf8");
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`POST /journey/generate - Generate a learning roadmap`);
+    console.log(`GET /roadmap/1234 - Retrieve roadmap 1234`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error("Failed to start server:", error);
+  process.exit(1);
 });
