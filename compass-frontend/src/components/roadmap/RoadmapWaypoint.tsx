@@ -13,6 +13,7 @@ import type { RoadmapWaypoint as RoadmapWaypointType } from "../../types/roadmap
 interface RoadmapWaypointProps {
   waypoint: RoadmapWaypointType;
   isSelected: boolean;
+  isFinal?: boolean;
   onSelect: () => void;
 }
 
@@ -28,6 +29,7 @@ const iconMap = {
 function RoadmapWaypoint({
   waypoint,
   isSelected,
+  isFinal = false,
   onSelect,
 }: RoadmapWaypointProps) {
   const Icon =
@@ -37,6 +39,8 @@ function RoadmapWaypoint({
     <article
       className={`roadmap-waypoint roadmap-waypoint--${waypoint.status} ${
         isSelected ? "roadmap-waypoint--selected" : ""
+      } ${
+        isFinal ? "roadmap-waypoint--final" : ""
       }`}
       style={{
         left: waypoint.position.left,

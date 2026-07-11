@@ -1,13 +1,14 @@
 import {
   BarChart3,
   BookOpen,
-  Compass,
+  Clock3,
   LayoutDashboard,
   Map,
   Settings,
   Sparkles,
   UserRound,
 } from "lucide-react";
+import compassLogo from "../../assets/compass-logo.png";
 import type { RoadmapData } from "../../types/roadmap";
 
 interface RoadmapSidebarProps {
@@ -18,9 +19,7 @@ function RoadmapSidebar({ roadmap }: RoadmapSidebarProps) {
   return (
     <aside className="roadmap-sidebar">
       <div className="roadmap-brand">
-        <span className="roadmap-brand-icon">
-          <Compass size={32} />
-        </span>
+        <img src={compassLogo} alt="" className="roadmap-brand-logo" />
 
         <div>
           <strong>COMPASS</strong>
@@ -92,7 +91,10 @@ function RoadmapSidebar({ roadmap }: RoadmapSidebarProps) {
 
         <div className="journey-details">
           <span>Weekly Commitment</span>
-          <strong>{roadmap.weeklyCommitment}</strong>
+          <div className="journey-commitment">
+            <strong>{roadmap.weeklyCommitment}</strong>
+            <Clock3 size={18} />
+          </div>
         </div>
       </section>
 

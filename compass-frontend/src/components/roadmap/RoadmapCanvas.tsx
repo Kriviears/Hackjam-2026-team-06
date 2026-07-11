@@ -5,7 +5,6 @@ import {
     Share2,
 } from "lucide-react";
 import roadmapAvatar from "../../assets/roadmap-avatar1.png";
-import techLandscape from "../../assets/tech-landscape.png";
 import type { RoadmapData } from "../../types/roadmap";
 import RoadmapControls from "./RoadmapControls";
 import RoadmapWaypoint from "./RoadmapWaypoint";
@@ -81,84 +80,79 @@ function RoadmapCanvas({
                 </button>
             </div>
 
-            <div
-                className="roadmap-canvas"
-                style={{
-                    backgroundImage: `
-            linear-gradient(
-              to bottom,
-              rgba(239, 247, 255, 0.2),
-              rgba(11, 101, 205, 0.13)
-            ),
-            url(${techLandscape})
-          `,
-                }}
-            >
-                <svg
-                    className="roadmap-path"
-                    viewBox="0 0 800 1000"
-                    preserveAspectRatio="none"
-                    aria-hidden="true"
-                    fill="none"
-                >
-                    <path
-                        className="roadmap-path-glow"
+            <div className="roadmap-canvas">
+                <div className="roadmap-stage">
+                    <svg
+                        className="roadmap-path"
+                        viewBox="0 0 800 1000"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
                         fill="none"
-                        d="
-              M 295 910
-              C 250 850, 260 770, 385 720
-              C 560 642, 590 545, 430 475
-              C 270 405, 300 300, 495 248
-              C 650 206, 710 126, 635 40
-            "
-                    />
+                    >
+                        <path
+                            className="roadmap-path-glow"
+                            fill="none"
+                            d="
+                M 295 910
+                C 250 850, 260 770, 385 720
+                C 560 642, 590 545, 430 475
+                C 270 405, 300 300, 495 248
+                C 650 206, 710 126, 635 40
+              "
+                        />
 
-                    <path
-                        className="roadmap-path-base"
-                        fill="none"
-                        d="
-              M 295 910
-              C 250 850, 260 770, 385 720
-              C 560 642, 590 545, 430 475
-              C 270 405, 300 300, 495 248
-              C 650 206, 710 126, 635 40
-            "
-                    />
+                        <path
+                            className="roadmap-path-base"
+                            fill="none"
+                            d="
+                M 295 910
+                C 250 850, 260 770, 385 720
+                C 560 642, 590 545, 430 475
+                C 270 405, 300 300, 495 248
+                C 650 206, 710 126, 635 40
+              "
+                        />
 
-                    <path
-                        className="roadmap-path-center"
-                        fill="none"
-                        d="
-              M 295 910
-              C 250 850, 260 770, 385 720
-              C 560 642, 590 545, 430 475
-              C 270 405, 300 300, 495 248
-              C 650 206, 710 126, 635 40
-            "
-                    />
-                </svg>
+                        <path
+                            className="roadmap-path-center"
+                            fill="none"
+                            d="
+                M 295 910
+                C 250 850, 260 770, 385 720
+                C 560 642, 590 545, 430 475
+                C 270 405, 300 300, 495 248
+                C 650 206, 710 126, 635 40
+              "
+                        />
+                    </svg>
 
-                <div className="roadmap-traveler" aria-hidden="true">
-                    <img src={roadmapAvatar} alt="" />
+                    <div className="roadmap-traveler" aria-hidden="true">
+                        <img src={roadmapAvatar} alt="" />
+                    </div>
+
+                    <div className="roadmap-start-banner">
+                        Your Future Starts Here!
+                    </div>
+
+                    <div className="roadmap-destination-badge">
+                        <span className="roadmap-destination-icon">
+                            <PartyPopper size={20} />
+                        </span>
+
+                        <span>Congratulations!</span>
+                        <strong>{destinationMessage}</strong>
+                    </div>
+
+                    {roadmap.waypoints.map((waypoint) => (
+                        <RoadmapWaypoint
+                            key={waypoint.id}
+                            waypoint={waypoint}
+                            isSelected={waypoint.id === selectedWaypointId}
+                            isFinal={waypoint.id === roadmap.waypoints.length}
+                            onSelect={() => onSelectWaypoint(waypoint.id)}
+                        />
+                    ))}
                 </div>
-
-                <div className="roadmap-destination-badge">
-                    <span className="roadmap-destination-icon">
-                        <PartyPopper size={20} />
-                    </span>
-
-                    <span>Congratulations!</span>
-                    <strong>{destinationMessage}</strong>
-                </div>
-
-                {roadmap.waypoints.map((waypoint) => (
-                    <RoadmapWaypoint
-                        key={waypoint.id}
-                        waypoint={waypoint}
-                        isSelected={waypoint.id === selectedWaypointId}
-                        onSelect={() => onSelectWaypoint(waypoint.id)}
-                    />
-                ))}
 
                 <RoadmapControls />
             </div>

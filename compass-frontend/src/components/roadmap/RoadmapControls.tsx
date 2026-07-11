@@ -8,24 +8,24 @@ import {
 function RoadmapControls() {
   return (
     <div className="roadmap-controls">
-      <button type="button">
+      <button type="button" aria-label="Zoom out" title="Zoom out">
         <MinusCircle size={21} />
-        <span>Zoom Out</span>
       </button>
 
-      <button type="button">
+      <button type="button" aria-label="Zoom in" title="Zoom in">
         <PlusCircle size={21} />
-        <span>Zoom In</span>
       </button>
 
-      <button type="button">
+      <button type="button" aria-label="Center roadmap" title="Center roadmap">
         <LocateFixed size={21} />
-        <span>Center</span>
       </button>
 
-      <button type="button">
+      <button
+        type="button"
+        aria-label="Recalculate path"
+        title="Recalculate path"
+      >
         <RefreshCw size={21} />
-        <span>Recalculate Path</span>
       </button>
     </div>
   );

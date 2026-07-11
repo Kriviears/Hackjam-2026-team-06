@@ -109,7 +109,7 @@ function getPointAtRoadProgress(progress: number) {
 
 function getWaypointPosition(index: number, total: number) {
   const startProgress = 0.18;
-  const endProgress = 0.96;
+  const endProgress = 0.92;
   const progress =
     total <= 1
       ? 0.58
@@ -171,7 +171,7 @@ function RoadmapPage() {
         }),
       ),
     };
-  }, [journeyResponse]);
+  }, [journeyResponse, state?.userType]);
 
   /*
    * No mock roadmap:
