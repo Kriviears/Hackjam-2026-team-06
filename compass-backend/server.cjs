@@ -1,5 +1,7 @@
 // Various parts of this code, past or present,
 // came from an AI model: Claude Haiku 4.5.
+// Dotenv is used to load environment variables from a .env file into process.env.
+require('dotenv').config();
 
 const PORT = 8000;
 
