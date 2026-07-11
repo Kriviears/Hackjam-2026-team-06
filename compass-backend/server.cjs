@@ -1,7 +1,7 @@
 // Various parts of this code, past or present,
 // came from an AI model: Claude Haiku 4.5.
 
-const PORT = 5000;
+const PORT = 8000;
 
 const express = require("express");
 const cors = require("cors");
@@ -250,8 +250,6 @@ app.use((req, res) => {
 // ============================================
 /*
   This starts the server on the specified PORT.
-  Once running, you can access it at http://localhost:5000
-  (check the port number, which may have changed)
 */
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
