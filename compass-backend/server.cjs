@@ -108,28 +108,28 @@ app.post("/journey/generate", (req, res) => {
 
     async function runAndWaitForCodeRelatedToAI() {
 
-    // Generate a personalized roadmap based on user input
-    const roadmap = await generatePersonalizedRoadmap({
-      userType,
-      careerGoal,
-      experienceLevel,
-      weeklyTimeCommitment,
-      existingSkills,
-      learningInterests,
-      targetTimeline,
-      biggestChallenge,
-      additionalNotes
-    });
+      // Generate a personalized roadmap based on user input
+      const roadmap = await generatePersonalizedRoadmap({
+        userType,
+        careerGoal,
+        experienceLevel,
+        weeklyTimeCommitment,
+        existingSkills,
+        learningInterests,
+        targetTimeline,
+        biggestChallenge,
+        additionalNotes
+      });
 
-    // Store the roadmap in memory (in a real app, save to database)
-    userRoadmaps[roadmapGlobalId] = roadmap;
-    roadmapGlobalId += 1;
+      // Store the roadmap in memory (in a real app, save to database)
+      userRoadmaps[roadmapGlobalId] = roadmap;
+      roadmapGlobalId += 1;
 
-    // Send the response back to the client
-    res.status(200).json({
-      id: roadmapId,
-      ...roadmap
-    });
+      // Send the response back to the client
+      res.status(200).json({
+        id: roadmapId,
+        ...roadmap
+      });
     }
 
     runAndWaitForCodeRelatedToAI();
