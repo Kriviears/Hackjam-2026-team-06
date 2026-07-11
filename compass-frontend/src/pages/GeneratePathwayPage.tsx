@@ -17,6 +17,7 @@ import {
 import type {
   JourneyRequest,
   JourneyResponse,
+  Waypoint,
   UserProfile,
 } from "../types/journey";
 import techLandscape from "../assets/tech-landscape.png";
@@ -78,6 +79,116 @@ const generationSteps: GenerationStep[] = [
 const JOURNEY_GENERATE_ENDPOINT = "http://localhost:8000/journey/generate";
 const MIN_GENERATION_TIME_MS = 7000;
 
+console.log("JOURNEY_GENERATE_ENDPOINT:", JOURNEY_GENERATE_ENDPOINT);
+type RawWaypoint = {
+  title?: unknown;
+  description?: unknown;
+  category?: unknown;
+  status?: unknown;
+};
+
+type RawJourneyResponse = Partial<Omit<JourneyResponse, "waypoints">> & {
+  waypoints?: unknown;
+};
+
+function asText(value: unknown, fallback: string) {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function asNumber(value: unknown, fallback: number) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const numericValue = Number.parseInt(value, 10);
+
+    if (Number.isFinite(numericValue)) {
+      return numericValue;
+    }
+  }
+
+  return fallback;
+}
+
+function normalizeWaypointStatus(
+  status: unknown,
+  index: number
+): Waypoint["status"] {
+  if (status === "completed" || status === "in-progress") {
+    return status;
+  }
+
+  if (status === "not-started" || status === "locked") {
+    return status;
+  }
+
+  if (status === "pending") {
+    return index === 0 ? "in-progress" : "locked";
+  }
+
+  return index === 0 ? "in-progress" : "locked";
+}
+
+function normalizeWaypoints(rawWaypoints: unknown, formData: JourneyRequest) {
+  const waypointArray = Array.isArray(rawWaypoints) ? rawWaypoints : [];
+  const fallbackCategory =
+    formData.learningInterests[0] ?? formData.careerGoal ?? "Career Skills";
+
+  if (waypointArray.length === 0) {
+    return [
+      {
+        title: "Start Your Learning Path",
+        description: `Begin building the skills needed for ${formData.careerGoal || "your target career"}.`,
+        category: fallbackCategory,
+        status: "in-progress" as const,
+      },
+    ];
+  }
+
+  return waypointArray.map((rawWaypoint, index) => {
+    const waypoint =
+      rawWaypoint && typeof rawWaypoint === "object"
+        ? (rawWaypoint as RawWaypoint)
+        : {};
+
+    return {
+      title: asText(waypoint.title, `Waypoint ${index + 1}`),
+      description: asText(
+        waypoint.description,
+        "Complete this milestone to keep moving toward your career goal."
+      ),
+      category: asText(waypoint.category, fallbackCategory),
+      status: normalizeWaypointStatus(waypoint.status, index),
+    };
+  });
+}
+
+function normalizeGeneratedRoadmap(
+  rawRoadmap: RawJourneyResponse,
+  formData: JourneyRequest
+): JourneyResponse {
+  const waypoints = normalizeWaypoints(rawRoadmap.waypoints, formData);
+  const currentWaypoint =
+    waypoints.find((waypoint) => waypoint.status === "in-progress") ??
+    waypoints.find((waypoint) => waypoint.status !== "completed") ??
+    waypoints[0];
+
+  return {
+    id: asText(rawRoadmap.id, `roadmap-${Date.now()}`),
+    destination: asText(rawRoadmap.destination, formData.careerGoal),
+    currentStage: asText(rawRoadmap.currentStage, currentWaypoint.title),
+    progressPercent: Math.max(
+      0,
+      Math.min(100, asNumber(rawRoadmap.progressPercent, 0))
+    ),
+    nextStep: asText(rawRoadmap.nextStep, currentWaypoint.title),
+    userType: formData.userType,
+    weeklyCommitment: formData.weeklyTimeCommitment,
+    waypoints,
+  };
+}
+
 async function requestRoadmap(
   formData: JourneyRequest
 ): Promise<JourneyResponse> {
@@ -93,7 +204,9 @@ async function requestRoadmap(
     throw new Error(`Request failed with status ${response.status}`);
   }
 
-  return response.json();
+  const rawRoadmap = (await response.json()) as RawJourneyResponse;
+
+  return normalizeGeneratedRoadmap(rawRoadmap, formData);
 }
 
 export default function GeneratePathwayPage() {

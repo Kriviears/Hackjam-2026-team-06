@@ -32,7 +32,7 @@ export interface Waypoint {
   title: string;
   description: string;
   category: string;
-   status: "pending" | "in-progress" | "completed";
+  status: "pending" | "not-started" | "locked" | "in-progress" | "completed";
 }
 
 // Response interface for the journey, including progress and waypoints
@@ -42,5 +42,7 @@ export interface JourneyResponse {
   currentStage: string;
   progressPercent: number;
   nextStep: string;
+  userType?: JourneyRequest["userType"];
+  weeklyCommitment?: string;
   waypoints: Waypoint[];
 }

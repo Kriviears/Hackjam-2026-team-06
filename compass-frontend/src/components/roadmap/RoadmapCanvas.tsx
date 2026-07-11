@@ -2,7 +2,8 @@ import {
     List,
     PartyPopper,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useNavigate } from "react-router-dom";
 import roadmapAvatar from "../../assets/roadmap-avatar1.png";
 import type { UserProfile } from "../../types/journey";
 import type { RoadmapData } from "../../types/roadmap";
@@ -46,7 +47,10 @@ function RoadmapCanvas({
     selectedWaypointId,
     onSelectWaypoint,
 }: RoadmapCanvasProps) {
+    const navigate = useNavigate();
     const cardRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+    const canvasRef = useRef<HTMLDivElement | null>(null);
+    const [zoomLevel, setZoomLevel] = useState(1);
     const destinationMessage = getDestinationMessage(roadmap.userType);
     const personalizedDestination = getPersonalizedDestination(roadmap.userType);
     const firstName = userProfile?.firstName.trim();
@@ -58,15 +62,6 @@ function RoadmapCanvas({
         totalWaypoints > 0
             ? Math.round((completedWaypoints / totalWaypoints) * 100)
             : 0;
-    const currentWaypointId =
-        roadmap.waypoints.find(
-            (waypoint) =>
-                waypoint.status === "in-progress" ||
-                waypoint.title === roadmap.currentStage,
-        )?.id ??
-        roadmap.waypoints.find((waypoint) => waypoint.status !== "completed")?.id ??
-        selectedWaypointId;
-
     useEffect(() => {
         cardRefs.current[selectedWaypointId]?.scrollIntoView({
             behavior: "smooth",
@@ -75,16 +70,31 @@ function RoadmapCanvas({
         });
     }, [selectedWaypointId]);
 
+    const handleZoomOut = () => {
+        setZoomLevel((currentZoom) => Math.max(0.85, currentZoom - 0.1));
+    };
+
+    const handleZoomIn = () => {
+        setZoomLevel((currentZoom) => Math.min(1.25, currentZoom + 0.1));
+    };
+
+    const handleCenter = () => {
+        setZoomLevel(1);
+        canvasRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "nearest",
+        });
+    };
+
+    const handleRecalculate = () => {
+        navigate("/onboarding");
+    };
+
     return (
         <section className="roadmap-main">
             <header className="roadmap-header">
                 <div>
-                    <nav className="roadmap-breadcrumb">
-                        <span>My Roadmap</span>
-                        <span>›</span>
-                        <span>Full Roadmap</span>
-                    </nav>
-
                     <h1>{firstName ? `Welcome ${firstName}!` : "Welcome!"}</h1>
 
                     <p>
@@ -102,8 +112,11 @@ function RoadmapCanvas({
                 </button>
             </div>
 
-            <div className="roadmap-canvas">
-                <div className="roadmap-stage">
+            <div className="roadmap-canvas" ref={canvasRef}>
+                <div
+                    className="roadmap-stage"
+                    style={{ "--roadmap-zoom": zoomLevel } as CSSProperties}
+                >
                     <svg
                         className="roadmap-path"
                         viewBox="0 0 800 1000"
@@ -186,7 +199,6 @@ function RoadmapCanvas({
                             key={waypoint.id}
                             waypoint={waypoint}
                             isSelected={waypoint.id === selectedWaypointId}
-                            isCurrent={waypoint.id === currentWaypointId}
                             isFinal={waypoint.id === roadmap.waypoints.length}
                             onSelect={() => onSelectWaypoint(waypoint.id)}
                             cardRef={(element) => {
@@ -215,7 +227,12 @@ function RoadmapCanvas({
                     </p>
                 </div>
 
-                <RoadmapControls />
+                <RoadmapControls
+                    onZoomOut={handleZoomOut}
+                    onZoomIn={handleZoomIn}
+                    onCenter={handleCenter}
+                    onRecalculate={handleRecalculate}
+                />
             </div>
         </section>
     );

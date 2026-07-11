@@ -1,6 +1,5 @@
 import {
   Check,
-  Laptop,
   Lock,
 } from "lucide-react";
 import type { RoadmapWaypoint as RoadmapWaypointType } from "../../types/roadmap";
@@ -8,7 +7,6 @@ import type { RoadmapWaypoint as RoadmapWaypointType } from "../../types/roadmap
 interface RoadmapWaypointProps {
   waypoint: RoadmapWaypointType;
   isSelected: boolean;
-  isCurrent: boolean;
   isFinal?: boolean;
   onSelect: () => void;
   cardRef?: (element: HTMLButtonElement | null) => void;
@@ -17,13 +15,10 @@ interface RoadmapWaypointProps {
 function RoadmapWaypoint({
   waypoint,
   isSelected,
-  isCurrent,
   isFinal = false,
   onSelect,
   cardRef,
 }: RoadmapWaypointProps) {
-  const Icon = isCurrent ? Laptop : Lock;
-
   return (
     <article
       className={`roadmap-waypoint roadmap-waypoint--${waypoint.status} ${
@@ -53,10 +48,6 @@ function RoadmapWaypoint({
         onClick={onSelect}
         aria-pressed={isSelected}
       >
-        <span className="roadmap-waypoint-icon">
-          <Icon size={24} />
-        </span>
-
         <span className="roadmap-waypoint-copy">
           <strong>{waypoint.title}</strong>
           <span>{waypoint.description}</span>
