@@ -1,14 +1,21 @@
 // Various parts of this code, past or present,
 // came from an AI model: Claude Haiku 4.5.
 
-const PORT = 5000;
+const PORT = 8000;
 
 const express = require("express");
 const cors = require("cors");
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+// ----------------------------------------------------------------------------
+// Prepare to call an AI model.
+const apiKey = process.env.GOOGLE_API_KEY;
+if (!apiKey) {
+  throw new Error('GOOGLE_API_KEY environment variable is not set');
+}
+const { GoogleGenAI } = require("@google/genai");
+const ai = new GoogleGenAI({apiKey});
 // ============================================
 // REQUEST SCHEMA DEFINITION
 // ============================================
@@ -99,28 +106,33 @@ app.post("/journey/generate", (req, res) => {
     // Generate a unique ID for this roadmap (in a real app, use a database)
     const roadmapId = `roadmap_${roadmapGlobalId}`;
 
-    // Generate a personalized roadmap based on user input
-    const roadmap = generatePersonalizedRoadmap({
-      userType,
-      careerGoal,
-      experienceLevel,
-      weeklyTimeCommitment,
-      existingSkills,
-      learningInterests,
-      targetTimeline,
-      biggestChallenge,
-      additionalNotes
-    });
+    async function runAndWaitForCodeRelatedToAI() {
 
-    // Store the roadmap in memory (in a real app, save to database)
-    userRoadmaps[roadmapGlobalId] = roadmap;
-    roadmapGlobalId += 1;
+      // Generate a personalized roadmap based on user input
+      const roadmap = await generatePersonalizedRoadmap({
+        userType,
+        careerGoal,
+        experienceLevel,
+        weeklyTimeCommitment,
+        existingSkills,
+        learningInterests,
+        targetTimeline,
+        biggestChallenge,
+        additionalNotes
+      });
 
-    // Send the response back to the client
-    res.status(200).json({
-      id: roadmapId,
-      ...roadmap
-    });
+      // Store the roadmap in memory (in a real app, save to database)
+      userRoadmaps[roadmapGlobalId] = roadmap;
+      roadmapGlobalId += 1;
+
+      // Send the response back to the client
+      res.status(200).json({
+        id: roadmapId,
+        ...roadmap
+      });
+    }
+
+    runAndWaitForCodeRelatedToAI();
 
   } catch (error) {
     // Handle any errors that occur
@@ -172,134 +184,53 @@ app.get('/roadmap/:id', (req, res) => {
   This function takes the user's input and creates a personalized learning roadmap.
   It's a simplified version - in a real app, you'd use more complex logic or AI.
 */
-function generatePersonalizedRoadmap(userInput) {
-  // Create a list of learning waypoints based on interests and experience level
-  const waypoints = createWaypoints(userInput);
+async function generatePersonalizedRoadmap(userInput) {
 
-  // Calculate the current progress (for new users, it's 0%)
-  const progressPercent = 0;
+    const u = userInput;
 
-  // Determine the next step based on experience level
-  const nextStep = determineNextStep(userInput);
+    // Create a prompt for an AI model.
+    const prompt = `
 
-  // Create and return the response object
-  return {
-    destination: userInput.careerGoal,        // The user's career goal
-    currentStage: userInput.experienceLevel,  // Their current experience level
-    progressPercent: progressPercent,         // How far along they are (0% for new users)
-    nextStep: nextStep,                       // What they should do first
-    waypoints: waypoints                      // The learning milestones to hit
-  };
-}
+        A user has specific job skills and wants to learn other jobs skills.
 
-// ============================================
-// HELPER FUNCTION: createWaypoints
-// ============================================
-/*
-  Creates a list of learning waypoints (milestones) based on the user's
-  learning interests and experience level.
-*/
-function createWaypoints(userInput) {
-  // Define a library of possible learning waypoints
-  const allWaypoints = {
-    fundamentals: {
-      title: 'Master Programming Fundamentals',
-      description: 'Learn variables, data types, functions, loops, and conditionals',
-      category: 'fundamentals',
-      status: 'pending'
-    },
-    oop: {
-      title: 'Object-Oriented Programming (OOP)',
-      description: 'Understand classes, inheritance, encapsulation, and polymorphism',
-      category: 'fundamentals',
-      status: 'pending'
-    },
-    react: {
-      title: 'Learn React Framework',
-      description: 'Master components, state, props, and hooks for building UIs',
-      category: 'practice',
-      status: 'pending'
-    },
-    nodejs: {
-      title: 'Build Backend with Node.js',
-      description: 'Learn Express, middleware, routing, and server-side JavaScript',
-      category: 'practice',
-      status: 'pending'
-    },
-    database: {
-      title: 'Database Design & SQL',
-      description: 'Understand database design, SQL queries, and data relationships',
-      category: 'practice',
-      status: 'pending'
-    },
-    project: {
-      title: 'Build a Full Portfolio Project',
-      description: 'Create a complete project combining frontend, backend, and database',
-      category: 'project',
-      status: 'pending'
-    },
-    testing: {
-      title: 'Testing & Debugging',
-      description: 'Learn unit testing, integration testing, and debugging techniques',
-      category: 'practice',
-      status: 'pending'
-    }
-  };
+        The following JSON dictionary has information about the user:
 
-  // Start with fundamentals for beginners
-  let selectedWaypoints = [allWaypoints.fundamentals];
+        {
+          userType: "${u.userType}",
+          careerGoal: "${u.careerGoal}",
+          experienceLevel: "${u.experienceLevel}",
+          weeklyTimeCommitment: "${u.weeklyTimeCommitment}",
+          existingSkills: "${u.existingSkills}",
+          learningInterests: "${u.learningInterests}",
+          targetTimeline: "${u.targetTimeline}",
+          biggestChallenge: "${u.biggestChallenge}",
+          additionalNotes: "${u.additionalNotes}"
+        }
 
-  // Add waypoints based on learning interests
-  if (userInput.learningInterests && userInput.learningInterests.length > 0) {
-    if (userInput.learningInterests.includes('React')) {
-      selectedWaypoints.push(allWaypoints.react);
-    }
-    if (userInput.learningInterests.includes('Node.js')) {
-      selectedWaypoints.push(allWaypoints.nodejs);
-    }
-    if (userInput.learningInterests.includes('databases')) {
-      selectedWaypoints.push(allWaypoints.database);
-    }
-  }
+        Give advice to the user.
 
-  // Add testing if intermediate or advanced
-  if (userInput.experienceLevel !== 'beginner') {
-    selectedWaypoints.push(allWaypoints.testing);
-  }
+        Your response should be only the following JSON dictionary,
+        but replace the values of the dictionary by appropriate advice.
+        {
+            destination: "What is a possible career for the user?",
+            currentStage: "How much job experience might the user have?",
+            progressPercent: "How close is the user to getting a new job?",
+            nextStep: "What should the user do next?",
+            waypoints: "What learning milestones should the user do?"
+        }
+    `
+    // Call an AI model.
+    const interaction = await ai.interactions.create
+    (
+        {
+            model: "gemini-3.5-flash",
+            input: prompt,
+        }
+    );
+    // Translate the text into a dictionary.
+    const roadmap = await JSON.parse(interaction.output_text);
 
-  // Always add a capstone project at the end
-  selectedWaypoints.push(allWaypoints.project);
-
-  return selectedWaypoints;
-}
-
-// ============================================
-// HELPER FUNCTION: determineNextStep
-// ============================================
-/*
-  Suggests the next step based on the user's experience level and goals.
-*/
-function determineNextStep(userInput) {
-  // For beginners, focus on fundamentals
-  if (userInput.experienceLevel === 'beginner') {
-    return 'Start with JavaScript fundamentals: variables, data types, and functions';
-  }
-
-  // For intermediate users, focus on frameworks or advanced concepts
-  if (userInput.experienceLevel === 'intermediate') {
-    if (userInput.learningInterests && userInput.learningInterests.includes('React')) {
-      return 'Learn React components, state management, and hooks';
-    }
-    return 'Choose a framework (React, Vue, or Angular) to specialize in';
-  }
-
-  // For advanced users, focus on system design and optimization
-  if (userInput.experienceLevel === 'advanced') {
-    return 'Focus on system design, performance optimization, and best practices';
-  }
-
-  // Default next step
-  return 'Review your learning interests and start with the first waypoint';
+    return roadmap;
 }
 
 // ============================================
@@ -319,8 +250,6 @@ app.use((req, res) => {
 // ============================================
 /*
   This starts the server on the specified PORT.
-  Once running, you can access it at http://localhost:5000
-  (check the port number, which may have changed)
 */
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
