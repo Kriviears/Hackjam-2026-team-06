@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import type { JourneyResponse } from "../types/journey";
+import type { JourneyResponse, UserProfile } from "../types/journey";
 import techLandscape from "../assets/tech-landscape.png";
 
 import "./DashboardPage.css";
@@ -8,6 +8,8 @@ import "./DashboardPage.css";
 export default function DashboardPage() {
   const location = useLocation();
   const journey = location.state?.journey as JourneyResponse | undefined;
+  const userProfile = location.state?.userProfile as UserProfile | undefined;
+  const firstName = userProfile?.firstName.trim();
 
   if (!journey) {
     return (
@@ -30,7 +32,7 @@ export default function DashboardPage() {
       <div className="dashboard-motion-background" aria-hidden="true" />
 
       <section className="dashboard-panel">
-        <h1>Your Compass Dashboard</h1>
+        <h1>{firstName ? `${firstName}'s Compass Dashboard` : "Your Compass Dashboard"}</h1>
 
         <h2>{journey.destination}</h2>
         <p>Current Stage: {journey.currentStage}</p>

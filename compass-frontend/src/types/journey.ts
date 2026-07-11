@@ -1,8 +1,18 @@
 // Request interface for initiating a new journey
+export interface UserProfile {
+  firstName: string;
+  lastName: string;
+}
+
 export interface JourneyRequest {
+  firstName: string;
+  lastName: string;
+
   userType:
     | "prospective_learner"
     | "current_learner"
+    | "prospectiveLearner"
+    | "currentLearner"
     | "alumna"
     | "";
 

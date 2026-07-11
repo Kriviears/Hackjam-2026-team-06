@@ -9,12 +9,14 @@ import type {
   JourneyResponse,
   RoadmapWaypoint,
 } from "../types/roadmap";
+import type { UserProfile } from "../types/journey";
 
 import "./RoadmapPage.css";
 
 interface RoadmapLocationState {
   roadmap?: JourneyResponse;
   userType?: JourneyResponse["userType"];
+  userProfile?: UserProfile;
 }
 
 interface Point {
@@ -127,6 +129,7 @@ function RoadmapPage() {
   const state = location.state as RoadmapLocationState | null;
 
   const journeyResponse = state?.roadmap;
+  const userProfile = state?.userProfile;
 
   /*
    * Start with the current waypoint rather than always selecting waypoint 2.
@@ -202,6 +205,7 @@ function RoadmapPage() {
 
       <RoadmapCanvas
         roadmap={roadmap}
+        userProfile={userProfile}
         selectedWaypointId={selectedWaypointId}
         onSelectWaypoint={setSelectedWaypointId}
       />

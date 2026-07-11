@@ -37,12 +37,57 @@ const interestOptions = [
     "Mobile Development",
 ];
 
+const userTypeLabels: Record<string, string> = {
+    prospectiveLearner: "Prospective Learner",
+    currentLearner: "Current Learner",
+    alumna: "Alumna",
+};
+
+const experienceLevelLabels: Record<string, string> = {
+    beginner: "Beginner",
+    someExperience: "Some experience",
+    intermediate: "Intermediate",
+    advanced: "Advanced",
+};
+
+const timelineLabels: Record<string, string> = {
+    "3 months": "Within 3 months",
+    "6 months": "Within 6 months",
+    "12 months": "Within 12 months",
+    flexible: "My timeline is flexible",
+};
+
+const onboardingSteps = [
+    {
+        number: 1,
+        title: "Tell Us About Yourself",
+        description: "This helps us understand where you are today.",
+    },
+    {
+        number: 2,
+        title: "Your Goals & Interests",
+        description: "Define where you want Compass to guide you.",
+    },
+    {
+        number: 3,
+        title: "Your Experience & Skills",
+        description: "Share your current strengths and learning focus.",
+    },
+    {
+        number: 4,
+        title: "Review & Generate",
+        description: "Complete the final details to generate your roadmap.",
+    },
+];
+
 function OnboardingPage() {
 
     console.log("OnboardingPage rendered");
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState<JourneyRequest>({
+        firstName: "",
+        lastName: "",
         userType: "",
         careerGoal: "",
         experienceLevel: "",
@@ -55,6 +100,7 @@ function OnboardingPage() {
     });
 
     console.log("Form Data:", formData);
+    const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [validationMessage, setValidationMessage] = useState("");
 
     const handleChange = (
@@ -90,22 +136,69 @@ function OnboardingPage() {
         setValidationMessage("");
     };
 
-    const getMissingRequiredFields = () => {
-        const requiredFields = [
+    const requiredFieldsByStep = [
+        [
+            { label: "your first name", value: formData.firstName },
+            { label: "your last name", value: formData.lastName },
             { label: "which best describes you", value: formData.userType },
-            { label: "your experience level", value: formData.experienceLevel },
+        ],
+        [
             { label: "your career goal", value: formData.careerGoal },
+            {
+                label: "what you are most interested in learning",
+                value: formData.learningInterests.join(","),
+            },
+            { label: "your target timeline", value: formData.targetTimeline },
+        ],
+        [
+            { label: "your experience level", value: formData.experienceLevel },
             {
                 label: "your weekly time commitment",
                 value: formData.weeklyTimeCommitment,
             },
-            { label: "your target timeline", value: formData.targetTimeline },
+            {
+                label: "the skills you already have",
+                value: formData.existingSkills.join(","),
+            },
+        ],
+        [
             { label: "your biggest challenge", value: formData.biggestChallenge },
-        ];
+        ],
+    ];
+
+    const getMissingFieldsForStep = (stepIndex: number) => {
+        const requiredFields = requiredFieldsByStep[stepIndex] ?? [];
 
         return requiredFields
             .filter((field) => !field.value.trim())
             .map((field) => field.label);
+    };
+
+    const getMissingRequiredFields = () =>
+        requiredFieldsByStep
+            .flat()
+            .filter((field) => !field.value.trim())
+            .map((field) => field.label);
+
+    const handlePreviousStep = () => {
+        setValidationMessage("");
+        setCurrentStepIndex((previousIndex) => Math.max(previousIndex - 1, 0));
+    };
+
+    const handleNextStep = () => {
+        const missingFields = getMissingFieldsForStep(currentStepIndex);
+
+        if (missingFields.length > 0) {
+            setValidationMessage(
+                `Please complete ${missingFields.join(", ")} before continuing.`
+            );
+            return;
+        }
+
+        setValidationMessage("");
+        setCurrentStepIndex((previousIndex) =>
+            Math.min(previousIndex + 1, onboardingSteps.length - 1)
+        );
     };
 
     const handleSubmit = (
@@ -125,9 +218,60 @@ function OnboardingPage() {
         navigate("/generating-path", {
             state: {
                 formData,
+                userProfile: {
+                    firstName: formData.firstName.trim(),
+                    lastName: formData.lastName.trim(),
+                },
             },
         });
     };
+
+    const stepCompletion = [
+        Boolean(formData.firstName.trim() && formData.lastName.trim() && formData.userType),
+        Boolean(formData.careerGoal.trim() && formData.learningInterests.length > 0 && formData.targetTimeline),
+        Boolean(formData.experienceLevel && formData.weeklyTimeCommitment && formData.existingSkills.length > 0),
+        Boolean(formData.biggestChallenge),
+    ];
+    const activeStep = onboardingSteps[currentStepIndex];
+    const progressPercent =
+        (currentStepIndex / (onboardingSteps.length - 1)) * 100;
+    const isFinalStep = currentStepIndex === onboardingSteps.length - 1;
+    const reviewItems = [
+        {
+            label: "Name",
+            value: `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim(),
+        },
+        {
+            label: "Learner type",
+            value: userTypeLabels[formData.userType],
+        },
+        {
+            label: "Career goal",
+            value: formData.careerGoal,
+        },
+        {
+            label: "Interests",
+            value: formData.learningInterests.join(", "),
+        },
+        {
+            label: "Timeline",
+            value: timelineLabels[formData.targetTimeline] ?? formData.targetTimeline,
+        },
+        {
+            label: "Experience",
+            value:
+                experienceLevelLabels[formData.experienceLevel] ??
+                formData.experienceLevel,
+        },
+        {
+            label: "Weekly time",
+            value: formData.weeklyTimeCommitment,
+        },
+        {
+            label: "Current skills",
+            value: formData.existingSkills.join(", "),
+        },
+    ];
 
     return (
         <main
@@ -174,30 +318,21 @@ function OnboardingPage() {
 
                 <section className="onboarding-card">
                     <nav className="step-sidebar" aria-label="Onboarding progress">
-                        <StepItem
-                            number={1}
-                            title="Tell Us About Yourself"
-                            icon={<UserRound size={25} />}
-                            active
-                        />
-
-                        <StepItem
-                            number={2}
-                            title="Your Goals & Interests"
-                            icon={<Target size={24} />}
-                        />
-
-                        <StepItem
-                            number={3}
-                            title="Your Experience & Skills"
-                            icon={<BarChart3 size={24} />}
-                        />
-
-                        <StepItem
-                            number={4}
-                            title="Review & Generate"
-                            icon={<ClipboardCheck size={24} />}
-                        />
+                        {[
+                            { icon: <UserRound size={25} /> },
+                            { icon: <Target size={24} /> },
+                            { icon: <BarChart3 size={24} /> },
+                            { icon: <ClipboardCheck size={24} /> },
+                        ].map((step, index) => (
+                            <StepItem
+                                key={onboardingSteps[index].number}
+                                number={onboardingSteps[index].number}
+                                title={onboardingSteps[index].title}
+                                icon={step.icon}
+                                active={index === currentStepIndex}
+                                completed={stepCompletion[index]}
+                            />
+                        ))}
 
                         <div className="privacy-note">
                             <span className="privacy-icon">
@@ -211,24 +346,35 @@ function OnboardingPage() {
                         <div className="form-heading-row">
                             <div>
                                 <div className="form-title">
-                                    <span className="section-number">1</span>
+                                    <span className="section-number">
+                                        {activeStep.number}
+                                    </span>
 
                                     <div>
-                                        <h2>Tell Us About Yourself</h2>
-                                        <p>This helps us understand where you are today.</p>
+                                        <h2>{activeStep.title}</h2>
+                                        <p>{activeStep.description}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="top-progress">
-                                <span>Step 1 of 4</span>
+                                <span>Step {activeStep.number} of {onboardingSteps.length}</span>
 
                                 <div className="progress-track">
-                                    <span className="progress-fill" />
-                                    <span className="progress-point completed" />
-                                    <span className="progress-point completed" />
-                                    <span className="progress-point completed" />
-                                    <span className="progress-point completed" />
+                                    <span
+                                        className="progress-fill"
+                                        style={{ width: `${progressPercent}%` }}
+                                    />
+                                    {onboardingSteps.map((step, index) => (
+                                        <span
+                                            key={step.number}
+                                            className={`progress-point ${
+                                                stepCompletion[index] ? "completed" : ""
+                                            } ${index === currentStepIndex ? "active" : ""}`}
+                                        >
+                                            {step.number}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -251,224 +397,310 @@ function OnboardingPage() {
                         )}
 
                         <div className="form-grid">
-                            <FormField htmlFor="userType" fullWidth>
-                                <fieldset className="form-group user-type-fieldset">
-                                    <legend className="section-label">
-                                        Which best describes you?
-                                    </legend>
+                            {currentStepIndex === 0 && (
+                                <>
+                                    <FormField
+                                        label="What is your first name?"
+                                        htmlFor="firstName"
+                                    >
+                                        <input
+                                            id="firstName"
+                                            name="firstName"
+                                            type="text"
+                                            value={formData.firstName}
+                                            onChange={handleChange}
+                                            placeholder="First name"
+                                            autoComplete="given-name"
+                                            required
+                                        />
+                                    </FormField>
 
-                                    <div className="user-type-grid">
-                                        {[
-                                            {
-                                                value: "prospectiveLearner",
-                                                label: "Prospective Learner",
-                                                icon: UserRound,
-                                            },
-                                            {
-                                                value: "currentLearner",
-                                                label: "Current Learner",
-                                                icon: GraduationCap,
-                                            },
-                                            {
-                                                value: "alumna",
-                                                label: "Alumna",
-                                                icon: BriefcaseBusiness,
-                                            },
-                                        ].map((option) => {
-                                            const Icon = option.icon;
-                                            const selected =
-                                                formData.userType === option.value;
+                                    <FormField
+                                        label="What is your last name?"
+                                        htmlFor="lastName"
+                                    >
+                                        <input
+                                            id="lastName"
+                                            name="lastName"
+                                            type="text"
+                                            value={formData.lastName}
+                                            onChange={handleChange}
+                                            placeholder="Last name"
+                                            autoComplete="family-name"
+                                            required
+                                        />
+                                    </FormField>
 
-                                            return (
-                                                <label
-                                                    key={option.value}
-                                                    className={`user-type-card ${selected ? "selected" : ""
-                                                        }`}
-                                                >
-                                                    <input
-                                                        type="radio"
-                                                        name="userType"
-                                                        value={option.value}
-                                                        checked={selected}
-                                                        onChange={handleChange}
-                                                        required
-                                                    />
+                                    <FormField htmlFor="userType" fullWidth>
+                                        <fieldset className="form-group user-type-fieldset">
+                                            <legend className="section-label">
+                                                Which best describes you?
+                                            </legend>
 
-                                                    <span className="user-type-icon-wrap">
-                                                        <Icon size={34} />
+                                            <div className="user-type-grid">
+                                                {[
+                                                    {
+                                                        value: "prospectiveLearner",
+                                                        label: "Prospective Learner",
+                                                        icon: UserRound,
+                                                    },
+                                                    {
+                                                        value: "currentLearner",
+                                                        label: "Current Learner",
+                                                        icon: GraduationCap,
+                                                    },
+                                                    {
+                                                        value: "alumna",
+                                                        label: "Alumna",
+                                                        icon: BriefcaseBusiness,
+                                                    },
+                                                ].map((option) => {
+                                                    const Icon = option.icon;
+                                                    const selected =
+                                                        formData.userType === option.value;
 
-                                                        {selected && (
-                                                            <span className="checkmark">
-                                                                <Check size={15} />
+                                                    return (
+                                                        <label
+                                                            key={option.value}
+                                                            className={`user-type-card ${selected ? "selected" : ""
+                                                                }`}
+                                                        >
+                                                            <input
+                                                                type="radio"
+                                                                name="userType"
+                                                                value={option.value}
+                                                                checked={selected}
+                                                                onChange={handleChange}
+                                                                required
+                                                            />
+
+                                                            <span className="user-type-icon-wrap">
+                                                                <Icon size={34} />
+
+                                                                {selected && (
+                                                                    <span className="checkmark">
+                                                                        <Check size={15} />
+                                                                    </span>
+                                                                )}
                                                             </span>
-                                                        )}
-                                                    </span>
 
-                                                    <span>{option.label}</span>
-                                                </label>
-                                            );
-                                        })}
-                                    </div>
-                                </fieldset>
-                            </FormField>
+                                                            <span>{option.label}</span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </fieldset>
+                                    </FormField>
+                                </>
+                            )}
 
-                            <FormField
-                                label="My experience level is..."
-                                htmlFor="experienceLevel"
-                                fullWidth
-                            >
-                                <select
-                                    id="experienceLevel"
-                                    name="experienceLevel"
-                                    value={formData.experienceLevel}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Select your experience level</option>
-                                    <option value="beginner">Beginner</option>
-                                    <option value="someExperience">Some experience</option>
-                                    <option value="intermediate">Intermediate</option>
-                                    <option value="advanced">Advanced</option>
-                                </select>
-                            </FormField>
+                            {currentStepIndex === 1 && (
+                                <>
+                                    <FormField
+                                        label="What is your ultimate career goal?"
+                                        htmlFor="careerGoal"
+                                        fullWidth
+                                    >
+                                        <input
+                                            id="careerGoal"
+                                            name="careerGoal"
+                                            type="text"
+                                            value={formData.careerGoal}
+                                            onChange={handleChange}
+                                            placeholder="e.g. Data Scientist, Full-Stack Developer, UX Designer"
+                                            required
+                                        />
+                                    </FormField>
 
-                            <FormField
-                                label="What is your ultimate career goal?"
-                                htmlFor="careerGoal"
-                                fullWidth
-                            >
-                                <input
-                                    id="careerGoal"
-                                    name="careerGoal"
-                                    type="text"
-                                    value={formData.careerGoal}
-                                    onChange={handleChange}
-                                    placeholder="e.g. Data Scientist, Full-Stack Developer, UX Designer"
-                                    required
-                                />
-                            </FormField>
+                                    <CheckboxGroup
+                                        title="What are you most interested in learning?"
+                                        helperText="Select up to 3"
+                                        options={interestOptions}
+                                        selectedValues={formData.learningInterests}
+                                        onToggle={(value) => {
+                                            const isAlreadySelected =
+                                                formData.learningInterests.includes(value);
 
-                            <FormField
-                                label="How much time can you commit to learning each week?"
-                                htmlFor="weeklyTimeCommitment"
-                                fullWidth
-                            >
-                                <select
-                                    id="weeklyTimeCommitment"
-                                    name="weeklyTimeCommitment"
-                                    value={formData.weeklyTimeCommitment}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Select your time commitment</option>
-                                    <option value="1-4 hours">1–4 hours</option>
-                                    <option value="5-10 hours">5–10 hours</option>
-                                    <option value="11-20 hours">11–20 hours</option>
-                                    <option value="20+ hours">More than 20 hours</option>
-                                </select>
-                            </FormField>
+                                            if (
+                                                !isAlreadySelected &&
+                                                formData.learningInterests.length >= 3
+                                            ) {
+                                                return;
+                                            }
 
-                            <CheckboxGroup
-                                title="What skills do you already have?"
-                                helperText="Select all that apply"
-                                options={skillOptions}
-                                selectedValues={formData.existingSkills}
-                                onToggle={(value) =>
-                                    handleCheckboxChange("existingSkills", value)
-                                }
-                            />
+                                            handleCheckboxChange("learningInterests", value);
+                                        }}
+                                    />
 
-                            <CheckboxGroup
-                                title="What are you most interested in learning?"
-                                helperText="Select up to 3"
-                                options={interestOptions}
-                                selectedValues={formData.learningInterests}
-                                onToggle={(value) => {
-                                    const isAlreadySelected =
-                                        formData.learningInterests.includes(value);
+                                    <FormField
+                                        label="What is your target timeline?"
+                                        htmlFor="targetTimeline"
+                                    >
+                                        <select
+                                            id="targetTimeline"
+                                            name="targetTimeline"
+                                            value={formData.targetTimeline}
+                                            onChange={handleChange}
+                                            required
+                                        >
+                                            <option value="">Select your timeline</option>
+                                            <option value="3 months">Within 3 months</option>
+                                            <option value="6 months">Within 6 months</option>
+                                            <option value="12 months">Within 12 months</option>
+                                            <option value="flexible">My timeline is flexible</option>
+                                        </select>
+                                    </FormField>
+                                </>
+                            )}
 
-                                    if (
-                                        !isAlreadySelected &&
-                                        formData.learningInterests.length >= 3
-                                    ) {
-                                        return;
-                                    }
+                            {currentStepIndex === 2 && (
+                                <>
+                                    <FormField
+                                        label="My experience level is..."
+                                        htmlFor="experienceLevel"
+                                        fullWidth
+                                    >
+                                        <select
+                                            id="experienceLevel"
+                                            name="experienceLevel"
+                                            value={formData.experienceLevel}
+                                            onChange={handleChange}
+                                            required
+                                        >
+                                            <option value="">Select your experience level</option>
+                                            <option value="beginner">Beginner</option>
+                                            <option value="someExperience">Some experience</option>
+                                            <option value="intermediate">Intermediate</option>
+                                            <option value="advanced">Advanced</option>
+                                        </select>
+                                    </FormField>
 
-                                    handleCheckboxChange("learningInterests", value);
-                                }}
-                            />
+                                    <FormField
+                                        label="How much time can you commit to learning each week?"
+                                        htmlFor="weeklyTimeCommitment"
+                                        fullWidth
+                                    >
+                                        <select
+                                            id="weeklyTimeCommitment"
+                                            name="weeklyTimeCommitment"
+                                            value={formData.weeklyTimeCommitment}
+                                            onChange={handleChange}
+                                            required
+                                        >
+                                            <option value="">Select your time commitment</option>
+                                            <option value="1-4 hours">1–4 hours</option>
+                                            <option value="5-10 hours">5–10 hours</option>
+                                            <option value="11-20 hours">11–20 hours</option>
+                                            <option value="20+ hours">More than 20 hours</option>
+                                        </select>
+                                    </FormField>
 
-                            <FormField
-                                label="What is your target timeline?"
-                                htmlFor="targetTimeline"
-                            >
-                                <select
-                                    id="targetTimeline"
-                                    name="targetTimeline"
-                                    value={formData.targetTimeline}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Select your timeline</option>
-                                    <option value="3 months">Within 3 months</option>
-                                    <option value="6 months">Within 6 months</option>
-                                    <option value="12 months">Within 12 months</option>
-                                    <option value="flexible">My timeline is flexible</option>
-                                </select>
-                            </FormField>
+                                    <CheckboxGroup
+                                        title="What skills do you already have?"
+                                        helperText="Select all that apply"
+                                        options={skillOptions}
+                                        selectedValues={formData.existingSkills}
+                                        onToggle={(value) =>
+                                            handleCheckboxChange("existingSkills", value)
+                                        }
+                                    />
+                                </>
+                            )}
 
-                            <FormField
-                                label="What is your biggest challenge right now?"
-                                htmlFor="biggestChallenge"
-                            >
-                                <select
-                                    id="biggestChallenge"
-                                    name="biggestChallenge"
-                                    value={formData.biggestChallenge}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Select your biggest challenge</option>
-                                    <option value="knowingWhereToStart">
-                                        Knowing where to start
-                                    </option>
-                                    <option value="choosingSkills">
-                                        Choosing the right skills
-                                    </option>
-                                    <option value="stayingConsistent">
-                                        Staying consistent
-                                    </option>
-                                    <option value="buildingExperience">
-                                        Building real-world experience
-                                    </option>
-                                    <option value="findingOpportunities">
-                                        Finding job opportunities
-                                    </option>
-                                </select>
-                            </FormField>
+                            {currentStepIndex === 3 && (
+                                <>
+                                    <section className="review-summary" aria-label="Review your answers">
+                                        <div className="review-summary-heading">
+                                            <h3>Your roadmap inputs</h3>
+                                            <p>Check the details Compass will use to shape your path.</p>
+                                        </div>
 
-                            <FormField
-                                label="Anything else we should know?"
-                                optional
-                                htmlFor="additionalNotes"
-                                fullWidth
-                            >
-                                <textarea
-                                    id="additionalNotes"
-                                    name="additionalNotes"
-                                    value={formData.additionalNotes}
-                                    onChange={handleChange}
-                                    placeholder="Share any additional context, goals, or circumstances that might help us personalize your path..."
-                                    rows={4}
-                                />
-                            </FormField>
+                                        <dl className="review-summary-list">
+                                            {reviewItems.map((item) => (
+                                                <div key={item.label} className="review-summary-item">
+                                                    <dt>{item.label}</dt>
+                                                    <dd>{item.value || "Not provided"}</dd>
+                                                </div>
+                                            ))}
+                                        </dl>
+                                    </section>
+
+                                    <FormField
+                                        label="What is your biggest challenge right now?"
+                                        htmlFor="biggestChallenge"
+                                    >
+                                        <select
+                                            id="biggestChallenge"
+                                            name="biggestChallenge"
+                                            value={formData.biggestChallenge}
+                                            onChange={handleChange}
+                                            required
+                                        >
+                                            <option value="">Select your biggest challenge</option>
+                                            <option value="knowingWhereToStart">
+                                                Knowing where to start
+                                            </option>
+                                            <option value="choosingSkills">
+                                                Choosing the right skills
+                                            </option>
+                                            <option value="stayingConsistent">
+                                                Staying consistent
+                                            </option>
+                                            <option value="buildingExperience">
+                                                Building real-world experience
+                                            </option>
+                                            <option value="findingOpportunities">
+                                                Finding job opportunities
+                                            </option>
+                                        </select>
+                                    </FormField>
+
+                                    <FormField
+                                        label="Anything else we should know?"
+                                        optional
+                                        htmlFor="additionalNotes"
+                                        fullWidth
+                                    >
+                                        <textarea
+                                            id="additionalNotes"
+                                            name="additionalNotes"
+                                            value={formData.additionalNotes}
+                                            onChange={handleChange}
+                                            placeholder="Share any additional context, goals, or circumstances that might help us personalize your path..."
+                                            rows={4}
+                                        />
+                                    </FormField>
+                                </>
+                            )}
                         </div>
 
                         <div className="form-actions">
-                            <button type="submit" className="continue-button">
-                                Navigate My Path
-                                <span aria-hidden="true">→</span>
-                            </button>
+                            {currentStepIndex > 0 && (
+                                <button
+                                    type="button"
+                                    className="back-button"
+                                    onClick={handlePreviousStep}
+                                >
+                                    <span aria-hidden="true">←</span>
+                                    Back
+                                </button>
+                            )}
+
+                            {isFinalStep ? (
+                                <button type="submit" className="continue-button">
+                                    Navigate My Path
+                                    <span aria-hidden="true">→</span>
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="continue-button"
+                                    onClick={handleNextStep}
+                                >
+                                    Next
+                                    <span aria-hidden="true">→</span>
+                                </button>
+                            )}
                         </div>
                     </form>
                 </section>
@@ -509,11 +741,22 @@ type StepItemProps = {
     title: string;
     icon: ReactNode;
     active?: boolean;
+    completed?: boolean;
 };
 
-function StepItem({ number, title, icon, active = false }: StepItemProps) {
+function StepItem({
+    number,
+    title,
+    icon,
+    active = false,
+    completed = false,
+}: StepItemProps) {
     return (
-        <div className={`step-item ${active ? "active" : ""}`}>
+        <div
+            className={`step-item ${active ? "active" : ""} ${
+                completed ? "completed" : ""
+            }`}
+        >
             <div className="step-marker">
                 <span>{number}</span>
             </div>

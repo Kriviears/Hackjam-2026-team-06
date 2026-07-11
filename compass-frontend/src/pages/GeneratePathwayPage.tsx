@@ -17,6 +17,7 @@ import {
 import type {
   JourneyRequest,
   JourneyResponse,
+  UserProfile,
 } from "../types/journey";
 import techLandscape from "../assets/tech-landscape.png";
 import pathwayCompass from "../assets/pathwaycompass.png";
@@ -25,6 +26,7 @@ import "./GeneratePathwayPage.css";
 
 interface GeneratingLocationState {
   formData?: JourneyRequest;
+  userProfile?: UserProfile;
 }
 
 interface GenerationStep {
@@ -100,6 +102,16 @@ export default function GeneratePathwayPage() {
 
   const { formData } =
     (location.state as GeneratingLocationState | null) ?? {};
+  const userProfile =
+    (location.state as GeneratingLocationState | null)?.userProfile ??
+    (formData
+      ? {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+        }
+      : undefined);
+  const firstName = userProfile?.firstName.trim();
+  const possessiveName = firstName ? `${firstName}'s` : "Your";
 
   const [progress, setProgress] = useState(4);
   const [activeStep, setActiveStep] = useState(1);
@@ -252,6 +264,7 @@ export default function GeneratePathwayPage() {
       state: {
         roadmap,
         userType: formData?.userType,
+        userProfile,
       },
     });
   }
@@ -290,14 +303,14 @@ export default function GeneratePathwayPage() {
         <section className="generate-intro">
           <h1>
             {isComplete
-              ? "Your Pathway Is Ready"
-              : "Generating Your Pathway"}
+              ? `${possessiveName} Pathway Is Ready`
+              : `Generating ${possessiveName} Pathway`}
           </h1>
 
           <p>
             {roadmap
-              ? `Compass mapped your path toward ${roadmap.destination}.`
-              : "Our AI Compass is analyzing your information and building a personalized roadmap just for you."}
+              ? `Compass mapped ${firstName ? `${firstName}'s` : "your"} path toward ${roadmap.destination}.`
+              : `Our AI Compass is analyzing ${firstName ? `${firstName}'s` : "your"} information and building a personalized roadmap.`}
           </p>
         </section>
 
@@ -342,10 +355,10 @@ export default function GeneratePathwayPage() {
 
             <p className="generate-current-status">
               {isComplete
-                ? "Your personalized roadmap is complete"
+                ? `${possessiveName} personalized roadmap is complete`
                 : isLoading
-                  ? "Building your personalized roadmap..."
-                  : "Preparing your personalized roadmap..."}
+                  ? `Building ${firstName ? `${firstName}'s` : "your"} personalized roadmap...`
+                  : `Preparing ${firstName ? `${firstName}'s` : "your"} personalized roadmap...`}
             </p>
 
             <strong className="generate-progress-number">

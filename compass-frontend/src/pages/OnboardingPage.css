@@ -23,6 +23,8 @@ textarea {
 
 .onboarding-page {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   color: var(--compass-text);
   background-position: center;
   background-repeat: no-repeat;
@@ -60,6 +62,7 @@ textarea {
 .onboarding-layout {
   width: min(1500px, calc(100% - 48px));
   margin: 0 auto;
+  flex: 1 0 auto;
   display: grid;
   grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
   gap: clamp(24px, 4vw, 56px);
@@ -665,8 +668,10 @@ textarea {
   margin-top: 26px;
   display: flex;
   justify-content: flex-end;
+  gap: 12px;
 }
 
+.back-button,
 .continue-button {
   min-height: 52px;
   padding: 0 24px;
@@ -689,8 +694,24 @@ textarea {
     box-shadow 160ms ease;
 }
 
+.back-button {
+  color: var(--compass-navy);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--compass-border);
+  box-shadow: 0 8px 18px rgba(0, 59, 92, 0.1);
+}
+
+.back-button:hover,
 .continue-button:hover {
   transform: translateY(-2px);
+}
+
+.back-button:hover {
+  border-color: var(--compass-teal);
+  box-shadow: 0 12px 24px rgba(0, 59, 92, 0.14);
+}
+
+.continue-button:hover {
   box-shadow: 0 14px 28px rgba(0, 95, 133, 0.28);
 }
 
@@ -2350,18 +2371,14 @@ textarea {
 
 /* Final user-type card visibility and interaction fix. */
 
-.form-grid > .form-field.full-width:first-child {
-  display: block;
-}
-
-.form-grid > .form-field.full-width:first-child .user-type-fieldset {
+.user-type-fieldset {
   display: block;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
-.form-grid > .form-field.full-width:first-child .section-label {
+.section-label {
   display: block;
   margin-bottom: 10px;
   color: #082d59;
@@ -2369,13 +2386,13 @@ textarea {
   font-weight: 850;
 }
 
-.form-grid > .form-field.full-width:first-child .user-type-grid {
+.user-type-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
-.form-grid > .form-field.full-width:first-child .user-type-card {
+.user-type-card {
   position: relative;
   min-height: 118px;
   padding: 18px 16px;
@@ -2390,30 +2407,30 @@ textarea {
   cursor: pointer;
 }
 
-.form-grid > .form-field.full-width:first-child .user-type-card:hover {
+.user-type-card:hover {
   border-color: #008aa4;
   transform: translateY(-1px);
 }
 
-.form-grid > .form-field.full-width:first-child .user-type-card:has(input:focus-visible) {
+.user-type-card:has(input:focus-visible) {
   outline: 3px solid rgba(0, 138, 164, 0.24);
   outline-offset: 3px;
 }
 
-.form-grid > .form-field.full-width:first-child .user-type-card.selected {
+.user-type-card.selected {
   border-color: #008aa4;
   background: #eefbfe;
   box-shadow: 0 12px 26px rgba(0, 95, 133, 0.12);
 }
 
-.form-grid > .form-field.full-width:first-child .user-type-card input[type="radio"] {
+.user-type-card input[type="radio"] {
   position: absolute;
   width: 1px;
   height: 1px;
   opacity: 0;
 }
 
-.form-grid > .form-field.full-width:first-child .user-type-icon-wrap {
+.user-type-icon-wrap {
   position: relative;
   display: grid;
   width: 48px;
@@ -2422,7 +2439,7 @@ textarea {
   color: #008aa4;
 }
 
-.form-grid > .form-field.full-width:first-child .checkmark {
+.checkmark {
   position: absolute;
   top: -14px;
   right: -52px;
@@ -2437,7 +2454,7 @@ textarea {
 }
 
 @media (max-width: 680px) {
-  .form-grid > .form-field.full-width:first-child .user-type-grid {
+  .user-type-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -2492,4 +2509,206 @@ textarea {
 .validation-popup button:focus-visible {
   outline: 3px solid rgba(0, 138, 164, 0.24);
   outline-offset: 2px;
+}
+
+/* Wide-screen lock: preserve the onboarding composition beyond 1440px. */
+
+body:has(.onboarding-page) {
+  background:
+    radial-gradient(circle at 50% 70%, rgba(23, 132, 224, 0.28), transparent 34rem),
+    linear-gradient(90deg, #eaf5ff 0%, #cfe8ff 50%, #eaf5ff 100%);
+}
+
+.onboarding-page {
+  width: min(100vw, 1440px);
+  max-width: 1440px;
+  margin: 0 auto;
+  container-type: inline-size;
+  background-attachment: scroll !important;
+}
+
+.onboarding-page::before {
+  position: absolute;
+  width: min(36cqw, 520px);
+}
+
+.onboarding-page::after {
+  display: none;
+}
+
+.onboarding-layout {
+  width: min(1358px, calc(100% - 64px));
+}
+
+/* Live onboarding progress states. */
+
+.step-item.completed .step-marker {
+  color: #008aa4;
+  background: #eefbfe;
+  border-color: rgba(0, 138, 164, 0.32);
+}
+
+.step-item.completed .onboarding-step-icon,
+.step-item.completed p {
+  color: #008aa4;
+}
+
+.step-item.active.completed .step-marker {
+  color: #ffffff;
+  background: linear-gradient(145deg, #0797b0, #056b8f);
+  border-color: transparent;
+}
+
+.progress-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: #008aa4;
+  transition: width 180ms ease;
+}
+
+.progress-point {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border: 2px solid #d4dee8;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #6b7d91;
+  font-size: 0.64rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.progress-point.completed {
+  border-color: #008aa4;
+  background: #e8fbff;
+  color: #008aa4;
+}
+
+.progress-point.active {
+  border-color: #008aa4;
+  background: #008aa4;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(0, 138, 164, 0.12);
+}
+
+/* Step flow layout polish. */
+
+.onboarding-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.onboarding-form .validation-popup {
+  flex: 0 0 auto;
+}
+
+.form-heading-row {
+  margin-bottom: 0;
+}
+
+.form-grid {
+  width: 100%;
+  margin-block: auto;
+}
+
+.form-actions {
+  margin-top: 0;
+}
+
+.review-summary {
+  grid-column: 1 / -1;
+  padding: 18px 20px;
+  border: 1px solid rgba(0, 138, 164, 0.18);
+  border-radius: 9px;
+  background: rgba(241, 251, 254, 0.72);
+}
+
+.review-summary-heading {
+  margin-bottom: 14px;
+}
+
+.review-summary-heading h3 {
+  margin: 0 0 4px;
+  color: #082d59;
+  font-size: 1rem;
+}
+
+.review-summary-heading p {
+  margin: 0;
+  color: #52687c;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.review-summary-list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 18px;
+}
+
+.review-summary-item {
+  min-width: 0;
+}
+
+.review-summary-item dt {
+  margin-bottom: 2px;
+  color: #007f9c;
+  font-size: 0.7rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.review-summary-item dd {
+  margin: 0;
+  color: #082d59;
+  overflow-wrap: anywhere;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+@media (max-width: 680px) {
+  .onboarding-form {
+    display: flex;
+  }
+
+  .review-summary-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Keep the onboarding frame compact on wide/tall screens. */
+
+.onboarding-page {
+  min-height: 0;
+}
+
+.onboarding-layout {
+  flex: 0 0 auto;
+  min-height: 700px;
+}
+
+.onboarding-intro,
+.onboarding-card {
+  min-height: 700px;
+}
+
+.onboarding-form {
+  min-height: 100%;
 }

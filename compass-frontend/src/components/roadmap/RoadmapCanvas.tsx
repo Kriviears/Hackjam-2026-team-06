@@ -5,12 +5,14 @@ import {
     Share2,
 } from "lucide-react";
 import roadmapAvatar from "../../assets/roadmap-avatar1.png";
+import type { UserProfile } from "../../types/journey";
 import type { RoadmapData } from "../../types/roadmap";
 import RoadmapControls from "./RoadmapControls";
 import RoadmapWaypoint from "./RoadmapWaypoint";
 
 interface RoadmapCanvasProps {
     roadmap: RoadmapData;
+    userProfile?: UserProfile;
     selectedWaypointId: number;
     onSelectWaypoint: (id: number) => void;
 }
@@ -29,10 +31,22 @@ function getDestinationMessage(userType: RoadmapData["userType"]) {
 
 function RoadmapCanvas({
     roadmap,
+    userProfile,
     selectedWaypointId,
     onSelectWaypoint,
 }: RoadmapCanvasProps) {
     const destinationMessage = getDestinationMessage(roadmap.userType);
+    const firstName = userProfile?.firstName.trim();
+    const lastName = userProfile?.lastName.trim();
+    const displayName =
+        firstName && lastName
+            ? `${firstName} ${lastName.charAt(0)}.`
+            : firstName || "Your Profile";
+    const initials =
+        firstName || lastName
+            ? `${firstName?.charAt(0) ?? ""}${lastName?.charAt(0) ?? ""}`.toUpperCase()
+            : "YP";
+    const possessiveName = firstName ? `${firstName}'s` : "Your";
 
     return (
         <section className="roadmap-main">
@@ -44,10 +58,10 @@ function RoadmapCanvas({
                         <span>Full Roadmap</span>
                     </nav>
 
-                    <h1>Your Full Roadmap</h1>
+                    <h1>{possessiveName} Full Roadmap</h1>
 
                     <p>
-                        Your personalized path from where you are today to your
+                        {firstName ? `${firstName}'s` : "Your"} personalized path from where you are today to your
                         dream career.
                     </p>
                 </div>
@@ -67,8 +81,8 @@ function RoadmapCanvas({
                     </button>
 
                     <button type="button" className="roadmap-profile-button">
-                        <span className="roadmap-avatar">FA</span>
-                        <span>Fabiola A.</span>
+                        <span className="roadmap-avatar">{initials}</span>
+                        <span>{displayName}</span>
                     </button>
                 </div>
             </header>

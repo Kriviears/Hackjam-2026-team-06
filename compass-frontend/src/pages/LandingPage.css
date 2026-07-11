@@ -26,6 +26,12 @@ body {
     sans-serif;
 }
 
+body:has(.landing-page) {
+  background:
+    radial-gradient(circle at 50% 70%, rgba(23, 132, 224, 0.28), transparent 34rem),
+    linear-gradient(90deg, #eaf5ff 0%, #cfe8ff 50%, #eaf5ff 100%);
+}
+
 button {
   border: 0;
   font: inherit;
@@ -35,6 +41,8 @@ button {
   position: relative;
   isolation: isolate;
   width: min(100vw, 1440px);
+  max-width: 1440px;
+  container-type: inline-size;
   min-height: 100vh;
   max-height: 100vh;
   margin: 0 auto;
@@ -45,35 +53,6 @@ button {
     linear-gradient(90deg, rgba(0, 34, 82, 0.12), transparent 26%, transparent 74%, rgba(0, 34, 82, 0.14)),
     linear-gradient(180deg, rgba(244, 251, 255, 0.9) 0%, rgba(231, 244, 255, 0.56) 60%, rgba(2, 61, 122, 0.08) 100%);
   color: var(--landing-text);
-}
-
-.landing-page::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background-image:
-    radial-gradient(circle at 12% 18%, var(--landing-cyan) 0 3px, transparent 4px),
-    radial-gradient(circle at 84% 17%, var(--landing-cyan) 0 3px, transparent 4px),
-    radial-gradient(circle at 18% 63%, var(--landing-cyan) 0 2px, transparent 3px),
-    radial-gradient(circle at 78% 58%, var(--landing-cyan) 0 2px, transparent 3px),
-    linear-gradient(90deg, transparent 0 10%, var(--landing-blue) 10.1% 10.2%, transparent 10.3% 24%, var(--landing-blue) 24.1% 24.2%, transparent 24.3%),
-    linear-gradient(90deg, transparent 0 68%, var(--landing-blue) 68.1% 68.2%, transparent 68.3% 90%, var(--landing-blue) 90.1% 90.2%, transparent 90.3%),
-    linear-gradient(0deg, transparent 0 30%, var(--landing-blue) 30.1% 30.2%, transparent 30.3% 72%, var(--landing-blue) 72.1% 72.2%, transparent 72.3%),
-    linear-gradient(rgba(7, 138, 152, 0.6) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(7, 138, 152, 0.6) 1px, transparent 1px);
-  background-size:
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    100% 180px,
-    100% 210px,
-    220px 100%,
-    96px 96px,
-    96px 96px;
-  opacity: 0.055;
-  mask-image: linear-gradient(to bottom, black 0 66%, transparent 96%);
 }
 
 .landing-background {
@@ -192,7 +171,7 @@ button {
 .compass-wrapper {
   position: relative;
   display: grid;
-  width: clamp(210px, 20vw, 300px);
+  width: clamp(210px, 20cqw, 300px);
   aspect-ratio: 1;
   margin: 0 auto 1.8rem;
   place-items: center;
@@ -234,7 +213,7 @@ button {
 .brand-heading h1 {
   margin: 0;
   color: var(--landing-navy);
-  font-size: clamp(3rem, 4.45vw, 4.6rem);
+  font-size: clamp(3rem, 4.45cqw, 4.6rem);
   font-weight: 600;
   letter-spacing: 0;
   line-height: 0.95;
@@ -277,7 +256,7 @@ button {
 .brand-tagline {
   margin: 12px 0 20px;
   color: var(--landing-blue);
-  font-size: clamp(1.25rem, 2vw, 1.8rem);
+  font-size: clamp(1.25rem, 2cqw, 1.8rem);
   font-weight: 500;
   letter-spacing: 0;
 }
@@ -311,7 +290,7 @@ button {
 .hero-message h2 {
   margin: 0 0 14px;
   color: var(--landing-navy);
-  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-size: clamp(1.35rem, 2cqw, 1.85rem);
   font-weight: 700;
   line-height: 1.15;
 }
@@ -319,7 +298,7 @@ button {
 .hero-message p {
   margin: 6px 0;
   color: var(--landing-text);
-  font-size: clamp(0.98rem, 1.35vw, 1.18rem);
+  font-size: clamp(0.98rem, 1.35cqw, 1.18rem);
   font-weight: 400;
 }
 
@@ -340,19 +319,17 @@ button {
 .landing-card {
   border: 1px solid rgba(101, 168, 219, 0.24);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 20px 48px rgba(31, 96, 155, 0.11);
-  backdrop-filter: blur(14px);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .benefits-section {
-  padding: clamp(1.5rem, 2.3vw, 2.35rem);
+  padding: clamp(1.5rem, 2.3cqw, 2.35rem);
 }
 
 .process-section {
-  padding: clamp(1.4rem, 2.15vw, 2.1rem);
+  padding: clamp(1.4rem, 2.15cqw, 2.1rem);
 }
 
 .section-heading {
@@ -361,13 +338,13 @@ button {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-bottom: clamp(1.15rem, 2vw, 2rem);
+  margin-bottom: clamp(1.15rem, 2cqw, 2rem);
 }
 
 .section-heading h2 {
   margin: 0;
   color: var(--landing-dark);
-  font-size: clamp(1.45rem, 2vw, 1.85rem);
+  font-size: clamp(1.45rem, 2cqw, 1.85rem);
   line-height: 1.1;
   text-align: center;
 }
@@ -409,9 +386,9 @@ button {
 }
 
 .benefit-icon-ring {
-  width: clamp(88px, 8vw, 120px);
-  height: clamp(88px, 8vw, 120px);
-  font-size: clamp(2.25rem, 3vw, 3.15rem);
+  width: clamp(88px, 8cqw, 120px);
+  height: clamp(88px, 8cqw, 120px);
+  font-size: clamp(2.25rem, 3cqw, 3.15rem);
 }
 
 .benefit-card h3,
@@ -423,7 +400,7 @@ button {
 .benefit-card h3 {
   min-height: 3rem;
   margin: 1.25rem 0 0.7rem;
-  font-size: clamp(1rem, 1.25vw, 1.25rem);
+  font-size: clamp(1rem, 1.25cqw, 1.25rem);
 }
 
 .small-accent-line {
@@ -438,7 +415,7 @@ button {
 .benefit-card p {
   margin: 0 auto;
   color: var(--landing-muted);
-  font-size: clamp(0.88rem, 1.08vw, 1.08rem);
+  font-size: clamp(0.88rem, 1.08cqw, 1.08rem);
   line-height: 1.45;
 }
 
@@ -457,8 +434,8 @@ button {
 }
 
 .step-icon-ring {
-  width: clamp(74px, 7.1vw, 106px);
-  height: clamp(74px, 7.1vw, 106px);
+  width: clamp(74px, 7.1cqw, 106px);
+  height: clamp(74px, 7.1cqw, 106px);
   color: var(--landing-blue);
 }
 
@@ -488,16 +465,16 @@ button {
 .journey-step h3 {
   max-width: 130px;
   margin: 1.05rem auto 0;
-  font-size: clamp(0.94rem, 1.18vw, 1.18rem);
+  font-size: clamp(0.94rem, 1.18cqw, 1.18rem);
   font-weight: 500;
 }
 
 .step-connector {
   position: absolute;
-  top: clamp(36px, 3.55vw, 54px);
-  left: calc(50% + clamp(48px, 5vw, 66px));
+  top: clamp(36px, 3.55cqw, 54px);
+  left: calc(50% + clamp(48px, 5cqw, 66px));
   display: flex;
-  width: calc(100% - clamp(96px, 10vw, 132px));
+  width: calc(100% - clamp(96px, 10cqw, 132px));
   justify-content: space-between;
 }
 
