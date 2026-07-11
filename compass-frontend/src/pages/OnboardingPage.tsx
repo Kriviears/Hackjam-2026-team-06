@@ -38,6 +38,8 @@ const interestOptions = [
 ];
 
 function OnboardingPage() {
+
+    console.log("OnboardingPage rendered");
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState<JourneyRequest>({
@@ -51,6 +53,8 @@ function OnboardingPage() {
         biggestChallenge: "",
         additionalNotes: "",
     });
+
+    console.log("Form Data:", formData);
     const [validationMessage, setValidationMessage] = useState("");
 
     const handleChange = (

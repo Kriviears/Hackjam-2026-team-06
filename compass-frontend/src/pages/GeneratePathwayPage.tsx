@@ -251,6 +251,7 @@ export default function GeneratePathwayPage() {
     navigate("/roadmap", {
       state: {
         roadmap,
+        userType: formData?.userType,
       },
     });
   }

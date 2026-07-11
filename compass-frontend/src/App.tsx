@@ -32,8 +32,6 @@ function App() {
         element={<RoadmapPage />}
       />
 
-      <Route path="/roadmap" element={<RoadmapPage />} />
-
     </Routes>
 
     
