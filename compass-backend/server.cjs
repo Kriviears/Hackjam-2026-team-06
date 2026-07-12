@@ -1,10 +1,13 @@
 // Various parts of this code, past or present,
 // came from an AI model: Claude Haiku 4.5.
+// ----------------------------------------------------------------------------
 // Dotenv is used to load environment variables from a .env file into process.env.
 require('dotenv').config();
 
+// ----------------------------------------------------------------------------
 const PORT = 8000;
 
+// ----------------------------------------------------------------------------
 const { readFile } = require("fs/promises");
 const path = require("path");
 const express = require("express");
@@ -20,6 +23,8 @@ if (!apiKey) {
 }
 const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({ apiKey });
+// ----------------------------------------------------------------------------
+// Get a prompt for the AI model.
 const ROADMAP_PROMPT_PATH = path.resolve(
   __dirname,
   "prompts",
@@ -99,6 +104,7 @@ const ResponseSchema = {
   }
 };
 
+// ----------------------------------------------------------------------------
 const VALID_WAYPOINT_STATUSES = new Set([
   "completed",
   "in-progress",
@@ -107,6 +113,7 @@ const VALID_WAYPOINT_STATUSES = new Set([
   "pending"
 ]);
 
+// ----------------------------------------------------------------------------
 const VALID_RESOURCE_TYPES = new Set([
   "book",
   "video",
@@ -116,6 +123,7 @@ const VALID_RESOURCE_TYPES = new Set([
   "website"
 ]);
 
+// ----------------------------------------------------------------------------
 class RoadmapValidationError extends Error {
   constructor(details) {
     super("AI roadmap response failed schema validation");
@@ -203,6 +211,7 @@ app.post("/journey/generate", async (req, res) => {
     if (isRateLimitError(error)) {
       const waitSeconds = getRateLimitWaitSeconds(error);
 
+      // Too many requests.
       return res.status(429).json({
         error: `Our Path Roadmap Generator is temporarily unavailable. Please try again in ${waitSeconds} seconds`,
         retryAfterSeconds: waitSeconds
@@ -210,12 +219,14 @@ app.post("/journey/generate", async (req, res) => {
     }
 
     if (error instanceof RoadmapValidationError) {
+      // Bad gateway (bad response from a server).
       return res.status(502).json({
         error: "Roadmap generator returned an invalid response. Please try again.",
         details: error.details
       });
     }
 
+    // Internal server error.
     res.status(500).json({
       error: 'Failed to generate roadmap. Please try again.'
     });
@@ -250,6 +261,7 @@ app.get('/roadmap/:id', (req, res) => {
 
   } catch (error) {
     console.error('Error retrieving roadmap:', error);
+    // Internal server error.
     res.status(500).json({
       error: 'Failed to retrieve roadmap'
     });
@@ -289,6 +301,7 @@ app.post("/assistant/ask", async (req, res) => {
           : {}
     });
 
+    // Everything is ok.
     res.status(200).json({ answer });
   } catch (error) {
     console.error("Error generating Ask Compass response:", error);
@@ -296,12 +309,14 @@ app.post("/assistant/ask", async (req, res) => {
     if (isRateLimitError(error)) {
       const waitSeconds = getRateLimitWaitSeconds(error);
 
+      // Too many requests.
       return res.status(429).json({
         error: `Ask Compass is temporarily unavailable. Please try again in ${waitSeconds} seconds`,
         retryAfterSeconds: waitSeconds
       });
     }
 
+    // Internal server error.
     res.status(500).json({
       error: "Ask Compass could not answer right now. Please try again."
     });
@@ -348,6 +363,7 @@ Additional Notes: ${u.additionalNotes}
   return roadmap;
 }
 
+// ----------------------------------------------------------------------------
 function getAskCompassInstruction(question) {
   // Each button gets a slightly different instruction so the same assistant
   // can answer milestone, resume, interview, networking, and resource questions.
@@ -369,6 +385,7 @@ function getAskCompassInstruction(question) {
   return instructions[question] ?? "Answer the user's Ask Compass question using the provided journey state.";
 }
 
+// ----------------------------------------------------------------------------
 async function generateAskCompassResponse({ question, journey, userProfile, journeyProgressChart }) {
   // This prompt is intentionally strict:
   // - use the roadmap/progress chart as source of truth
@@ -407,6 +424,7 @@ ${JSON.stringify(journeyProgressChart, null, 2)}
   return String(interaction.output_text ?? "").trim();
 }
 
+// ----------------------------------------------------------------------------
 function parseRoadmapResponse(outputText) {
   const trimmedOutput = String(outputText ?? "").trim();
   const unfencedOutput = trimmedOutput
@@ -427,26 +445,33 @@ function parseRoadmapResponse(outputText) {
   }
 }
 
+// ----------------------------------------------------------------------------
 function isNonEmptyString(value) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+// ----------------------------------------------------------------------------
 function validateRoadmapResponse(roadmap) {
   const errors = [];
 
+  // Is the roadmap not an object?
   if (!roadmap || typeof roadmap !== "object" || Array.isArray(roadmap)) {
     throw new RoadmapValidationError(["Response must be a JSON object"]);
   }
 
+  // Loop through some fields.
   ["destination", "currentStage", "nextStep"].forEach((fieldName) => {
+    // Is the associated value an empty string?
     if (!isNonEmptyString(roadmap[fieldName])) {
       errors.push(`${fieldName} must be a non-empty string`);
     }
   });
 
+  // Is "waypoints" not an array?
   if (!Array.isArray(roadmap.waypoints)) {
     errors.push("waypoints must be an array");
   } else {
+    // Is the number of waypoints not 3, 4, 5, or 6?
     if (roadmap.waypoints.length < 3 || roadmap.waypoints.length > 6) {
       errors.push("waypoints must include between 3 and 6 items");
     }
@@ -454,28 +479,34 @@ function validateRoadmapResponse(roadmap) {
     roadmap.waypoints.forEach((waypoint, waypointIndex) => {
       const waypointLabel = `waypoints[${waypointIndex}]`;
 
+      // Is the waypoint not an object?
       if (!waypoint || typeof waypoint !== "object" || Array.isArray(waypoint)) {
         errors.push(`${waypointLabel} must be an object`);
         return;
       }
 
+      // Loop through some fields.
       ["title", "description", "category"].forEach((fieldName) => {
+        // Is the associated value an empty string?
         if (!isNonEmptyString(waypoint[fieldName])) {
           errors.push(`${waypointLabel}.${fieldName} must be a non-empty string`);
         }
       });
 
+      // Is the waypoint status not valid?
       if (!VALID_WAYPOINT_STATUSES.has(waypoint.status)) {
         errors.push(
           `${waypointLabel}.status must be one of ${Array.from(VALID_WAYPOINT_STATUSES).join(", ")}`
         );
       }
 
+      // Is "tasks" not an array?
       if (!Array.isArray(waypoint.tasks)) {
         errors.push(`${waypointLabel}.tasks must be an array`);
         return;
       }
 
+      // Is the number of tasks not 3, 4, 5 or 6?
       if (waypoint.tasks.length < 3 || waypoint.tasks.length > 6) {
         errors.push(`${waypointLabel}.tasks must include between 3 and 6 items`);
       }
@@ -483,15 +514,18 @@ function validateRoadmapResponse(roadmap) {
       waypoint.tasks.forEach((task, taskIndex) => {
         const taskLabel = `${waypointLabel}.tasks[${taskIndex}]`;
 
+        // Is the task not an object?
         if (!task || typeof task !== "object" || Array.isArray(task)) {
           errors.push(`${taskLabel} must be an object`);
           return;
         }
 
+        // Is the task tile an empty string?
         if (!isNonEmptyString(task.title)) {
           errors.push(`${taskLabel}.title must be a non-empty string`);
         }
 
+        // Is the task-completion status not a boolean?
         if (typeof task.completed !== "boolean") {
           errors.push(`${taskLabel}.completed must be a boolean`);
         }
@@ -499,9 +533,11 @@ function validateRoadmapResponse(roadmap) {
     });
   }
 
+  // Is "resources" not an array?
   if (!Array.isArray(roadmap.resources)) {
     errors.push("resources must be an array");
   } else {
+    // Is the number of resources not 3, 4, or 5?
     if (roadmap.resources.length < 3 || roadmap.resources.length > 5) {
       errors.push("resources must include between 3 and 5 items");
     }
@@ -509,23 +545,28 @@ function validateRoadmapResponse(roadmap) {
     roadmap.resources.forEach((resource, resourceIndex) => {
       const resourceLabel = `resources[${resourceIndex}]`;
 
+      // Is the resource not an object?
       if (!resource || typeof resource !== "object" || Array.isArray(resource)) {
         errors.push(`${resourceLabel} must be an object`);
         return;
       }
 
+      // Loop through some fields.
       ["title", "reason"].forEach((fieldName) => {
+        // Is the associated value an empty string?
         if (!isNonEmptyString(resource[fieldName])) {
           errors.push(`${resourceLabel}.${fieldName} must be a non-empty string`);
         }
       });
 
+      // Is the resource type not valid?
       if (!VALID_RESOURCE_TYPES.has(resource.type)) {
         errors.push(
           `${resourceLabel}.type must be one of ${Array.from(VALID_RESOURCE_TYPES).join(", ")}`
         );
       }
 
+      // Is the URL not a string?
       if (
         resource.url !== undefined &&
         resource.url !== null &&
@@ -536,41 +577,52 @@ function validateRoadmapResponse(roadmap) {
     });
   }
 
+  // Is "futureYou" not an object?
   if (!roadmap.futureYou || typeof roadmap.futureYou !== "object" || Array.isArray(roadmap.futureYou)) {
     errors.push("futureYou must be an object");
   } else {
+    // Loop through some fields.
     ["title", "summary", "nextOpportunity"].forEach((fieldName) => {
+      // Is the associated value an empty string?
       if (!isNonEmptyString(roadmap.futureYou[fieldName])) {
         errors.push(`futureYou.${fieldName} must be a non-empty string`);
       }
     });
 
+    // Is "roles" not an array?
     if (!Array.isArray(roadmap.futureYou.roles)) {
       errors.push("futureYou.roles must be an array");
+    // Is the number of roles not 3?
     } else if (roadmap.futureYou.roles.length !== 3) {
       errors.push("futureYou.roles must include exactly 3 items");
     } else {
       roadmap.futureYou.roles.forEach((role, roleIndex) => {
+        // Is the role an empty string?
         if (!isNonEmptyString(role)) {
           errors.push(`futureYou.roles[${roleIndex}] must be a non-empty string`);
         }
       });
     }
 
+    // Is "companies" not an array?
     if (!Array.isArray(roadmap.futureYou.companies)) {
       errors.push("futureYou.companies must be an array");
+    // Is the number of companies not 3?
     } else if (roadmap.futureYou.companies.length !== 3) {
       errors.push("futureYou.companies must include exactly 3 items");
     } else {
       roadmap.futureYou.companies.forEach((company, companyIndex) => {
         const companyLabel = `futureYou.companies[${companyIndex}]`;
 
+        // Is the company not an object?
         if (!company || typeof company !== "object" || Array.isArray(company)) {
           errors.push(`${companyLabel} must be an object`);
           return;
         }
 
+        // Loop through some fields.
         ["name", "reason"].forEach((fieldName) => {
+          // Is the associated value an empty string?
           if (!isNonEmptyString(company[fieldName])) {
             errors.push(`${companyLabel}.${fieldName} must be a non-empty string`);
           }
@@ -578,20 +630,25 @@ function validateRoadmapResponse(roadmap) {
       });
     }
 
+    // Is "opportunityTypes" not an array?
     if (!Array.isArray(roadmap.futureYou.opportunityTypes)) {
       errors.push("futureYou.opportunityTypes must be an array");
+    // Is the number of opportunity types not 3?
     } else if (roadmap.futureYou.opportunityTypes.length !== 3) {
       errors.push("futureYou.opportunityTypes must include exactly 3 items");
     } else {
       roadmap.futureYou.opportunityTypes.forEach((opportunity, opportunityIndex) => {
         const opportunityLabel = `futureYou.opportunityTypes[${opportunityIndex}]`;
 
+        // Is the opportunity not an object?
         if (!opportunity || typeof opportunity !== "object" || Array.isArray(opportunity)) {
           errors.push(`${opportunityLabel} must be an object`);
           return;
         }
 
+        // Loop through some fields.
         ["title", "reason"].forEach((fieldName) => {
+          // Is the associated value an empty string?
           if (!isNonEmptyString(opportunity[fieldName])) {
             errors.push(`${opportunityLabel}.${fieldName} must be a non-empty string`);
           }
@@ -599,12 +656,15 @@ function validateRoadmapResponse(roadmap) {
       });
     }
 
+    // Is "networkingActions" an array?
     if (!Array.isArray(roadmap.futureYou.networkingActions)) {
       errors.push("futureYou.networkingActions must be an array");
+    // Is the number of networking actions not 3?
     } else if (roadmap.futureYou.networkingActions.length !== 3) {
       errors.push("futureYou.networkingActions must include exactly 3 items");
     } else {
       roadmap.futureYou.networkingActions.forEach((action, actionIndex) => {
+        // Is the networking action an empty string?
         if (!isNonEmptyString(action)) {
           errors.push(`futureYou.networkingActions[${actionIndex}] must be a non-empty string`);
         }
@@ -612,11 +672,13 @@ function validateRoadmapResponse(roadmap) {
     }
   }
 
+  // Do we have an error?
   if (errors.length > 0) {
     throw new RoadmapValidationError(errors);
   }
 }
 
+// ----------------------------------------------------------------------------
 function isRateLimitError(error) {
   return (
     error?.status === 429 ||
@@ -627,6 +689,7 @@ function isRateLimitError(error) {
   );
 }
 
+// ----------------------------------------------------------------------------
 function getHeaderValue(headers, headerName) {
   if (!headers) {
     return undefined;
@@ -639,6 +702,7 @@ function getHeaderValue(headers, headerName) {
   return headers[headerName] ?? headers[headerName.toLowerCase()];
 }
 
+// ----------------------------------------------------------------------------
 function parseRetryAfterSeconds(retryAfter) {
   if (!retryAfter) {
     return undefined;
@@ -659,6 +723,7 @@ function parseRetryAfterSeconds(retryAfter) {
   return undefined;
 }
 
+// ----------------------------------------------------------------------------
 function getRateLimitWaitSeconds(error) {
   const retryAfter =
     getHeaderValue(error?.headers, "retry-after") ??
