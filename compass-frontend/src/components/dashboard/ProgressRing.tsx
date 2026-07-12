@@ -2,9 +2,10 @@ interface ProgressRingProps {
   value: number;
   label?: string;
   size?: "sm" | "lg";
+  displayValue?: string;
 }
 
-function ProgressRing({ value, label, size = "lg" }: ProgressRingProps) {
+function ProgressRing({ value, label, size = "lg", displayValue }: ProgressRingProps) {
   const clampedValue = Math.max(0, Math.min(100, value));
 
   return (
@@ -16,7 +17,7 @@ function ProgressRing({ value, label, size = "lg" }: ProgressRingProps) {
       aria-label={`${label ?? "Progress"} ${clampedValue}%`}
     >
       <span>
-        <strong>{clampedValue}%</strong>
+        <strong>{displayValue ?? `${clampedValue}%`}</strong>
         {label && <small>{label}</small>}
       </span>
     </div>

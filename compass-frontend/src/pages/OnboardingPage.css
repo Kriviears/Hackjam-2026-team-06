@@ -2689,14 +2689,14 @@ body:has(.onboarding-page) {
 
 .review-summary {
   grid-column: 1 / -1;
-  padding: 18px 20px;
+  padding: 16px 18px;
   border: 1px solid rgba(0, 138, 164, 0.18);
   border-radius: 9px;
   background: rgba(241, 251, 254, 0.72);
 }
 
 .review-summary-heading {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .review-summary-heading h3 {
@@ -2715,8 +2715,8 @@ body:has(.onboarding-page) {
 .review-summary-list {
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 16px;
 }
 
 .review-summary-item {
@@ -2770,8 +2770,22 @@ body:has(.onboarding-page) {
   display: none !important;
 }
 
+.onboarding-page::before {
+  position: absolute !important;
+  inset: 0;
+  z-index: 0;
+  display: block !important;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 44% 52% at 19% 42%, rgba(255, 255, 255, 0.86) 0%, rgba(255, 255, 255, 0.58) 40%, rgba(255, 255, 255, 0.2) 66%, transparent 88%),
+    radial-gradient(ellipse 42% 30% at 18% 76%, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.34) 50%, transparent 86%);
+  content: "";
+}
+
 .onboarding-layout {
-  --onboarding-panel-height: clamp(500px, 64vh, 600px);
+  --onboarding-panel-height: clamp(640px, 78vh, 760px);
+  position: relative;
+  z-index: 1;
   flex: 1 0 auto;
   width: min(1260px, calc(100% - 64px));
   min-height: 100vh;
@@ -2820,7 +2834,7 @@ body:has(.onboarding-page) {
   flex-direction: column;
   min-height: 100%;
   gap: 14px;
-  padding: clamp(20px, 2.2vw, 28px) var(--onboarding-form-x) 92px;
+  padding: clamp(20px, 2.2vw, 28px) var(--onboarding-form-x) 148px;
   overflow: visible;
 }
 

@@ -261,7 +261,7 @@ function RoadmapCanvas({
                     <div
                         className="roadmap-map-progress-chart"
                         style={{
-                            background: `conic-gradient(#00a676 ${journeyProgressPercent}%, rgba(219, 229, 238, 0.9) 0)`,
+                            background: `conic-gradient(#078aa4 ${journeyProgressPercent}%, rgba(219, 229, 238, 0.9) 0)`,
                         }}
                         aria-hidden="true"
                     >

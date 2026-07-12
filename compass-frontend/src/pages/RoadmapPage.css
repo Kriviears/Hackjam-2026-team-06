@@ -548,7 +548,7 @@ body:has(.roadmap-page) {
 }
 
 .roadmap-path-progress {
-  stroke: rgba(0, 166, 118, 0.96);
+  stroke: rgba(7, 138, 164, 0.96);
   stroke-width: 16;
   filter:
     drop-shadow(0 0 10px rgba(0, 203, 166, 0.48))
@@ -625,20 +625,20 @@ body:has(.roadmap-page) {
 }
 
 .roadmap-waypoint--highlight-current .roadmap-waypoint-card {
-  border: 3px solid #00a676;
+  border: 3px solid #078aa4;
   box-shadow:
-    0 12px 34px rgba(0, 122, 90, 0.22),
+    0 12px 34px rgba(7, 95, 133, 0.22),
     0 0 0 6px rgba(255, 255, 255, 0.58),
-    0 0 0 11px rgba(0, 166, 118, 0.2);
+    0 0 0 11px rgba(7, 138, 164, 0.2);
 }
 
 .roadmap-waypoint--highlight-current .roadmap-node {
   background:
-    radial-gradient(circle at 35% 30%, #effff8 0 14%, #80f2cf 38%, #00a676 72%, #00684f 100%);
+    radial-gradient(circle at 35% 30%, #effff8 0 14%, #9be7f3 38%, #078aa4 72%, #075f85 100%);
   box-shadow:
-    0 8px 22px rgba(0, 104, 79, 0.28),
+    0 8px 22px rgba(7, 95, 133, 0.28),
     0 0 0 8px rgba(255, 255, 255, 0.72),
-    0 0 0 14px rgba(0, 166, 118, 0.24);
+    0 0 0 14px rgba(7, 138, 164, 0.24);
   transform: scale(1.06);
 }
 
@@ -769,7 +769,7 @@ body:has(.roadmap-page) {
 
 .waypoint-status--complete {
   background: #dff7ed;
-  color: #08724f;
+  color: #075f85;
 }
 
 .waypoint-status--progress {
@@ -918,7 +918,7 @@ body:has(.roadmap-page) {
   border: 1px solid rgba(179, 255, 206, 0.5);
   border-radius: 9px;
   padding: 0.4rem 0.62rem;
-  background: linear-gradient(135deg, #43d37d, #18a95c);
+  background: linear-gradient(135deg, #18a6e7, #078aa4);
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 850;
@@ -1042,10 +1042,10 @@ body:has(.roadmap-page) {
 
 .waypoint-panel--highlight-current .waypoint-summary-card,
 .waypoint-panel--highlight-current .waypoint-panel-card:first-of-type {
-  border-color: #00a676;
+  border-color: #078aa4;
   box-shadow:
-    0 14px 34px rgba(0, 122, 90, 0.16),
-    0 0 0 4px rgba(0, 166, 118, 0.15);
+    0 14px 34px rgba(7, 95, 133, 0.16),
+    0 0 0 4px rgba(7, 138, 164, 0.15);
 }
 
 .waypoint-panel--highlight-locked .waypoint-summary-card,
@@ -1129,7 +1129,7 @@ body:has(.roadmap-page) {
 
 .panel-status--completed {
   background: #def7ed;
-  color: #08724f;
+  color: #075f85;
 }
 
 .panel-status--locked {
@@ -1177,7 +1177,7 @@ body:has(.roadmap-page) {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #00a676, #12b7a6, #f4b740);
+  background: linear-gradient(90deg, #078aa4, #18a6e7, #f4b740);
 }
 
 .waypoint-metrics {
@@ -1272,7 +1272,7 @@ body:has(.roadmap-page) {
   border-color: #0aa36f;
   background: #ddf8ef;
   color: #007a5a;
-  box-shadow: 0 0 0 4px rgba(0, 166, 118, 0.13);
+  box-shadow: 0 0 0 4px rgba(7, 138, 164, 0.13);
 }
 
 .skill-check-row input:disabled + .skill-toggle {

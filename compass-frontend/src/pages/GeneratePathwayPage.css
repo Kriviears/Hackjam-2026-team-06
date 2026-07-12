@@ -1250,3 +1250,135 @@ body:has(.generate-shell) {
     scroll-behavior: auto !important;
   }
 }
+
+@media (min-width: 1024px) {
+  .generate-page {
+    padding-top: clamp(16px, 1.8vw, 24px);
+  }
+
+  .generate-intro {
+    width: min(100%, 1300px);
+    margin-top: -8px;
+  }
+
+  .generate-intro h1 {
+    font-size: clamp(1.95rem, 2.7vw, 2.7rem);
+  }
+
+  .generate-workspace {
+    width: min(100%, 1300px);
+    margin-top: 12px;
+    grid-template-columns:
+      minmax(245px, 318px)
+      minmax(380px, 500px)
+      minmax(245px, 318px);
+    gap: clamp(14px, 1.8vw, 26px);
+  }
+
+  .generate-center {
+    min-height: 330px;
+  }
+
+  .compass-animation {
+    width: min(390px, 100%);
+  }
+
+  .compass-animation::before {
+    inset: -24px 30px -8px;
+  }
+
+  .compass-ring {
+    width: 272px;
+    height: 272px;
+  }
+
+  .compass-ring-middle {
+    width: 248px;
+    height: 248px;
+  }
+
+  .compass-ring-inner {
+    width: 216px;
+    height: 216px;
+  }
+
+  .generation-step-card {
+    min-height: 76px;
+    padding: 10px 12px;
+  }
+
+  .generation-step-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .generation-step-content h2 {
+    font-size: 0.8rem;
+  }
+
+  .generation-step-content p {
+    font-size: 0.68rem;
+    line-height: 1.28;
+  }
+
+  .generation-step-indicator {
+    width: 24px;
+    height: 24px;
+  }
+
+  .generate-progress-number {
+    font-size: 2rem;
+  }
+
+  .generate-lower-grid {
+    width: min(100%, 1300px);
+    margin-top: 6px;
+    grid-template-columns: minmax(0, 1fr) minmax(315px, 370px);
+    gap: 18px;
+  }
+
+  .generate-lower-left {
+    min-height: 110px;
+  }
+
+  .generate-road-visual {
+    left: 16%;
+    right: 3%;
+    bottom: 34px;
+    height: 96px;
+  }
+
+  .waypoint-preview-section {
+    padding: 13px 16px;
+  }
+
+  .waypoint-timeline {
+    margin-top: 10px;
+    gap: 9px;
+  }
+
+  .waypoint-preview-card {
+    grid-template-columns: 30px 1fr;
+    gap: 11px;
+  }
+
+  .waypoint-preview-number {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+  }
+
+  .waypoint-preview-card h3 {
+    font-size: 0.8rem;
+  }
+
+  .waypoint-preview-description {
+    font-size: 0.68rem;
+    -webkit-line-clamp: 1;
+  }
+
+  .generate-footer {
+    width: min(760px, 100%);
+    padding: 9px 13px;
+  }
+}

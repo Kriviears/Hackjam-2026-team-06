@@ -4,6 +4,7 @@ import {
   Building2,
   BriefcaseBusiness,
   Check,
+  ChevronDown,
   Code2,
   CircleUserRound,
   Compass,
@@ -23,12 +24,20 @@ import {
   TrendingUp,
   UsersRound,
 } from "lucide-react";
+import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import DashboardCard from "../components/dashboard/DashboardCard";
 import ProgressRing from "../components/dashboard/ProgressRing";
+import { askCompass } from "../services/askCompassApi";
 import type { JourneyResponse, UserProfile, Waypoint } from "../types/journey";
+import {
+  applyStoredJourneyProgress,
+  buildJourneyProgressChart,
+  readJourneyProgress,
+} from "../utils/journeyProgressStorage";
 import compassLogo from "../assets/compass-landing-logo.png";
+import roboCompass from "../assets/roboCompass.png";
 import techLandscape from "../assets/tech-landscape.png";
 
 import "./DashboardPage.css";
@@ -41,9 +50,65 @@ const weeklyGoals = [
   "Practice one interview question",
 ];
 
+const assistantOptions = [
+  "Explain my current milestone",
+  "What should I work on this week?",
+  "Help me improve my resume",
+  "Prepare me for interviews",
+  "Show networking ideas",
+  "Find learning resources",
+];
+
+function getAssistantGreeting(firstName: string, destination: string) {
+  return `Hi ${firstName}! I've been keeping track of your journey toward becoming a ${destination}.\n\nI can help you decide what to work on next.`;
+}
+
 const storageKeys = {
   weekly: "compass-dashboard-weekly-goals",
   savedOpportunities: "compass-dashboard-saved-opportunities",
+};
+
+const mockupJourney: JourneyResponse = {
+  id: "dashboard-preview",
+  destination: "Front-End Software Engineer",
+  currentStage: "Building Foundations",
+  progressPercent: 33,
+  nextStep:
+    "Complete the first draft of your technical resume and compare it with three current frontend developer job descriptions.",
+  userType: "currentLearner",
+  weeklyCommitment: "5-7 hours",
+  waypoints: [
+    {
+      title: "Establish Core Foundations",
+      description: "Develop Technical Data Skills",
+      category: "Technical Foundations",
+      status: "in-progress",
+      tasks: [
+        { title: "Review HTML, CSS, and JavaScript fundamentals", completed: true },
+        { title: "Practice GitHub portfolio hygiene", completed: false },
+      ],
+    },
+    {
+      title: "Build Role-Specific Skills",
+      description: "Strengthen React, testing, and API fluency",
+      category: "Role-Specific Skills",
+      status: "pending",
+      tasks: [
+        { title: "Create a React component library", completed: false },
+        { title: "Add testing practice to a small app", completed: false },
+      ],
+    },
+    {
+      title: "Connect Projects to Careers",
+      description: "Translate project work into interview-ready stories",
+      category: "Career Readiness",
+      status: "pending",
+      tasks: [
+        { title: "Draft STAR stories from project work", completed: false },
+        { title: "Prepare a portfolio walkthrough", completed: false },
+      ],
+    },
+  ],
 };
 
 function getStoredArray(key: string, length: number) {
@@ -77,7 +142,7 @@ function getNextWaypoint(waypoints: Waypoint[]) {
 }
 
 function buildSkillSnapshot(journey: JourneyResponse) {
-  const waypointProgress = getWaypointProgress(journey.waypoints);
+  const waypointProgress = Math.max(getWaypointProgress(journey.waypoints), journey.progressPercent ?? 0);
   const categories = journey.waypoints.map((waypoint) => waypoint.category.toLowerCase());
   const hasPortfolio = categories.some((category) => category.includes("portfolio") || category.includes("project"));
   const hasCareer = categories.some((category) => category.includes("career") || category.includes("interview"));
@@ -88,11 +153,12 @@ function buildSkillSnapshot(journey: JourneyResponse) {
    * before the backend returns dedicated skill metrics.
    */
   return [
-    { label: "Technical Foundations", value: Math.max(35, waypointProgress + 35) },
-    { label: "Role-Specific Skills", value: Math.max(30, waypointProgress + 25) },
-    { label: "Portfolio Development", value: hasPortfolio ? Math.max(45, waypointProgress + 20) : 38 },
-    { label: "Career Readiness", value: hasCareer ? Math.max(45, waypointProgress + 18) : 42 },
-    { label: "Professional Networking", value: hasNetworking ? Math.max(42, waypointProgress + 16) : 36 },
+    { label: "Technical Foundations", value: Math.max(75, waypointProgress + 35) },
+    { label: "Role-Specific Skills", value: Math.max(60, waypointProgress + 25) },
+    { label: "TypeScript", value: Math.max(45, waypointProgress + 12) },
+    { label: "Backend & APIs", value: hasPortfolio ? Math.max(40, waypointProgress + 7) : 40 },
+    { label: "Career Readiness", value: hasCareer ? Math.max(55, waypointProgress + 18) : 55 },
+    { label: "Professional Networking", value: hasNetworking ? Math.max(50, waypointProgress + 16) : 50 },
   ].map((skill) => ({ ...skill, value: Math.min(95, skill.value) }));
 }
 
@@ -102,45 +168,45 @@ function buildInsights(journey: JourneyResponse) {
 
   return [
     {
-      title: "Skill Gap",
+      title: "Skill Gap Detected",
       icon: <Lightbulb size={22} />,
-      text: `${categoryText} is showing up as your next growth area for ${journey.destination}.`,
-      action: "Explore Skill",
+      text: `${categoryText} appears in 72% of similar roles. Add one focused practice block this week.`,
+      action: "Explore Skills",
     },
     {
       title: "Portfolio Recommendation",
       icon: <Sparkles size={22} />,
-      text: `Build one small proof-of-skill project tied to ${journey.nextStep}.`,
+      text: "Build a project that demonstrates API integration, authentication, and responsive design.",
       action: "Explore Project Ideas",
     },
     {
       title: "Career Readiness",
       icon: <TrendingUp size={22} />,
-      text: `Keep aligning your resume, networking, and practice around ${journey.currentStage}.`,
+      text: "You're making progress. Focus on portfolio storytelling and LinkedIn visibility.",
       action: "View Recommendation",
     },
   ];
 }
 
-function buildOpportunities(journey: JourneyResponse) {
+function buildOpportunities() {
   return [
     {
-      type: "Career development event",
+      type: "EVENT",
       title: "Per Scholas Workshop",
       match: 92,
-      reason: `Supports your next step: ${journey.nextStep}.`,
+      reason: "Frontend Development Best Practices · May 28, 2025 · Virtual",
     },
     {
-      type: "Entry-level role or internship",
-      title: `${journey.destination} Starter Opportunity`,
+      type: "JOB",
+      title: "Junior Frontend Developer Role",
       match: 88,
-      reason: `Aligned to your destination and current stage.`,
+      reason: "React · TypeScript · UI Development · Posted May 20, 2025 · Atlanta, GA",
     },
     {
-      type: "Alumni or networking opportunity",
+      type: "NETWORKING",
       title: "Per Scholas Alumni Networking",
       match: 85,
-      reason: "Helps you connect with people who understand the path.",
+      reason: "Connect, learn, and grow together · Jun 5, 2025 · In-person",
     },
   ];
 }
@@ -148,19 +214,46 @@ function buildOpportunities(journey: JourneyResponse) {
 export default function DashboardPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const journey = location.state?.journey as JourneyResponse | undefined;
-  const userProfile = location.state?.userProfile as UserProfile | undefined;
-  const firstName = userProfile?.firstName.trim() || "there";
+  const journey = (location.state?.journey as JourneyResponse | undefined) ?? mockupJourney;
+  const userProfile =
+    (location.state?.userProfile as UserProfile | undefined) ?? {
+      firstName: "Fabiola",
+      lastName: "",
+    };
+  const firstName = userProfile?.firstName.trim() || "Fabiola";
   const initials = `${userProfile?.firstName?.charAt(0) ?? "C"}${userProfile?.lastName?.charAt(0) ?? ""}`.toUpperCase();
-  const [weeklyChecked, setWeeklyChecked] = useState(() =>
-    getStoredArray(storageKeys.weekly, weeklyGoals.length),
-  );
+  const [weeklyChecked, setWeeklyChecked] = useState(() => {
+    const stored = getStoredArray(storageKeys.weekly, weeklyGoals.length);
+    return stored.some(Boolean) ? stored : [true, true, true, false, false];
+  });
   const [todayComplete, setTodayComplete] = useState(false);
   const [rewardOpen, setRewardOpen] = useState(false);
   const [savedOpportunities, setSavedOpportunities] = useState(() =>
     getStoredArray(storageKeys.savedOpportunities, 3),
   );
   const [connections, setConnections] = useState([false, false, false]);
+  const [progressSyncVersion, setProgressSyncVersion] = useState(0);
+
+  // Ask Compass UI state:
+  // ready controls the delayed greeting, expanded reveals the question buttons,
+  // typedLength powers the typewriter intro, and answer/error/loading handle LLM replies.
+  const [assistantReady, setAssistantReady] = useState(false);
+  const [assistantExpanded, setAssistantExpanded] = useState(false);
+  const [assistantTypedLength, setAssistantTypedLength] = useState(0);
+  const [assistantAnswer, setAssistantAnswer] = useState("");
+  const [assistantError, setAssistantError] = useState("");
+  const [assistantLoadingQuestion, setAssistantLoadingQuestion] = useState("");
+
+  // Pull in the latest Roadmap-owned progress so Ask Compass answers from
+  // the same journey state shown by the Dashboard progress chart.
+  const syncedJourney = useMemo(
+    () => applyStoredJourneyProgress(journey),
+    [journey, progressSyncVersion],
+  );
+  const journeyProgressChart = useMemo(
+    () => readJourneyProgress(journey)?.chart ?? buildJourneyProgressChart(syncedJourney),
+    [journey, syncedJourney, progressSyncVersion],
+  );
 
   useEffect(() => {
     window.localStorage.setItem(storageKeys.weekly, JSON.stringify(weeklyChecked));
@@ -173,13 +266,64 @@ export default function DashboardPage() {
     );
   }, [savedOpportunities]);
 
+  useEffect(() => {
+    // The assistant starts with typing bubbles, then switches to the greeting.
+    const greetingTimer = window.setTimeout(() => {
+      setAssistantReady(true);
+    }, 2400);
+
+    return () => window.clearTimeout(greetingTimer);
+  }, []);
+
+  const assistantGreeting = useMemo(
+    () => getAssistantGreeting(firstName, syncedJourney.destination),
+    [firstName, syncedJourney.destination],
+  );
+
+  useEffect(() => {
+    // Once the greeting is ready, reveal it one character at a time.
+    if (!assistantReady) {
+      setAssistantTypedLength(0);
+      return;
+    }
+
+    setAssistantTypedLength(0);
+    const typingTimer = window.setInterval(() => {
+      setAssistantTypedLength((length) => {
+        if (length >= assistantGreeting.length) {
+          window.clearInterval(typingTimer);
+          return length;
+        }
+
+        return length + 1;
+      });
+    }, 18);
+
+    return () => window.clearInterval(typingTimer);
+  }, [assistantGreeting, assistantReady]);
+
+  useEffect(() => {
+    const syncJourneyProgress = () => setProgressSyncVersion((version) => version + 1);
+
+    window.addEventListener("storage", syncJourneyProgress);
+    window.addEventListener("focus", syncJourneyProgress);
+
+    return () => {
+      window.removeEventListener("storage", syncJourneyProgress);
+      window.removeEventListener("focus", syncJourneyProgress);
+    };
+  }, []);
+
   const dashboardData = useMemo(() => {
-    if (!journey) {
+    if (!syncedJourney) {
       return null;
     }
 
-    const progressPercent = Math.max(0, Math.min(100, journey.progressPercent ?? 0));
-    const nextWaypoint = getNextWaypoint(journey.waypoints);
+    const progressPercent = Math.max(
+      0,
+      Math.min(100, journeyProgressChart.progressPercent ?? 0),
+    );
+    const nextWaypoint = getNextWaypoint(syncedJourney.waypoints);
     const completedWeekly = weeklyChecked.filter(Boolean).length;
 
     return {
@@ -187,13 +331,13 @@ export default function DashboardPage() {
       nextWaypoint,
       completedWeekly,
       weeklyPercent: Math.round((completedWeekly / weeklyGoals.length) * 100),
-      skills: buildSkillSnapshot(journey),
-      insights: buildInsights(journey),
-      opportunities: buildOpportunities(journey),
+      skills: buildSkillSnapshot(syncedJourney),
+      insights: buildInsights(syncedJourney),
+      opportunities: buildOpportunities(),
     };
-  }, [journey, weeklyChecked]);
+  }, [syncedJourney, journeyProgressChart, weeklyChecked]);
 
-  if (!journey || !dashboardData) {
+  if (!dashboardData) {
     return (
       <main className="dashboard-page dashboard-empty">
         <DashboardCard className="dashboard-empty-card">
@@ -210,15 +354,118 @@ export default function DashboardPage() {
 
   const rewardUnlocked = dashboardData.progressPercent >= 50;
 
+  // Called when a user clicks one of the suggested Ask Compass questions.
+  // It sends the selected question plus the current journey/progress context
+  // to the backend LLM route, then renders the returned answer in the panel.
+  const handleAskCompassQuestion = async (question: string) => {
+    setAssistantExpanded(true);
+    setAssistantAnswer("");
+    setAssistantError("");
+    setAssistantLoadingQuestion(question);
+
+    try {
+      const answer = await askCompass({
+        question,
+        journey: syncedJourney,
+        userProfile,
+        journeyProgressChart,
+      });
+
+      setAssistantAnswer(answer);
+    } catch (error) {
+      setAssistantError(
+        error instanceof Error
+          ? error.message
+          : "Ask Compass could not answer right now.",
+      );
+    } finally {
+      setAssistantLoadingQuestion("");
+    }
+  };
+  const askCompassPanel = (
+    <section className="dashboard-robo-assistant" aria-label="roboCompass assistant">
+      <div
+        className={
+          assistantReady
+            ? "dashboard-robo-message dashboard-robo-message--speaking"
+            : "dashboard-robo-message dashboard-robo-message--typing"
+        }
+        aria-live="polite"
+      >
+        {assistantReady ? (
+          <p className="dashboard-robo-typewritten">
+            {assistantGreeting.slice(0, assistantTypedLength)}
+            {assistantTypedLength < assistantGreeting.length && (
+              <span aria-hidden="true" className="dashboard-robo-caret" />
+            )}
+          </p>
+        ) : (
+          <div className="dashboard-robo-typing" aria-label="roboCompass is typing">
+            <span />
+            <span />
+            <span />
+          </div>
+        )}
+      </div>
+
+      <button
+        type="button"
+        className="dashboard-robo-trigger"
+        aria-expanded={assistantExpanded}
+        onClick={() => setAssistantExpanded(true)}
+      >
+        <img src={roboCompass} alt="" />
+        <span>Ask Compass</span>
+      </button>
+
+      {assistantExpanded && (
+        <div className="dashboard-robo-options">
+          {/* Each option becomes the "question" sent to the Ask Compass LLM route. */}
+          {assistantOptions.map((option) => (
+            <button
+              type="button"
+              key={option}
+              disabled={Boolean(assistantLoadingQuestion)}
+              onClick={() => void handleAskCompassQuestion(option)}
+            >
+              {assistantLoadingQuestion === option ? "Thinking..." : option}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {(assistantLoadingQuestion || assistantAnswer || assistantError) && (
+        <>
+          {/* This block shows the backend LLM answer, or an error if the call fails. */}
+          <div
+            className={
+              assistantError
+                ? "dashboard-robo-answer dashboard-robo-answer--error"
+                : "dashboard-robo-answer"
+            }
+            aria-live="polite"
+          >
+            {assistantLoadingQuestion && (
+              <div className="dashboard-robo-typing" aria-label="Ask Compass is thinking">
+                <span />
+                <span />
+                <span />
+              </div>
+            )}
+            {!assistantLoadingQuestion && assistantAnswer && <p>{assistantAnswer}</p>}
+            {!assistantLoadingQuestion && assistantError && <p>{assistantError}</p>}
+          </div>
+        </>
+      )}
+    </section>
+  );
+
   return (
     <main
       className="dashboard-page"
       style={{
-        backgroundImage: `
-          linear-gradient(180deg, rgba(236, 248, 255, 0.92) 0%, rgba(218, 239, 255, 0.54) 46%, rgba(7, 83, 150, 0.22) 100%),
-          url(${techLandscape})
-        `,
-      }}
+        "--dashboard-techscape": `url(${techLandscape})`,
+      } as CSSProperties}
     >
       <aside className="dashboard-sidebar">
         <div className="dashboard-brand">
@@ -232,7 +479,10 @@ export default function DashboardPage() {
             <LayoutDashboard size={19} />
             Dashboard
           </NavLink>
-          <NavLink to="/roadmap" state={{ roadmap: journey, userType: journey.userType, userProfile }}>
+          <NavLink
+            to="/roadmap"
+            state={{ roadmap: syncedJourney, userType: syncedJourney.userType, userProfile }}
+          >
             <Map size={19} />
             Roadmap
           </NavLink>
@@ -267,12 +517,6 @@ export default function DashboardPage() {
           </a>
         </nav>
 
-        <div className="dashboard-ai-card">
-          <Sparkles size={18} />
-          <strong>AI Assistant</strong>
-          <p>Ask anything about your journey.</p>
-          <button type="button">Start a chat</button>
-        </div>
       </aside>
 
       <section className="dashboard-shell">
@@ -286,37 +530,56 @@ export default function DashboardPage() {
             <span>2</span>
           </button>
           <button type="button" className="dashboard-profile" aria-label="Profile">
-            {initials}
+            <span>{initials}</span>
+            <ChevronDown size={14} />
           </button>
         </header>
 
         <section className="dashboard-hero-grid">
           <DashboardCard className="dashboard-hero">
             <div>
-              <p className="dashboard-kicker">Good evening, {firstName}! 👋</p>
+              <p className="dashboard-kicker">Good evening, {firstName}!</p>
               <h1>Your future is taking shape.</h1>
               <span>Destination</span>
-              <strong>{journey.destination}</strong>
+              <strong>{syncedJourney.destination}</strong>
             </div>
 
             <div className="dashboard-hero-progress">
-              <ProgressRing value={dashboardData.progressPercent} label="Journey Progress" />
+              <div
+                className="dashboard-roadmap-progress"
+                aria-label={`Journey progress ${dashboardData.progressPercent}%`}
+              >
+                <span className="dashboard-roadmap-progress-title">Journey Progress</span>
+                <div
+                  className="dashboard-roadmap-progress-chart"
+                  style={{
+                    background: `conic-gradient(#078aa4 ${dashboardData.progressPercent}%, rgba(219, 229, 238, 0.9) 0)`,
+                  }}
+                  aria-hidden="true"
+                >
+                  <span>{dashboardData.progressPercent}%</span>
+                </div>
+                <p>
+                  {journeyProgressChart.completedWaypoints} of{" "}
+                  {journeyProgressChart.totalWaypoints} waypoints complete
+                </p>
+              </div>
 
               <div className="dashboard-stage-stack">
                 <div>
                   <Building2 size={18} />
                   <span>Current Stage</span>
-                  <strong>{journey.currentStage}</strong>
+                  <strong>{syncedJourney.currentStage}</strong>
                 </div>
                 <div>
                   <Flag size={18} />
                   <span>Current Milestone</span>
-                  <strong>{dashboardData.nextWaypoint?.title ?? journey.nextStep}</strong>
+                  <strong>{dashboardData.nextWaypoint?.title ?? syncedJourney.nextStep}</strong>
                 </div>
                 <div>
                   <span className="dashboard-next-number">2</span>
                   <span>Next Waypoint</span>
-                  <strong>{dashboardData.nextWaypoint?.description ?? journey.nextStep}</strong>
+                  <strong>{dashboardData.nextWaypoint?.description ?? syncedJourney.nextStep}</strong>
                 </div>
               </div>
             </div>
@@ -327,7 +590,11 @@ export default function DashboardPage() {
                 className="dashboard-primary-button"
                 onClick={() =>
                   navigate("/roadmap", {
-                    state: { roadmap: journey, userType: journey.userType, userProfile },
+                    state: {
+                      roadmap: syncedJourney,
+                      userType: syncedJourney.userType,
+                      userProfile,
+                    },
                   })
                 }
               >
@@ -343,7 +610,11 @@ export default function DashboardPage() {
           <DashboardCard className="dashboard-weekly" title="Weekly Momentum" icon={<TrendingUp size={22} />}>
             <div className="dashboard-weekly-heading">
               <strong>{dashboardData.completedWeekly} of 5 weekly goals completed</strong>
-              <ProgressRing value={dashboardData.weeklyPercent} label={`${dashboardData.completedWeekly}/5`} size="sm" />
+              <ProgressRing
+                value={dashboardData.weeklyPercent}
+                displayValue={`${dashboardData.completedWeekly}/5`}
+                size="sm"
+              />
             </div>
 
             <div className="dashboard-weekly-list">
@@ -384,7 +655,7 @@ export default function DashboardPage() {
           <DashboardCard className="dashboard-today" title="Today's Compass" icon={<Compass size={22} />}>
             <div className="dashboard-today-layout">
               <div>
-                <h2>{journey.nextStep}</h2>
+                <h2>{syncedJourney.nextStep}</h2>
                 <p>
                   This step will strengthen your positioning and highlight the skills
                   employers are looking for.
@@ -520,6 +791,9 @@ export default function DashboardPage() {
             )}
           </DashboardCard>
         </section>
+
+        {askCompassPanel}
+
       </section>
 
       {rewardOpen && (

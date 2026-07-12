@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
 import RoadmapSidebar from "../components/roadmap/RoadmapSidebar";
@@ -12,6 +12,10 @@ import type {
   WaypointStatus,
 } from "../types/roadmap";
 import type { UserProfile } from "../types/journey";
+import {
+  applyStoredJourneyProgress,
+  saveJourneyProgress,
+} from "../utils/journeyProgressStorage";
 
 import "./RoadmapPage.css";
 
@@ -396,24 +400,20 @@ function RoadmapPage() {
 
   const journeyResponse = state?.roadmap;
   const userProfile = state?.userProfile;
-  const [roadmap, setRoadmap] = useState<RoadmapData | null>(() =>
+  const getInitialRoadmap = () =>
     journeyResponse
-      ? buildRoadmapData(
-          journeyResponse,
-          state?.userType ?? journeyResponse.userType,
+      ? applyStoredJourneyProgress(
+          buildRoadmapData(
+            journeyResponse,
+            state?.userType ?? journeyResponse.userType,
+          ),
         )
-      : null,
+      : null;
+  const [roadmap, setRoadmap] = useState<RoadmapData | null>(() =>
+    getInitialRoadmap(),
   );
   const [selectedWaypointId, setSelectedWaypointId] = useState<number | null>(
-    () =>
-      getCurrentWaypointId(
-        journeyResponse
-          ? buildRoadmapData(
-              journeyResponse,
-              state?.userType ?? journeyResponse.userType,
-            )
-          : null,
-      ),
+    () => getCurrentWaypointId(getInitialRoadmap()),
   );
   const [hoveredWaypointId, setHoveredWaypointId] = useState<number | null>(
     null,
@@ -473,6 +473,12 @@ function RoadmapPage() {
       setHoveredWaypointId(null);
     }
   };
+
+  useEffect(() => {
+    if (roadmap) {
+      saveJourneyProgress(roadmap);
+    }
+  }, [roadmap]);
 
   /*
    * No mock roadmap:

@@ -264,14 +264,6 @@ function OnboardingPage() {
                 experienceLevelLabels[formData.experienceLevel] ??
                 formData.experienceLevel,
         },
-        {
-            label: "Weekly time",
-            value: formData.weeklyTimeCommitment,
-        },
-        {
-            label: "Current skills",
-            value: formData.existingSkills.join(", "),
-        },
     ];
 
     return (
