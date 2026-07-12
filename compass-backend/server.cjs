@@ -220,6 +220,58 @@ app.get('/roadmap/:id', (req, res) => {
   }
 });
 
+// Ask Compass endpoint:
+// The frontend sends the clicked assistant question plus the current journey state.
+// The backend owns the LLM call so API keys and prompt rules never live in the browser.
+app.post("/assistant/ask", async (req, res) => {
+  try {
+    const { question, journey, userProfile, journeyProgressChart } = req.body;
+
+    // The selected button text becomes the user's Ask Compass question.
+    if (!isNonEmptyString(question)) {
+      return res.status(400).json({
+        error: "Missing required field: question"
+      });
+    }
+
+    // Journey data is required so the assistant answers from the user's roadmap,
+    // not from generic career advice.
+    if (!journey || typeof journey !== "object") {
+      return res.status(400).json({
+        error: "Missing required field: journey"
+      });
+    }
+
+    // Generate one concise, dashboard-sized response grounded in the journey data.
+    const answer = await generateAskCompassResponse({
+      question,
+      journey,
+      userProfile: userProfile && typeof userProfile === "object" ? userProfile : {},
+      journeyProgressChart:
+        journeyProgressChart && typeof journeyProgressChart === "object"
+          ? journeyProgressChart
+          : {}
+    });
+
+    res.status(200).json({ answer });
+  } catch (error) {
+    console.error("Error generating Ask Compass response:", error);
+
+    if (isRateLimitError(error)) {
+      const waitSeconds = getRateLimitWaitSeconds(error);
+
+      return res.status(429).json({
+        error: `Ask Compass is temporarily unavailable. Please try again in ${waitSeconds} seconds`,
+        retryAfterSeconds: waitSeconds
+      });
+    }
+
+    res.status(500).json({
+      error: "Ask Compass could not answer right now. Please try again."
+    });
+  }
+});
+
 // ============================================
 // HELPER FUNCTION: generatePersonalizedRoadmap
 // ============================================
@@ -259,6 +311,65 @@ Additional Notes: ${u.additionalNotes}
   validateRoadmapResponse(roadmap);
   console.log("Roadmap generated:", roadmap);
   return roadmap;
+}
+
+function getAskCompassInstruction(question) {
+  // Each button gets a slightly different instruction so the same assistant
+  // can answer milestone, resume, interview, networking, and resource questions.
+  const instructions = {
+    "Explain my current milestone":
+      "Explain the user's current milestone in simple, encouraging terms. Include what it means, why it matters for their destination, and what completion looks like.",
+    "What should I work on this week?":
+      "Recommend the highest-impact task for this week based on incomplete roadmap tasks. Explain why it matters and give one practical next step.",
+    "Help me improve my resume":
+      "Give resume advice based on the user's destination, current stage, and roadmap progress. Suggest 2-3 resume improvements and one concrete bullet they could draft.",
+    "Prepare me for interviews":
+      "Create a short interview prep recommendation based on the user's current milestone and destination. Include one likely topic, one practice question, and one prep action.",
+    "Show networking ideas":
+      "Suggest networking ideas relevant to the user's journey and Per Scholas background. Include two outreach targets and one short message template.",
+    "Find learning resources":
+      "Recommend learning resource types based on the user's current milestone and incomplete tasks. Do not invent specific links unless provided. Suggest what to search for and how to use it."
+  };
+
+  return instructions[question] ?? "Answer the user's Ask Compass question using the provided journey state.";
+}
+
+async function generateAskCompassResponse({ question, journey, userProfile, journeyProgressChart }) {
+  // This prompt is intentionally strict:
+  // - use the roadmap/progress chart as source of truth
+  // - avoid inventing user progress or resources
+  // - keep responses short enough for the dashboard chat panel
+  const prompt = `
+You are Ask Compass, a warm, concise AI career coach for Per Scholas learners and alumni.
+
+Use the provided journey data as your source of truth. Be encouraging, specific, and practical.
+Do not invent completed progress, tasks, resources, opportunities, or user history. If you make a suggestion, clearly frame it as a suggestion.
+Keep the answer short enough for a dashboard chat panel: 80-140 words.
+You may start with the learner's first name, but do not add a separate greeting such as "Hi", "Hello", or "Hey".
+Do not use markdown tables. Avoid long lists. End with one clear next action.
+
+Selected Ask Compass question:
+${question}
+
+Response goal:
+${getAskCompassInstruction(question)}
+
+User profile:
+${JSON.stringify(userProfile, null, 2)}
+
+Journey:
+${JSON.stringify(journey, null, 2)}
+
+Journey progress chart:
+${JSON.stringify(journeyProgressChart, null, 2)}
+`;
+
+  const interaction = await ai.interactions.create({
+    model: "gemini-3.5-flash",
+    input: prompt,
+  });
+
+  return String(interaction.output_text ?? "").trim();
 }
 
 function parseRoadmapResponse(outputText) {
@@ -454,6 +565,7 @@ async function startServer() {
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`POST /journey/generate - Generate a learning roadmap`);
+    console.log(`POST /assistant/ask - Answer an Ask Compass question`);
     console.log(`GET /roadmap/1234 - Retrieve roadmap 1234`);
   });
 }
