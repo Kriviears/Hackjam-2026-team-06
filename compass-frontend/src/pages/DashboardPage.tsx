@@ -141,6 +141,20 @@ function getAssistantGreeting(firstName: string, destination: string) {
   return `Hi ${firstName}! I've been keeping track of your journey toward becoming a ${destination}.\n\nI can help you decide what to work on next.`;
 }
 
+function getTimeOfDayGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return "Good morning";
+  }
+
+  if (hour < 17) {
+    return "Good afternoon";
+  }
+
+  return "Good evening";
+}
+
 const storageKeys = {
   weekly: "compass-dashboard-weekly-goals",
   savedOpportunities: "compass-dashboard-saved-opportunities",
@@ -397,6 +411,7 @@ export default function DashboardPage() {
       lastName: "",
     };
   const firstName = userProfile?.firstName.trim() || "Fabiola";
+  const timeOfDayGreeting = useMemo(() => getTimeOfDayGreeting(), []);
   const initials = `${userProfile?.firstName?.charAt(0) ?? "C"}${userProfile?.lastName?.charAt(0) ?? ""}`.toUpperCase();
   const [weeklyChecked, setWeeklyChecked] = useState(() => {
     const stored = getStoredArray(storageKeys.weekly, weeklyGoals.length);
@@ -713,10 +728,6 @@ export default function DashboardPage() {
             <BookOpen size={19} />
             Resources
           </NavLink>
-          <a href="#assistant">
-            <Sparkles size={19} />
-            AI Assistant
-          </a>
         </nav>
 
       </aside>
@@ -740,7 +751,7 @@ export default function DashboardPage() {
         <section className="dashboard-hero-grid">
           <DashboardCard className="dashboard-hero">
             <div>
-              <p className="dashboard-kicker">Good evening, {firstName}!</p>
+              <p className="dashboard-kicker">{timeOfDayGreeting}, {firstName}!</p>
               <h1>Your future is taking shape.</h1>
               <span>Destination</span>
               <strong>{syncedJourney.destination}</strong>
@@ -858,7 +869,7 @@ export default function DashboardPage() {
         </section>
 
         <section className="dashboard-main-grid">
-          <DashboardCard className="dashboard-today" title="Today's Compass Activity" icon={<Compass size={22} />}>
+          <DashboardCard className="dashboard-today" title="Today's Mission" icon={<Compass size={22} />}>
             <div className="dashboard-today-layout">
               <div>
                 <h2>{syncedJourney.nextStep}</h2>

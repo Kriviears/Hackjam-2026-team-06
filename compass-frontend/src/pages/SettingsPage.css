@@ -1,0 +1,15 @@
+body:has(.settings-page) {
+  margin: 0;
+  background: #f6fbff;
+}
+
+.settings-page {
+  min-height: 100vh;
+  background: #f6fbff;
+}
+
+.settings-page img {
+  display: block;
+  width: 100%;
+  height: auto;
+}

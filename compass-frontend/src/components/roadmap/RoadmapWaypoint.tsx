@@ -73,13 +73,13 @@ function RoadmapWaypoint({
               In progress
             </small>
           )}
-
-          {waypoint.status === "locked" && (
-            <small className="waypoint-lock">
-              <Lock size={14} />
-            </small>
-          )}
         </span>
+
+        {waypoint.status === "locked" && (
+          <span className="waypoint-lock" aria-label="Locked">
+            <Lock size={14} />
+          </span>
+        )}
       </button>
     </article>
   );

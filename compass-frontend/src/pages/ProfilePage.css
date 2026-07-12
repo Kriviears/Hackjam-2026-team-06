@@ -1,0 +1,33 @@
+body:has(.profile-page) {
+  margin: 0;
+  background: #f6fbff;
+}
+
+.profile-page {
+  min-height: 100vh;
+  background: #f6fbff;
+}
+
+.profile-mockup-frame {
+  position: relative;
+}
+
+.profile-mockup-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.profile-dashboard-hotspot {
+  position: absolute;
+  left: 54.9%;
+  top: 14.6%;
+  width: 16.2%;
+  height: 2.15%;
+  border-radius: 8px;
+}
+
+.profile-dashboard-hotspot:focus-visible {
+  outline: 3px solid rgba(24, 166, 231, 0.72);
+  outline-offset: 3px;
+}

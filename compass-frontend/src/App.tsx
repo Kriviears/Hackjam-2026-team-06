@@ -5,6 +5,8 @@ import OnboardingPage from "./pages/OnboardingPage";
 import GeneratePathwayPage from "./pages/GeneratePathwayPage";
 import DashboardPage from "./pages/DashboardPage";
 import RoadmapPage from "./pages/RoadmapPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 
 
 function App() {
@@ -30,6 +32,16 @@ function App() {
       <Route
         path="/roadmap"
         element={<RoadmapPage />}
+      />
+
+      <Route
+        path="/profile"
+        element={<ProfilePage />}
+      />
+
+      <Route
+        path="/settings"
+        element={<SettingsPage />}
       />
 
     </Routes>

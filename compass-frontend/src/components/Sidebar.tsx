@@ -63,16 +63,6 @@ function Sidebar() {
         </NavLink>
 
         <NavLink
-          to="/assistant"
-          className={({ isActive }) =>
-            isActive ? "sidebar-link active" : "sidebar-link"
-          }
-        >
-          <Bot size={21} />
-          <span>AI Assistant</span>
-        </NavLink>
-
-        <NavLink
           to="/profile"
           className={({ isActive }) =>
             isActive ? "sidebar-link active" : "sidebar-link"

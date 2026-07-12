@@ -72,7 +72,7 @@ body:has(.dashboard-page) {
 }
 
 .dashboard-brand strong {
-  color: var(--compass-blue);
+  color: var(--compass-navy);
   font-size: 1.5rem;
   font-weight: 900;
   letter-spacing: 0;
@@ -292,11 +292,11 @@ body:has(.dashboard-page) {
 }
 
 .dashboard-kicker {
-  margin-bottom: 0.3rem;
-  color: #071f62;
-  font-size: clamp(1.7rem, 3vw, 2.45rem);
+  margin: 0.35rem 0 0.5rem;
+  color: #082b63;
+  font-size: clamp(2rem, 3vw, 3rem);
   font-weight: 900;
-  line-height: 1.05;
+  line-height: 1;
 }
 
 .dashboard-hero h1 {
@@ -316,7 +316,7 @@ body:has(.dashboard-page) {
 
 .dashboard-hero > div:first-child > strong {
   display: block;
-  color: var(--compass-blue);
+  color: var(--compass-navy);
   font-size: 1.25rem;
   font-weight: 900;
 }
@@ -430,15 +430,28 @@ body:has(.dashboard-page) {
 }
 
 .dashboard-pace-card {
+  position: relative;
+  isolation: isolate;
   display: grid;
   gap: 0.56rem;
   width: min(370px, 100%);
   padding: 0.82rem 0.9rem;
-  border: 1px solid rgba(87, 155, 218, 0.12);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 14px 28px rgba(9, 61, 119, 0.05);
-  backdrop-filter: blur(7px);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.dashboard-pace-card::before {
+  content: "";
+  position: absolute;
+  inset: -16px -24px -18px -18px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 34% 42%, rgba(255, 255, 255, 0.42) 0 16%, rgba(255, 255, 255, 0.18) 36%, transparent 68%),
+    radial-gradient(ellipse at 72% 60%, rgba(255, 255, 255, 0.32) 0 14%, rgba(255, 255, 255, 0.14) 38%, transparent 72%);
 }
 
 .dashboard-pace-eyebrow {
@@ -497,9 +510,9 @@ body:has(.dashboard-page) {
 .dashboard-pace-details div {
   min-height: 58px;
   padding: 0.48rem 0.52rem;
-  border: 1px solid rgba(7, 138, 164, 0.1);
+  border: 1px solid rgba(7, 138, 164, 0.08);
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .dashboard-pace-details span {
@@ -1568,8 +1581,8 @@ body:has(.dashboard-page) {
   }
 
   .dashboard-kicker {
-    margin-bottom: 0.35rem;
-    font-size: 2.1rem;
+    margin: 0.35rem 0 0.5rem;
+    font-size: clamp(2rem, 3vw, 3rem);
   }
 
   .dashboard-hero h1 {

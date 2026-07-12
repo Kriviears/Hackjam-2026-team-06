@@ -1,13 +1,8 @@
 import {
-  BarChart3,
-  Bell,
-  BookOpen,
   Clock3,
   LayoutDashboard,
   Map,
   Settings,
-  Share2,
-  Sparkles,
   UserRound,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -57,22 +52,6 @@ function RoadmapSidebar({ roadmap, userProfile }: RoadmapSidebarProps) {
         </div>
       </div>
 
-      <div className="roadmap-sidebar-actions" aria-label="Roadmap actions">
-        <button type="button" className="roadmap-sidebar-action-button">
-          <Share2 size={17} />
-          <span>Share</span>
-        </button>
-
-        <button
-          type="button"
-          className="roadmap-sidebar-action-button"
-          aria-label="Notifications"
-        >
-          <Bell size={18} />
-          <span>Alerts</span>
-        </button>
-      </div>
-
       <nav className="roadmap-navigation">
         <NavLink
           to="/dashboard"
@@ -85,21 +64,6 @@ function RoadmapSidebar({ roadmap, userProfile }: RoadmapSidebarProps) {
         <a href="/roadmap" className="active">
           <Map size={20} />
           My Roadmap
-        </a>
-
-        <a href="/skills">
-          <BarChart3 size={20} />
-          Skills &amp; Progress
-        </a>
-
-        <a href="/resources">
-          <BookOpen size={20} />
-          Resources
-        </a>
-
-        <a href="/assistant">
-          <Sparkles size={20} />
-          AI Assistant
         </a>
 
         <a href="/profile">
