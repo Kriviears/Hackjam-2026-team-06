@@ -90,6 +90,13 @@ A Google AI API key is required to enable AI-powered roadmap generation.
 
 Create a `.env` file using the provided `.env.example` template and add your API key before starting the application.
 
+- # Open-Source Licenses
+- React — MIT License
+- Express.js — MIT License
+- Node.js — MIT License
+- Vite — MIT License
+- Lucide React — ISC License
+
 # Acknowledgments
 
 The Compass team would like to acknowledge the following tools and services that supported the development of this project:
@@ -99,11 +106,4 @@ The Compass team would like to acknowledge the following tools and services that
 - Google AI Studio (Gemini API) for AI-powered roadmap generation.
 - Lucide React for open-source icons.
 
-- # Open-Source Licenses
-- React — MIT License
-- Express.js — MIT License
-- Node.js — MIT License
-- Vite — MIT License
-- Lucide React — ISC License
-
-- Special thanks to our HackJam mentor, Josh Geter, for providing guidance, thoughtful feedback, and encouragement during development of Compass.
+- Very special thanks to our HackJam mentor, Josh Geter, for providing guidance, thoughtful feedback, and encouragement during development of Compass.
