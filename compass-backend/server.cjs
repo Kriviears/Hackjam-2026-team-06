@@ -69,7 +69,34 @@ const ResponseSchema = {
         }
       ]
     }
-  ]
+  ],
+  resources: [
+    {
+      title: String,             // e.g., "MDN JavaScript Guide"
+      type: String,              // e.g., "documentation", "course", "video"
+      url: String,               // e.g., "https://developer.mozilla.org/"
+      reason: String             // e.g., why this resource fits the learner now
+    }
+  ],
+  futureYou: {
+    title: String,               // e.g., "Front-End Software Engineer"
+    summary: String,             // e.g., projected career direction
+    roles: [String],             // e.g., adjacent role titles to explore
+    companies: [
+      {
+        name: String,            // e.g., "Accenture"
+        reason: String           // e.g., why this company is worth researching
+      }
+    ],
+    opportunityTypes: [
+      {
+        title: String,           // e.g., "Portfolio project"
+        reason: String           // e.g., why this experience builds readiness
+      }
+    ],
+    networkingActions: [String], // e.g., concrete outreach actions
+    nextOpportunity: String      // e.g., the most immediate career-building step
+  }
 };
 
 const VALID_WAYPOINT_STATUSES = new Set([
@@ -78,6 +105,15 @@ const VALID_WAYPOINT_STATUSES = new Set([
   "locked",
   "not-started",
   "pending"
+]);
+
+const VALID_RESOURCE_TYPES = new Set([
+  "book",
+  "video",
+  "course",
+  "documentation",
+  "worksheet",
+  "website"
 ]);
 
 class RoadmapValidationError extends Error {
@@ -309,7 +345,6 @@ Additional Notes: ${u.additionalNotes}
   // Translate the text into a dictionary.
   const roadmap = parseRoadmapResponse(interaction.output_text);
   validateRoadmapResponse(roadmap);
-  console.log("Roadmap generated:", roadmap);
   return roadmap;
 }
 
@@ -462,6 +497,119 @@ function validateRoadmapResponse(roadmap) {
         }
       });
     });
+  }
+
+  if (!Array.isArray(roadmap.resources)) {
+    errors.push("resources must be an array");
+  } else {
+    if (roadmap.resources.length < 3 || roadmap.resources.length > 5) {
+      errors.push("resources must include between 3 and 5 items");
+    }
+
+    roadmap.resources.forEach((resource, resourceIndex) => {
+      const resourceLabel = `resources[${resourceIndex}]`;
+
+      if (!resource || typeof resource !== "object" || Array.isArray(resource)) {
+        errors.push(`${resourceLabel} must be an object`);
+        return;
+      }
+
+      ["title", "reason"].forEach((fieldName) => {
+        if (!isNonEmptyString(resource[fieldName])) {
+          errors.push(`${resourceLabel}.${fieldName} must be a non-empty string`);
+        }
+      });
+
+      if (!VALID_RESOURCE_TYPES.has(resource.type)) {
+        errors.push(
+          `${resourceLabel}.type must be one of ${Array.from(VALID_RESOURCE_TYPES).join(", ")}`
+        );
+      }
+
+      if (
+        resource.url !== undefined &&
+        resource.url !== null &&
+        typeof resource.url !== "string"
+      ) {
+        errors.push(`${resourceLabel}.url must be a string when provided`);
+      }
+    });
+  }
+
+  if (!roadmap.futureYou || typeof roadmap.futureYou !== "object" || Array.isArray(roadmap.futureYou)) {
+    errors.push("futureYou must be an object");
+  } else {
+    ["title", "summary", "nextOpportunity"].forEach((fieldName) => {
+      if (!isNonEmptyString(roadmap.futureYou[fieldName])) {
+        errors.push(`futureYou.${fieldName} must be a non-empty string`);
+      }
+    });
+
+    if (!Array.isArray(roadmap.futureYou.roles)) {
+      errors.push("futureYou.roles must be an array");
+    } else if (roadmap.futureYou.roles.length !== 3) {
+      errors.push("futureYou.roles must include exactly 3 items");
+    } else {
+      roadmap.futureYou.roles.forEach((role, roleIndex) => {
+        if (!isNonEmptyString(role)) {
+          errors.push(`futureYou.roles[${roleIndex}] must be a non-empty string`);
+        }
+      });
+    }
+
+    if (!Array.isArray(roadmap.futureYou.companies)) {
+      errors.push("futureYou.companies must be an array");
+    } else if (roadmap.futureYou.companies.length !== 3) {
+      errors.push("futureYou.companies must include exactly 3 items");
+    } else {
+      roadmap.futureYou.companies.forEach((company, companyIndex) => {
+        const companyLabel = `futureYou.companies[${companyIndex}]`;
+
+        if (!company || typeof company !== "object" || Array.isArray(company)) {
+          errors.push(`${companyLabel} must be an object`);
+          return;
+        }
+
+        ["name", "reason"].forEach((fieldName) => {
+          if (!isNonEmptyString(company[fieldName])) {
+            errors.push(`${companyLabel}.${fieldName} must be a non-empty string`);
+          }
+        });
+      });
+    }
+
+    if (!Array.isArray(roadmap.futureYou.opportunityTypes)) {
+      errors.push("futureYou.opportunityTypes must be an array");
+    } else if (roadmap.futureYou.opportunityTypes.length !== 3) {
+      errors.push("futureYou.opportunityTypes must include exactly 3 items");
+    } else {
+      roadmap.futureYou.opportunityTypes.forEach((opportunity, opportunityIndex) => {
+        const opportunityLabel = `futureYou.opportunityTypes[${opportunityIndex}]`;
+
+        if (!opportunity || typeof opportunity !== "object" || Array.isArray(opportunity)) {
+          errors.push(`${opportunityLabel} must be an object`);
+          return;
+        }
+
+        ["title", "reason"].forEach((fieldName) => {
+          if (!isNonEmptyString(opportunity[fieldName])) {
+            errors.push(`${opportunityLabel}.${fieldName} must be a non-empty string`);
+          }
+        });
+      });
+    }
+
+    if (!Array.isArray(roadmap.futureYou.networkingActions)) {
+      errors.push("futureYou.networkingActions must be an array");
+    } else if (roadmap.futureYou.networkingActions.length !== 3) {
+      errors.push("futureYou.networkingActions must include exactly 3 items");
+    } else {
+      roadmap.futureYou.networkingActions.forEach((action, actionIndex) => {
+        if (!isNonEmptyString(action)) {
+          errors.push(`futureYou.networkingActions[${actionIndex}] must be a non-empty string`);
+        }
+      });
+    }
   }
 
   if (errors.length > 0) {
