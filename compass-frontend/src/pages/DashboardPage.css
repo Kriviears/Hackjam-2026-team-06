@@ -434,11 +434,11 @@ body:has(.dashboard-page) {
   gap: 0.56rem;
   width: min(370px, 100%);
   padding: 0.82rem 0.9rem;
-  border: 1px solid rgba(87, 155, 218, 0.18);
+  border: 1px solid rgba(87, 155, 218, 0.12);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.34);
-  box-shadow: 0 14px 28px rgba(9, 61, 119, 0.08);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 28px rgba(9, 61, 119, 0.05);
+  backdrop-filter: blur(7px);
 }
 
 .dashboard-pace-eyebrow {
@@ -497,9 +497,9 @@ body:has(.dashboard-page) {
 .dashboard-pace-details div {
   min-height: 58px;
   padding: 0.48rem 0.52rem;
-  border: 1px solid rgba(7, 138, 164, 0.16);
+  border: 1px solid rgba(7, 138, 164, 0.1);
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .dashboard-pace-details span {
