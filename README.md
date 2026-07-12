@@ -1,230 +1,109 @@
-# Compass can create a plan for you to learn more job skills
+# 🚀 Hack Jam 2026 - Team 06: Compass Crew
 
-Compass can prepare you to get admitted into Per Scholas, a nonprofit organization that provides courses in technology, for free or at low cost. "Per Scholas" is Latin for "through schools."
+# 🚀 Feature Overview
 
-# How do I run Compass?
+## 🧭 AI-Powered Career Roadmaps
+Generates personalized career roadmaps based on each learner’s background, goals, experience, timeline, and weekly availability.
 
-- Download the Compass repository.
-- Install node.js on your operating system.
-- Open a command-line window. (The directions below show directories in the convention of UNIX or GNU/Linux.)
-- Go inside the Compass repository.
-- Go inside ```compass-backend/```. Type ```npm install```.
-- Go inside ```compass-frontend/```. Type ```npm install```.
-- Go inside ```compass-backend/```. Type ```node server.cjs```.
-- Go inside ```compass-frontend/```. Type ```npm run dev```.
-- In a browser, go to ```http://localhost:5173/```,
+## 📍 Interactive Journey Visualization
+Displays the learner’s career path as an immersive roadmap with clear milestones, current priorities, and upcoming steps.
 
-# 🚀 Hack Jam 2026 - Team 06
+## 📚 Personalized Resource Recommendations
+Returns relevant books, videos, worksheets, courses, and other learning resources alongside the generated roadmap to support the learner’s specific goals.
 
-Welcome to your team's official Hack Jam 2026 project repository. This is where your team will plan, build, document, and deliver your **Tech Futures: Illuminate Your Path** application prototype.
+## 📈 Timeline and Pace Feedback
+Evaluates the learner’s target timeline and weekly learning commitment, then provides personalized feedback on whether the plan appears realistic and sustainable.
 
----
+## 📊 Personalized Dashboard
+Provides a centralized view of the learner’s journey, current milestone, progress, recommendations, and next actions.
 
-# Business Case
+## 🤖 Ask Compass AI Assistant
+Allows learners to ask questions about their roadmap and receive contextual guidance based on their current journey data.
 
-In today's rapidly evolving digital landscape, the future of a career in tech can feel both limitless and uncertain. Per Scholas alumni, current learners, and aspiring candidates may begin from different starting points, but they share a common challenge: clearly seeing the path from where they are today to where they want to be tomorrow.
+## 🎨 Modern User Experience
+Uses a responsive, futuristic interface designed to make career planning engaging, visual, and easy to navigate.
 
-Many learners and alumni bring ambition, talent, and technical skills, but the journey forward is not always visible. Some are navigating the transition from training to career. Others are taking their first step into tech or trying to understand what is possible beyond their current reality. The opportunity exists, but the roadmap is often missing.
+## 🏗️ Scalable Architecture
+Built with a modular React and Node.js architecture that can support future features such as employer matching, mentor connections, saved profiles, and dynamic roadmap updates.
 
-Without clear direction or meaningful connections to industry, individuals can struggle to transform potential into progress. The challenge is no longer only about gaining skills. It is about envisioning the future, mapping the journey, and confidently moving toward it.
-
----
-
-# Solution Objectives
-
-Your mission is to **design and develop an application that acts as a digital gateway to the future**, guiding Per Scholians from where they are today to where they aspire to be.
-
-An ideal solution should incorporate the following elements in a creative, immersive, and futuristic way:
-
-- ✅ **AI-Powered Career Pathing**
-  - Generate dynamic, personalized roadmaps that chart a user's journey from their current state to their desired tech career
-  - Adapt pathways in real time based on user progress, skills, and goals
-- ✅ **Future Visualization Engine**
-  - Use AI to create compelling visual representations of a user's future career *Optional*
-  - Bring the journey to life through interactive maps, simulations, dashboards, or futuristic UI experiences
-- ✅ **Employer Possibilities Portal**
-  - Show tech companies, mentors, roles, and opportunities aligned with a user's projected career path
-- ✅ **Immersive User Experience**
-  - Design an intuitive, engaging interface that users will love
-  - Provide user profiles and methods to track progress, milestones, and goals
-- ✅ **Scalable Innovation**
-  - Build the solution so it can evolve over time, supporting future users, new technologies, and expanded capabilities
-
----
-
-# Judging Criteria
-
-Projects will be judged based on the following:
-
-- **Idea** - Uniqueness of innovation, creativity in execution, demonstrated value
-- **Design** - Ease of use and design appeal
-- **Implementation** - Functionality and code quality; excellence and technique in execution
-- **Presentation** - Demonstrated team collaboration; excellence in storytelling and pitching; presence and engagement
-
----
-
-# Required AI Integration
-
-Each team must use or implement AI in at least one area of the project. AI should enhance the Tech Futures experience and should not replace the core application functionality.
-
-Possible AI features include:
-
-- Personalized career pathway generation
-- Skill-gap analysis and adaptive roadmap updates
-- Future career visualization, simulations, or interactive journey maps
-- AI chatbots or virtual assistants for onboarding, career guidance, mentorship support, or Q&A
-- Personalized recommendations for learning resources, mentors, companies, events, or opportunities
-- Profile matching between users, mentors, employers, and career paths
-- Engagement analytics and progress insights
-- AI-powered achievement tracking and milestone recommendations
-- Natural language search for career resources, roles, or alumni opportunities
-
-> ⚠️ AI may assist with development, but teams must write the majority of their own code. Fully AI-generated project code is not allowed.
-
----
-
-# Deliverables
-
-Teams must submit a final project by the designated Hack Jam deadline. Final submissions should include:
-
-- [ ] A working prototype or demo
-- [ ] Any visual aids/Presentation in addition to the codebase
-- [ ] A README updated with the project description, setup instructions, and feature overview
-- [ ] A clear explanation of how the solution supports Per Scholas learners, alumni, and aspiring candidates in navigating tech career futures
-- [ ] A list of external resources, open-source libraries, APIs, and assets used
-
-Recommended documentation:
-
-- [ ] `/docs/overview.md` - Technical overview of your solution
-- [ ] `/docs/roadmap.md` - Vision for future development and deployment
-- [ ] `/docs/demo.mp4` - Optional video walkthrough
-- [ ] `/docs/Presentation.ppt` - Powerpoint presentation slides
----
-
-## 🛠 Approved Tech Stack
-
-Participants must use technologies from the approved Hack Jam 2026 whitelist unless they receive explicit approval to use something else.
-
-### Frontend
-
-- React.js - preferred frontend framework
-- Next.js - for server-side rendering or static site generation
-- Vue.js - allowed if justified
-- Tailwind CSS - recommended styling framework
-- Bootstrap
-- Material-UI / MUI
-- Chakra UI
-- Redux / Redux Toolkit
-- React Context API
-- Framer Motion
-- ShadCN/UI
-- D3.js or Chart.js
-
-### Backend
-
-- Node.js with Express.js - preferred JavaScript backend
-- Flask - lightweight Python backend option
-- Django - Python full-stack framework option
-- Spring Boot - Java enterprise-grade backend option
-- GraphQL - optional API query layer
-
-### Databases
-
-- MongoDB / MongoDB Atlas Free Tier - preferred for MERN and NoSQL solutions
-- PostgreSQL Free Tier - preferred for relational data
-- Supabase - PostgreSQL-based Firebase alternative
-- Redis - optional for caching or real-time updates
-
-### AI Tools and Techniques
-
-- LLMs, including Llama 3, Mistral 7B / Mixtral, Google Gemma, and Claude models
-- AI coding assistants, including GitHub Copilot, Codeium, and Codex
-- AI studios and IDEs, including Google AI Studio, Cursor IDE, and Lovable
-- Natural language processing techniques
-- Recommendation systems
-- Profile matching and engagement analytics
-- Natural language search
-
----
-
-## 🚫 Blacklisted Technologies
-
-The following are not allowed:
-
-- Low-code or no-code platforms such as Wix, Squarespace, or Bubble
-- Proprietary, non-free databases or paid database plans
-- Ruby on Rails, .NET Core, or outdated frameworks
-- Fully AI-generated project code
-- Unauthorized third-party APIs
-
----
-
-## 📣 Communication
-
-Official Hack Jam communication will occur through Discord. All participants must join the official event server and use designated channels for:
-
-- Team discussions
-- Support and help desk questions
-- Event updates
-
-All communication must remain professional, respectful, inclusive, and hackathon-focused.
-
-Participants should not share private information, server screenshots, logs, or private conversations outside the Hack Jam community without permission.
-
----
-
-## 🔐 Security, Privacy, and Release
-
-- Participant data must be handled responsibly and in accordance with privacy laws.
-- Teams must not include sensitive data or proprietary company information in their projects.
-- By submitting a project, teams agree that Hack Jam organizers may showcase the project for promotional and educational purposes.
-
-
----
-
-## 📅 Key Dates
-
-- **June 11, 2026** - Official Event Policies & Procedures effective date
-- **July 6, 2026** - Professional Development Training completion confirmation due
-- **July 8-13, 2026** - Discord Acceptable Use Policy event period
-- **Kickoff Day** - Team formation announced on Discord no later than kickoff day
-- **Final project deadline** - Submit by the designated Hack Jam deadline announced by organizers
-
-> Meeting invitations and final event deadlines will be provided by Hack Jam organizers.
-
----
-
-## 🧭 Clone This Repo
-
-```bash
-git clone https://github.com/your-org/hackjam-team-XX.git
-cd hackjam-team-XX
-```
-
----
 
 ## 🚀 Getting Started
 
-Add your team's setup instructions here as your project develops.
+# Installation and Setup
+## Prerequisites
+
+- Install Node.js (version 18 or later recommended).
+- Clone or download the Compass repository.
+
+## Install Dependencies
+
+Open a terminal and navigate to the project directory.
+
+### Backend
 
 ```bash
-# Example
+cd compass-backend
 npm install
+```
+
+### Frontend
+
+```bash
+cd ../compass-frontend
+npm install
+```
+
+## Run the Application
+
+Open **two terminal windows**.
+
+### Terminal 1 – Start the Backend
+
+```bash
+cd compass-backend
+node server.cjs
+```
+
+> If the project uses nodemon, you can alternatively run:
+>
+> ```bash
+> npm run dev
+> ```
+
+### Terminal 2 – Start the Frontend
+
+```bash
+cd compass-frontend
 npm run dev
 ```
 
----
+## Launch the Application
 
-## 📌 Project Description
+Open your browser and navigate to:
 
-Add a brief description of your team's Tech Futures solution here.
+```
+http://localhost:5173
+```
+## Environment Variables
 
-Suggested format:
+A Google AI API key is required to enable AI-powered roadmap generation.
 
-> Our project is a futuristic career pathing application that helps Per Scholas alumni, learners, and aspiring candidates visualize their tech career future, generate personalized AI-powered roadmaps, track milestones, and discover aligned employers, mentors, and opportunities.
+Create a `.env` file using the provided `.env.example` template and add your API key before starting the application.
 
----
+# Acknowledgments
 
-## 📄 License and Resource Credits
+The Compass team would like to acknowledge the following tools and services that supported the development of this project:
 
-Add licensing information and credits for any open-source tools, APIs, design assets, datasets, or AI tools used in the project.
+- OpenAI ChatGPT for design consultation, architecture discussions, documentation, and development guidance.
+- OpenAI Codex for implementation assistance and code generation.
+- Google AI Studio (Gemini API) for AI-powered roadmap generation.
+- Lucide React for open-source icons.
+
+- # Open-Source Licenses
+- React — MIT License
+- Express.js — MIT License
+- Node.js — MIT License
+- Vite — MIT License
+- Lucide React — ISC License
+
+- Special thanks to our HackJam mentor, Josh Geter, for providing guidance, thoughtful feedback, and encouragement during development of Compass.
