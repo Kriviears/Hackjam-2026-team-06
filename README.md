@@ -70,6 +70,8 @@ node server.cjs
 > npm run dev
 > ```
 
+nodemon ("node monitor") is a program for Node.js that can help you save time: if you change files on the server, nodmeon will automatically restart the server.
+
 ### Terminal 2 – Start the Frontend
 
 ```bash
@@ -88,9 +90,11 @@ http://localhost:5173
 
 A Google AI API key is required to enable AI-powered roadmap generation.
 
+You can get an API key from Google for zero cost. You can also use it for zero cost, if your usage is low.
+
 Create a `.env` file using the provided `.env.example` template and add your API key before starting the application.
 
-- # Open-Source Licenses
+# Open-Source Licenses
 - React — MIT License
 - Express.js — MIT License
 - Node.js — MIT License
@@ -105,5 +109,11 @@ The Compass team would like to acknowledge the following tools and services that
 - OpenAI Codex for implementation assistance and code generation.
 - Google AI Studio (Gemini API) for AI-powered roadmap generation.
 - Lucide React for open-source icons.
+- Outlier Playground for coding help from:
+  - Anthropic Claude Haiku 4.5.
+  - xAI Grok (one or more versions).
+  - Zero or more other AI models.
+- DuckDuckGo Search Assist for information.
+- OpenAI ChatGPT 5 nano, which was used in the past by Compass to generate roadmaps.
 
-- Very special thanks to our HackJam mentor, Josh Geter, for providing guidance, thoughtful feedback, and encouragement during development of Compass.
+- Very special thanks to our Hack Jam mentor, Josh Geter, for providing guidance, thoughtful feedback, and encouragement during development of Compass.
