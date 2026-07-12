@@ -41,6 +41,33 @@ export interface Waypoint {
   tasks: WaypointTask[];
 }
 
+export interface LearningResource {
+  title: string;
+  type: "book" | "video" | "course" | "documentation" | "worksheet" | "website";
+  url?: string;
+  reason: string;
+}
+
+export interface FutureYouCompany {
+  name: string;
+  reason: string;
+}
+
+export interface FutureYouOpportunity {
+  title: string;
+  reason: string;
+}
+
+export interface FutureYou {
+  title: string;
+  summary: string;
+  roles: string[];
+  companies: FutureYouCompany[];
+  opportunityTypes: FutureYouOpportunity[];
+  networkingActions: string[];
+  nextOpportunity: string;
+}
+
 // Response interface for the journey, including progress and waypoints
 export interface JourneyResponse {
   id: string;
@@ -50,5 +77,8 @@ export interface JourneyResponse {
   nextStep: string;
   userType?: JourneyRequest["userType"];
   weeklyCommitment?: string;
+  targetTimeline?: string;
   waypoints: Waypoint[];
+  resources: LearningResource[];
+  futureYou?: FutureYou;
 }

@@ -17,6 +17,33 @@ export interface JourneyWaypoint {
   tasks: WaypointTask[];
 }
 
+export interface LearningResource {
+  title: string;
+  type: "book" | "video" | "course" | "documentation" | "worksheet" | "website";
+  url?: string;
+  reason: string;
+}
+
+export interface FutureYouCompany {
+  name: string;
+  reason: string;
+}
+
+export interface FutureYouOpportunity {
+  title: string;
+  reason: string;
+}
+
+export interface FutureYou {
+  title: string;
+  summary: string;
+  roles: string[];
+  companies: FutureYouCompany[];
+  opportunityTypes: FutureYouOpportunity[];
+  networkingActions: string[];
+  nextOpportunity: string;
+}
+
 export interface JourneyResponse {
   destination: string;
   currentStage: string;
@@ -30,7 +57,10 @@ export interface JourneyResponse {
     | "alumna"
     | "";
   weeklyCommitment?: string;
+  targetTimeline?: string;
   waypoints: JourneyWaypoint[];
+  resources: LearningResource[];
+  futureYou?: FutureYou;
 }
 
 export interface WaypointPosition {

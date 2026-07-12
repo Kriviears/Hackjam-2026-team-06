@@ -8,13 +8,15 @@ import {
   CircleUserRound,
   Home,
   LoaderCircle,
-  Map,
+  Map as MapIcon,
   Route,
   Sparkles,
   Target,
 } from "lucide-react";
 
 import type {
+  FutureYou,
+  LearningResource,
   JourneyRequest,
   JourneyResponse,
   Waypoint,
@@ -60,7 +62,7 @@ const generationSteps: GenerationStep[] = [
     id: 4,
     title: "Mapping Learning Pathway",
     description: "Creating your step-by-step learning journey...",
-    icon: Map,
+    icon: MapIcon,
   },
   {
     id: 5,
@@ -78,6 +80,7 @@ const generationSteps: GenerationStep[] = [
 
 const JOURNEY_GENERATE_ENDPOINT = "http://localhost:8000/journey/generate";
 const MIN_GENERATION_TIME_MS = 7000;
+const roadmapRequestCache = new Map<string, Promise<JourneyResponse>>();
 
 type RawWaypoint = {
   title?: unknown;
@@ -92,16 +95,74 @@ type RawWaypointTask = {
   completed?: unknown;
 };
 
-type RawJourneyResponse = Partial<Omit<JourneyResponse, "waypoints">> & {
+type RawLearningResource = {
+  title?: unknown;
+  type?: unknown;
+  url?: unknown;
+  reason?: unknown;
+};
+
+type RawFutureYouCompany = {
+  name?: unknown;
+  reason?: unknown;
+};
+
+type RawFutureYouOpportunity = {
+  title?: unknown;
+  reason?: unknown;
+};
+
+type RawFutureYou = {
+  title?: unknown;
+  summary?: unknown;
+  roles?: unknown;
+  companies?: unknown;
+  opportunityTypes?: unknown;
+  networkingActions?: unknown;
+  nextOpportunity?: unknown;
+};
+
+type RawJourneyResponse = Partial<Omit<JourneyResponse, "waypoints" | "resources">> & {
   waypoints?: unknown;
+  resources?: unknown;
+  futureYou?: unknown;
 };
 
 type ApiErrorResponse = {
   error?: unknown;
 };
 
+function getRoadmapRequestCacheKey(formData: JourneyRequest) {
+  return JSON.stringify({
+    userType: formData.userType,
+    careerGoal: formData.careerGoal,
+    experienceLevel: formData.experienceLevel,
+    weeklyTimeCommitment: formData.weeklyTimeCommitment,
+    existingSkills: formData.existingSkills,
+    learningInterests: formData.learningInterests,
+    targetTimeline: formData.targetTimeline,
+    biggestChallenge: formData.biggestChallenge,
+    additionalNotes: formData.additionalNotes,
+  });
+}
+
 function asText(value: unknown, fallback: string) {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function normalizeResourceType(type: unknown): LearningResource["type"] {
+  if (
+    type === "book" ||
+    type === "video" ||
+    type === "course" ||
+    type === "documentation" ||
+    type === "worksheet" ||
+    type === "website"
+  ) {
+    return type;
+  }
+
+  return "website";
 }
 
 function normalizeWaypointStatus(
@@ -230,6 +291,162 @@ function normalizeWaypoints(rawWaypoints: unknown, formData: JourneyRequest) {
   });
 }
 
+function createFallbackResources(formData: JourneyRequest): LearningResource[] {
+  const careerGoal = formData.careerGoal || "your target career";
+
+  return [
+    {
+      title: "Per Scholas Course Catalog",
+      type: "website",
+      url: "https://perscholas.org/courses/",
+      reason: `Use this to compare current Per Scholas training options that align with ${careerGoal}.`,
+    },
+    {
+      title: "Per Scholas Admissions",
+      type: "website",
+      url: "https://perscholas.org/apply/",
+      reason:
+        "This supports the immediate next step of checking eligibility, requirements, and application details.",
+    },
+    {
+      title: "MDN Learn Web Development",
+      type: "documentation",
+      url: "https://developer.mozilla.org/en-US/docs/Learn",
+      reason:
+        "This provides beginner-friendly technical practice for learners building core web and software foundations.",
+    },
+  ];
+}
+
+function normalizeResources(
+  rawResources: unknown,
+  formData: JourneyRequest
+): LearningResource[] {
+  if (!Array.isArray(rawResources) || rawResources.length === 0) {
+    return createFallbackResources(formData);
+  }
+
+  const normalizedResources = rawResources
+    .slice(0, 5)
+    .map((rawResource) => {
+      const resource =
+        rawResource && typeof rawResource === "object"
+          ? (rawResource as RawLearningResource)
+          : {};
+      const title = asText(resource.title, "");
+      const reason = asText(resource.reason, "");
+
+      if (!title || !reason) {
+        return null;
+      }
+
+      const normalizedResource: LearningResource = {
+        title,
+        type: normalizeResourceType(resource.type),
+        reason,
+      };
+
+      if (typeof resource.url === "string" && resource.url.trim()) {
+        normalizedResource.url = resource.url.trim();
+      }
+
+      return normalizedResource;
+    })
+    .filter((resource): resource is LearningResource => Boolean(resource));
+
+  if (normalizedResources.length >= 3) {
+    return normalizedResources;
+  }
+
+  return [
+    ...normalizedResources,
+    ...createFallbackResources(formData).slice(normalizedResources.length, 3),
+  ];
+}
+
+function normalizeStringList(rawList: unknown, limit: number) {
+  if (!Array.isArray(rawList)) {
+    return [];
+  }
+
+  return rawList
+    .map((item) => asText(item, ""))
+    .filter(Boolean)
+    .slice(0, limit);
+}
+
+function normalizeFutureYou(rawFutureYou: unknown): FutureYou | undefined {
+  if (!rawFutureYou || typeof rawFutureYou !== "object" || Array.isArray(rawFutureYou)) {
+    return undefined;
+  }
+
+  const futureYou = rawFutureYou as RawFutureYou;
+  const title = asText(futureYou.title, "");
+  const summary = asText(futureYou.summary, "");
+  const nextOpportunity = asText(futureYou.nextOpportunity, "");
+
+  if (!title || !summary || !nextOpportunity) {
+    return undefined;
+  }
+
+  const roles = normalizeStringList(futureYou.roles, 3);
+  const networkingActions = normalizeStringList(futureYou.networkingActions, 3);
+  const companies = Array.isArray(futureYou.companies)
+    ? futureYou.companies
+        .map((rawCompany) => {
+          const company =
+            rawCompany && typeof rawCompany === "object"
+              ? (rawCompany as RawFutureYouCompany)
+              : {};
+          const name = asText(company.name, "");
+          const reason = asText(company.reason, "");
+
+          return name && reason ? { name, reason } : null;
+        })
+        .filter((company): company is FutureYou["companies"][number] => Boolean(company))
+        .slice(0, 3)
+    : [];
+  const opportunityTypes = Array.isArray(futureYou.opportunityTypes)
+    ? futureYou.opportunityTypes
+        .map((rawOpportunity) => {
+          const opportunity =
+            rawOpportunity && typeof rawOpportunity === "object"
+              ? (rawOpportunity as RawFutureYouOpportunity)
+              : {};
+          const opportunityTitle = asText(opportunity.title, "");
+          const reason = asText(opportunity.reason, "");
+
+          return opportunityTitle && reason
+            ? { title: opportunityTitle, reason }
+            : null;
+        })
+        .filter(
+          (opportunity): opportunity is FutureYou["opportunityTypes"][number] =>
+            Boolean(opportunity),
+        )
+        .slice(0, 3)
+    : [];
+
+  if (
+    roles.length === 0 ||
+    companies.length === 0 ||
+    opportunityTypes.length === 0 ||
+    networkingActions.length === 0
+  ) {
+    return undefined;
+  }
+
+  return {
+    title,
+    summary,
+    roles,
+    companies,
+    opportunityTypes,
+    networkingActions,
+    nextOpportunity,
+  };
+}
+
 function calculateJourneyProgress(waypoints: Waypoint[]) {
   const taskTotals = waypoints.reduce(
     (totals, waypoint) => {
@@ -252,6 +469,8 @@ function normalizeGeneratedRoadmap(
   formData: JourneyRequest
 ): JourneyResponse {
   const waypoints = normalizeWaypoints(rawRoadmap.waypoints, formData);
+  const resources = normalizeResources(rawRoadmap.resources, formData);
+  const futureYou = normalizeFutureYou(rawRoadmap.futureYou);
   const currentWaypoint =
     waypoints.find((waypoint) => waypoint.status === "in-progress") ??
     waypoints.find((waypoint) => waypoint.status !== "completed") ??
@@ -265,11 +484,35 @@ function normalizeGeneratedRoadmap(
     nextStep: asText(rawRoadmap.nextStep, currentWaypoint.title),
     userType: formData.userType,
     weeklyCommitment: formData.weeklyTimeCommitment,
+    targetTimeline: formData.targetTimeline,
     waypoints,
+    resources,
+    futureYou,
   };
 }
 
 async function requestRoadmap(
+  formData: JourneyRequest
+): Promise<JourneyResponse> {
+  const cacheKey = getRoadmapRequestCacheKey(formData);
+  const cachedRequest = roadmapRequestCache.get(cacheKey);
+
+  if (cachedRequest) {
+    return cachedRequest;
+  }
+
+  const requestPromise = fetchRoadmap(formData);
+  roadmapRequestCache.set(cacheKey, requestPromise);
+
+  try {
+    return await requestPromise;
+  } catch (error) {
+    roadmapRequestCache.delete(cacheKey);
+    throw error;
+  }
+}
+
+async function fetchRoadmap(
   formData: JourneyRequest
 ): Promise<JourneyResponse> {
   const response = await fetch(JOURNEY_GENERATE_ENDPOINT, {
@@ -623,15 +866,6 @@ export default function GeneratePathwayPage() {
 
         <section className="generate-lower-grid">
           <div className="generate-lower-left">
-            <div className="generate-road-visual" aria-hidden="true">
-              {[0, 1, 2, 3].map((point) => (
-                <span
-                  key={point}
-                  className={`road-pin road-pin-${point + 1}`}
-                />
-              ))}
-            </div>
-
             <footer className="generate-footer">
               <Sparkles size={17} />
 
@@ -717,6 +951,15 @@ export default function GeneratePathwayPage() {
             </div>
           </section>
         </section>
+
+        <div className="generate-road-visual" aria-hidden="true">
+          {[0, 1, 2, 3].map((point) => (
+            <span
+              key={point}
+              className={`road-pin road-pin-${point + 1}`}
+            />
+          ))}
+        </div>
       </main>
     </div>
   );

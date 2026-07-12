@@ -1305,13 +1305,24 @@ body:has(.roadmap-page) {
   justify-content: flex-start;
 }
 
-.panel-heading-row button {
+.panel-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.panel-heading-row button,
+.panel-heading-row > span,
+.panel-heading-actions > span {
   border: 0;
   background: transparent;
   color: #075eb7;
   font: inherit;
   font-size: 0.72rem;
   font-weight: 750;
+}
+
+.panel-heading-row button {
   cursor: pointer;
 }
 
@@ -1320,11 +1331,27 @@ body:has(.roadmap-page) {
   grid-template-columns: 28px 1fr 28px;
   align-items: center;
   gap: 0.65rem;
+  min-width: 0;
+  border-radius: 8px;
+  padding: 0.35rem;
   color: #062b74;
   text-decoration: none;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.resource-list a:hover,
+.resource-list a:focus-visible {
+  background: rgba(233, 242, 255, 0.82);
+  box-shadow: 0 8px 18px rgba(9, 61, 119, 0.11);
+  transform: translateY(-1px);
+  outline: none;
 }
 
 .resource-list a > svg:first-child {
+  flex: 0 0 auto;
   color: #008c7d;
 }
 
@@ -1357,6 +1384,13 @@ body:has(.roadmap-page) {
   margin-top: 0.18rem;
   color: #36577f;
   font-size: 0.7rem;
+}
+
+.resource-empty-message {
+  margin: 0;
+  color: #36577f;
+  font-size: 0.74rem;
+  line-height: 1.42;
 }
 
 .waypoint-insight-card {

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -7,10 +8,16 @@ import {
   Circle,
   Clock3,
   Database,
-  FileSpreadsheet,
+  FileText,
+  GraduationCap,
+  PlaySquare,
   Sparkles,
 } from "lucide-react";
-import type { RoadmapData, RoadmapWaypoint } from "../../types/roadmap";
+import type {
+  LearningResource,
+  RoadmapData,
+  RoadmapWaypoint,
+} from "../../types/roadmap";
 
 interface WaypointDetailsProps {
   roadmap: RoadmapData;
@@ -21,6 +28,32 @@ interface WaypointDetailsProps {
   onToggleTask: (waypointId: number, taskIndex: number) => void;
 }
 
+const resourceTypeLabels: Record<LearningResource["type"], string> = {
+  book: "Book",
+  video: "Video",
+  course: "Course",
+  documentation: "Docs",
+  worksheet: "Worksheet",
+  website: "Website",
+};
+
+function getResourceIcon(type: LearningResource["type"]) {
+  switch (type) {
+    case "book":
+    case "documentation":
+      return BookOpen;
+    case "course":
+      return GraduationCap;
+    case "video":
+      return PlaySquare;
+    case "worksheet":
+      return FileText;
+    case "website":
+    default:
+      return Database;
+  }
+}
+
 function WaypointDetails({
   roadmap,
   waypoint,
@@ -29,11 +62,18 @@ function WaypointDetails({
   highlightTone,
   onToggleTask,
 }: WaypointDetailsProps) {
+  const [showAllResources, setShowAllResources] = useState(false);
   const completedWaypoints = roadmap.waypoints.filter(
     (roadmapWaypoint) => roadmapWaypoint.status === "completed",
   ).length;
   const journeyProgressPercent = roadmap.progressPercent;
   const tasks = waypoint.tasks;
+  const resources = roadmap.resources ?? [];
+  const recommendedResources = showAllResources
+    ? resources
+    : resources.slice(0, 3);
+  const hasMoreResources = resources.length > 3;
+  const resourcePreviewLabel = `${recommendedResources.length} of ${resources.length}`;
   const isLocked = waypoint.status === "locked";
   const visibleTasks = isLocked
     ? tasks.map((task) => ({
@@ -154,36 +194,49 @@ function WaypointDetails({
       <section className="waypoint-panel-card">
         <div className="panel-heading-row">
           <h3>Recommended Resources</h3>
-          <button type="button">View all</button>
+          <div className="panel-heading-actions">
+            <span>{resourcePreviewLabel}</span>
+            {hasMoreResources ? (
+              <button
+                type="button"
+                onClick={() => setShowAllResources((isShowingAll) => !isShowingAll)}
+              >
+                {showAllResources ? "Show less" : "View all"}
+              </button>
+            ) : null}
+          </div>
         </div>
 
         <div className="resource-list">
-          <a href="/resources">
-            <Database size={22} />
-            <span>
-              <strong>{waypoint.category} Starter Guide</strong>
-              <small>Course • 3h 45m</small>
-            </span>
-            <ArrowRight size={18} />
-          </a>
+          {recommendedResources.length > 0 ? recommendedResources.map((resource, resourceIndex) => {
+            const ResourceIcon = getResourceIcon(resource.type);
+            const resourceHref = resource.url ?? "#";
+            const opensExternalResource = Boolean(resource.url);
 
-          <a href="/resources">
-            <BookOpen size={22} />
-            <span>
-              <strong>{waypoint.title} Lessons</strong>
-              <small>Practice • 15 lessons</small>
-            </span>
-            <ArrowRight size={18} />
-          </a>
-
-          <a href="/resources">
-            <FileSpreadsheet size={22} />
-            <span>
-              <strong>Portfolio Worksheet</strong>
-              <small>Template • 40m</small>
-            </span>
-            <ArrowRight size={18} />
-          </a>
+            return (
+              <a
+                href={resourceHref}
+                key={`${resource.title}-${resourceIndex}`}
+                target={opensExternalResource ? "_blank" : undefined}
+                rel={opensExternalResource ? "noreferrer" : undefined}
+                title={`${resource.title}: ${resource.reason}`}
+                aria-label={`Open ${resource.title}. ${resource.reason}`}
+              >
+                <ResourceIcon size={22} />
+                <span>
+                  <strong>{resource.title}</strong>
+                  <small>
+                    {resourceTypeLabels[resource.type]} • {resource.reason}
+                  </small>
+                </span>
+                <ArrowRight size={18} />
+              </a>
+            );
+          }) : (
+            <p className="resource-empty-message">
+              Generate or refresh your roadmap to view recommended resources.
+            </p>
+          )}
         </div>
       </section>
 

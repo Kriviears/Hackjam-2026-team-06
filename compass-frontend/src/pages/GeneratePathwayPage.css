@@ -684,19 +684,19 @@ body:has(.generate-shell) {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0;
+  padding: 0 0 42px;
 }
 
 .generate-road-visual {
   position: absolute;
-  left: 20%;
-  right: 4%;
-  bottom: 42px;
-  height: 126px;
-  z-index: 1;
+  left: clamp(220px, 26vw, 420px);
+  right: clamp(430px, 37vw, 600px);
+  bottom: clamp(18px, 3.4vh, 38px);
+  height: 84px;
+  z-index: 2;
   pointer-events: none;
   overflow: visible;
-  opacity: 0.72;
+  opacity: 0.78;
 }
 
 .road-pin {
@@ -722,25 +722,25 @@ body:has(.generate-shell) {
 }
 
 .road-pin-1 {
-  left: 4%;
-  bottom: 2px;
+  left: 2%;
+  bottom: 4px;
 }
 
 .road-pin-2 {
-  left: 24%;
-  bottom: 48px;
+  left: 25%;
+  bottom: 16px;
   animation-delay: 180ms;
 }
 
 .road-pin-3 {
-  left: 47%;
-  bottom: 38px;
+  left: 50%;
+  bottom: 29px;
   animation-delay: 360ms;
 }
 
 .road-pin-4 {
-  left: 69%;
-  bottom: 86px;
+  left: 75%;
+  bottom: 42px;
   animation-delay: 540ms;
 }
 .waypoint-preview-section {
@@ -880,6 +880,7 @@ body:has(.generate-shell) {
 .generate-footer {
   position: relative;
   z-index: 2;
+  transform: translateY(-12px);
   width: min(680px, 100%);
   margin: 0;
   padding: 10px 14px;
@@ -1213,14 +1214,14 @@ body:has(.generate-shell) {
 
   .generate-lower-left {
     min-height: 212px;
-    padding: 0 0 12px;
+    padding: 0 0 52px;
   }
 
   .generate-road-visual {
     left: 12%;
-    right: 0;
-    bottom: 82px;
-    height: 150px;
+    right: 14%;
+    bottom: 18px;
+    height: 92px;
   }
 
   .waypoint-preview-section {
@@ -1339,13 +1340,30 @@ body:has(.generate-shell) {
 
   .generate-lower-left {
     min-height: 110px;
+    padding-bottom: 36px;
   }
 
   .generate-road-visual {
-    left: 16%;
-    right: 3%;
+    left: clamp(220px, 25vw, 390px);
+    right: clamp(410px, 36vw, 560px);
+    bottom: clamp(16px, 3vh, 32px);
+    height: 78px;
+  }
+
+  .road-pin-1 {
+    bottom: 3px;
+  }
+
+  .road-pin-2 {
+    bottom: 13px;
+  }
+
+  .road-pin-3 {
+    bottom: 24px;
+  }
+
+  .road-pin-4 {
     bottom: 34px;
-    height: 96px;
   }
 
   .waypoint-preview-section {
@@ -1380,5 +1398,6 @@ body:has(.generate-shell) {
   .generate-footer {
     width: min(760px, 100%);
     padding: 9px 13px;
+    transform: translateY(-10px);
   }
 }

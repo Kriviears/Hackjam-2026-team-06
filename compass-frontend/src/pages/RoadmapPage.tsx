@@ -372,12 +372,16 @@ function buildRoadmapData(
     },
   );
   const normalizedWaypoints = normalizeWaypointProgress(waypoints);
+  const resources = Array.isArray(journeyResponse.resources)
+    ? journeyResponse.resources
+    : [];
 
   return {
     ...journeyResponse,
     userType,
     progressPercent: calculateJourneyProgress(normalizedWaypoints),
     waypoints: normalizedWaypoints,
+    resources,
   };
 }
 

@@ -1,24 +1,19 @@
 import {
   Bell,
   BookOpen,
-  Building2,
   BriefcaseBusiness,
   Check,
   ChevronDown,
   Code2,
-  CircleUserRound,
   Compass,
   FileText,
-  Flag,
   Gift,
   Handshake,
   LayoutDashboard,
   Lightbulb,
   Map,
-  MessageCircle,
   Play,
   Search,
-  Settings,
   Sparkles,
   Target,
   TrendingUp,
@@ -30,13 +25,14 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import DashboardCard from "../components/dashboard/DashboardCard";
 import ProgressRing from "../components/dashboard/ProgressRing";
 import { askCompass } from "../services/askCompassApi";
-import type { JourneyResponse, UserProfile, Waypoint } from "../types/journey";
+import type { FutureYou, JourneyResponse, UserProfile, Waypoint } from "../types/journey";
 import {
   applyStoredJourneyProgress,
   buildJourneyProgressChart,
   readJourneyProgress,
 } from "../utils/journeyProgressStorage";
 import compassLogo from "../assets/compass-landing-logo.png";
+import giftCardImage from "../assets/actualGiftcard.png";
 import roboCompass from "../assets/roboCompass.png";
 import techLandscape from "../assets/tech-landscape.png";
 
@@ -59,6 +55,88 @@ const assistantOptions = [
   "Find learning resources",
 ];
 
+const timelineLabels: Record<string, string> = {
+  "3 months": "Within 3 months",
+  "6 months": "Within 6 months",
+  "12 months": "Within 12 months",
+  flexible: "My timeline is flexible",
+};
+
+const weeklyCommitmentLabels: Record<string, string> = {
+  "1-4 hours": "1-4 hours",
+  "5-10 hours": "5-10 hours",
+  "11-20 hours": "11-20 hours",
+  "20+ hours": "More than 20 hours",
+};
+
+const paceMessages = {
+  accelerated:
+    "Your weekly commitment supports an ambitious timeline. Protect your study time and stay focused on the current waypoint.",
+  onTrack:
+    "Your timeline and weekly availability appear well matched. Consistent progress will be more important than speed.",
+  stretch:
+    "Your target may require more weekly learning time. Consider increasing your commitment or allowing more time.",
+  flexible:
+    "Your timeline gives you room to build skills steadily while balancing other responsibilities.",
+  missing:
+    "Add your target timeline and weekly availability to receive a personalized pace recommendation.",
+};
+
+function getCompassPaceRecommendation(targetTimeline?: string, weeklyCommitment?: string) {
+  if (!targetTimeline || !weeklyCommitment) {
+    return {
+      status: "Compass Pace",
+      tone: "neutral",
+      message: paceMessages.missing,
+    };
+  }
+
+  const shortTimeline = targetTimeline === "3 months";
+  const mediumTimeline = targetTimeline === "6 months";
+  const longTimeline = targetTimeline === "12 months" || targetTimeline === "flexible";
+  const lowCommitment = weeklyCommitment === "1-4 hours";
+  const moderateCommitment = weeklyCommitment === "5-10 hours";
+  const highCommitment = weeklyCommitment === "11-20 hours" || weeklyCommitment === "20+ hours";
+
+  if ((shortTimeline || mediumTimeline) && lowCommitment) {
+    return {
+      status: "Stretch Goal",
+      tone: "stretch",
+      message: paceMessages.stretch,
+    };
+  }
+
+  if (shortTimeline && highCommitment) {
+    return {
+      status: "Accelerated",
+      tone: "accelerated",
+      message: paceMessages.accelerated,
+    };
+  }
+
+  if (mediumTimeline && moderateCommitment) {
+    return {
+      status: "On Track",
+      tone: "on-track",
+      message: paceMessages.onTrack,
+    };
+  }
+
+  if (longTimeline && (lowCommitment || moderateCommitment)) {
+    return {
+      status: "On Track",
+      tone: "on-track",
+      message: paceMessages.flexible,
+    };
+  }
+
+  return {
+    status: highCommitment ? "Accelerated" : "On Track",
+    tone: highCommitment ? "accelerated" : "on-track",
+    message: highCommitment ? paceMessages.accelerated : paceMessages.onTrack,
+  };
+}
+
 function getAssistantGreeting(firstName: string, destination: string) {
   return `Hi ${firstName}! I've been keeping track of your journey toward becoming a ${destination}.\n\nI can help you decide what to work on next.`;
 }
@@ -76,7 +154,8 @@ const mockupJourney: JourneyResponse = {
   nextStep:
     "Complete the first draft of your technical resume and compare it with three current frontend developer job descriptions.",
   userType: "currentLearner",
-  weeklyCommitment: "5-7 hours",
+  weeklyCommitment: "5-10 hours",
+  targetTimeline: "6 months",
   waypoints: [
     {
       title: "Establish Core Foundations",
@@ -109,6 +188,80 @@ const mockupJourney: JourneyResponse = {
       ],
     },
   ],
+  resources: [
+    {
+      title: "MDN Learn Web Development",
+      type: "documentation",
+      url: "https://developer.mozilla.org/en-US/docs/Learn",
+      reason:
+        "Supports the current foundation-building milestone with practical HTML, CSS, and JavaScript guidance.",
+    },
+    {
+      title: "React Official Tutorial",
+      type: "documentation",
+      url: "https://react.dev/learn",
+      reason:
+        "Helps the learner prepare for the next role-specific React milestone without jumping into advanced material.",
+    },
+    {
+      title: "Per Scholas Career Services",
+      type: "website",
+      url: "https://perscholas.org/",
+      reason:
+        "Connects technical progress to resume, interview, and job-search support for the career readiness milestone.",
+    },
+  ],
+  futureYou: {
+    title: "Front-End Software Engineer",
+    summary:
+      "You are building toward a frontend role where strong fundamentals, React practice, and clear project storytelling help you show readiness.",
+    roles: [
+      "Junior Front-End Developer",
+      "UI Developer",
+      "React Developer Apprentice",
+    ],
+    companies: [
+      {
+        name: "Accenture",
+        reason:
+          "Research this organization because large consulting teams often include web, UI, and software delivery role families.",
+      },
+      {
+        name: "Capital One",
+        reason:
+          "Explore its product and engineering teams to understand how frontend skills support customer-facing digital tools.",
+      },
+      {
+        name: "Per Scholas employer partners",
+        reason:
+          "Use Career Services conversations to identify partner organizations that value entry-level technical talent.",
+      },
+    ],
+    opportunityTypes: [
+      {
+        title: "Frontend portfolio project",
+        reason:
+          "Build a responsive React project that demonstrates components, API usage, accessibility, and clear documentation.",
+      },
+      {
+        title: "Hackathon or community build",
+        reason:
+          "Practice shipping a small feature with teammates and turn the experience into interview-ready stories.",
+      },
+      {
+        title: "Informational interviews",
+        reason:
+          "Ask frontend professionals how they use React, testing, and collaboration skills in day-to-day work.",
+      },
+    ],
+    networkingActions: [
+      "Connect with two Per Scholas alumni in frontend or UI roles.",
+      "Ask one software engineer for feedback on your portfolio homepage.",
+      "Attend one virtual meetup focused on React or accessible web design.",
+    ],
+    nextOpportunity:
+      "Choose one frontend portfolio project and write the problem, users, and first three features before building.",
+  },
 };
 
 function getStoredArray(key: string, length: number) {
@@ -122,6 +275,43 @@ function getStoredArray(key: string, length: number) {
   } catch {
     return Array<boolean>(length).fill(false);
   }
+}
+
+function getFutureYouOpportunityIds(futureYou?: FutureYou) {
+  if (!futureYou) {
+    return [];
+  }
+
+  return [
+    ...futureYou.companies.map((company) => getOpportunityId("company", company.name)),
+    ...futureYou.opportunityTypes.map((opportunity) =>
+      getOpportunityId("experience", opportunity.title),
+    ),
+  ];
+}
+
+function getStoredSavedOpportunityIds(key: string, legacyOpportunityIds: string[] = []) {
+  if (typeof window === "undefined") {
+    return new Set<string>();
+  }
+
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(key) ?? "[]");
+
+    if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) {
+      return new Set(parsed);
+    }
+
+    if (Array.isArray(parsed) && parsed.every((item) => typeof item === "boolean")) {
+      return new Set(
+        legacyOpportunityIds.filter((_, index) => Boolean(parsed[index])),
+      );
+    }
+  } catch {
+    return new Set<string>();
+  }
+
+  return new Set<string>();
 }
 
 function getWaypointProgress(waypoints: Waypoint[]) {
@@ -188,33 +378,19 @@ function buildInsights(journey: JourneyResponse) {
   ];
 }
 
-function buildOpportunities() {
-  return [
-    {
-      type: "EVENT",
-      title: "Per Scholas Workshop",
-      match: 92,
-      reason: "Frontend Development Best Practices · May 28, 2025 · Virtual",
-    },
-    {
-      type: "JOB",
-      title: "Junior Frontend Developer Role",
-      match: 88,
-      reason: "React · TypeScript · UI Development · Posted May 20, 2025 · Atlanta, GA",
-    },
-    {
-      type: "NETWORKING",
-      title: "Per Scholas Alumni Networking",
-      match: 85,
-      reason: "Connect, learn, and grow together · Jun 5, 2025 · In-person",
-    },
-  ];
+function getFutureYou(journey: JourneyResponse): FutureYou | undefined {
+  return journey.futureYou;
+}
+
+function getOpportunityId(kind: string, title: string) {
+  return `${kind}:${title.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 }
 
 export default function DashboardPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const journey = (location.state?.journey as JourneyResponse | undefined) ?? mockupJourney;
+  const initialOpportunityIds = getFutureYouOpportunityIds(journey.futureYou);
   const userProfile =
     (location.state?.userProfile as UserProfile | undefined) ?? {
       firstName: "Fabiola",
@@ -228,8 +404,9 @@ export default function DashboardPage() {
   });
   const [todayComplete, setTodayComplete] = useState(false);
   const [rewardOpen, setRewardOpen] = useState(false);
-  const [savedOpportunities, setSavedOpportunities] = useState(() =>
-    getStoredArray(storageKeys.savedOpportunities, 3),
+  const [futureYouExpanded, setFutureYouExpanded] = useState(false);
+  const [savedOpportunityIds, setSavedOpportunityIds] = useState(() =>
+    getStoredSavedOpportunityIds(storageKeys.savedOpportunities, initialOpportunityIds),
   );
   const [connections, setConnections] = useState([false, false, false]);
   const [progressSyncVersion, setProgressSyncVersion] = useState(0);
@@ -254,6 +431,22 @@ export default function DashboardPage() {
     () => readJourneyProgress(journey)?.chart ?? buildJourneyProgressChart(syncedJourney),
     [journey, syncedJourney, progressSyncVersion],
   );
+  const paceRecommendation = useMemo(
+    () =>
+      getCompassPaceRecommendation(
+        syncedJourney.targetTimeline,
+        syncedJourney.weeklyCommitment,
+      ),
+    [syncedJourney.targetTimeline, syncedJourney.weeklyCommitment],
+  );
+  const openRoadmap = () =>
+    navigate("/roadmap", {
+      state: {
+        roadmap: syncedJourney,
+        userType: syncedJourney.userType,
+        userProfile,
+      },
+    });
 
   useEffect(() => {
     window.localStorage.setItem(storageKeys.weekly, JSON.stringify(weeklyChecked));
@@ -262,9 +455,9 @@ export default function DashboardPage() {
   useEffect(() => {
     window.localStorage.setItem(
       storageKeys.savedOpportunities,
-      JSON.stringify(savedOpportunities),
+      JSON.stringify(Array.from(savedOpportunityIds)),
     );
-  }, [savedOpportunities]);
+  }, [savedOpportunityIds]);
 
   useEffect(() => {
     // The assistant starts with typing bubbles, then switches to the greeting.
@@ -325,6 +518,7 @@ export default function DashboardPage() {
     );
     const nextWaypoint = getNextWaypoint(syncedJourney.waypoints);
     const completedWeekly = weeklyChecked.filter(Boolean).length;
+    const futureYou = getFutureYou(syncedJourney);
 
     return {
       progressPercent,
@@ -333,7 +527,7 @@ export default function DashboardPage() {
       weeklyPercent: Math.round((completedWeekly / weeklyGoals.length) * 100),
       skills: buildSkillSnapshot(syncedJourney),
       insights: buildInsights(syncedJourney),
-      opportunities: buildOpportunities(),
+      futureYou,
     };
   }, [syncedJourney, journeyProgressChart, weeklyChecked]);
 
@@ -353,6 +547,24 @@ export default function DashboardPage() {
   }
 
   const rewardUnlocked = dashboardData.progressPercent >= 50;
+  const futureYou = dashboardData.futureYou;
+  const previewRoles = futureYou
+    ? futureYou.roles.slice(0, futureYouExpanded ? futureYou.roles.length : 2)
+    : [];
+  const previewCompanies = futureYou
+    ? futureYou.companies.slice(0, futureYouExpanded ? futureYou.companies.length : 1)
+    : [];
+  const previewOpportunities = futureYou
+    ? futureYou.opportunityTypes.slice(
+        0,
+        futureYouExpanded ? futureYou.opportunityTypes.length : 1,
+      )
+    : [];
+  const hasMoreFutureYou =
+    Boolean(futureYou) &&
+    (futureYou!.roles.length > 2 ||
+      futureYou!.companies.length > 1 ||
+      futureYou!.opportunityTypes.length > 1);
 
   // Called when a user clicks one of the suggested Ask Compass questions.
   // It sends the selected question plus the current journey/progress context
@@ -383,7 +595,7 @@ export default function DashboardPage() {
     }
   };
   const askCompassPanel = (
-    <section className="dashboard-robo-assistant" aria-label="roboCompass assistant">
+    <section id="assistant" className="dashboard-robo-assistant" aria-label="roboCompass assistant">
       <div
         className={
           assistantReady
@@ -494,26 +706,16 @@ export default function DashboardPage() {
             <UsersRound size={19} />
             Connections
           </a>
-          <a href="#resources">
+          <NavLink
+            to="/roadmap"
+            state={{ roadmap: syncedJourney, userType: syncedJourney.userType, userProfile }}
+          >
             <BookOpen size={19} />
             Resources
-          </a>
-          <a href="#messages">
-            <MessageCircle size={19} />
-            Messages
-            <span className="dashboard-nav-badge">3</span>
-          </a>
+          </NavLink>
           <a href="#assistant">
             <Sparkles size={19} />
             AI Assistant
-          </a>
-          <a href="#profile">
-            <CircleUserRound size={19} />
-            Profile
-          </a>
-          <a href="#settings">
-            <Settings size={19} />
-            Settings
           </a>
         </nav>
 
@@ -565,22 +767,34 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              <div className="dashboard-stage-stack">
-                <div>
-                  <Building2 size={18} />
-                  <span>Current Stage</span>
-                  <strong>{syncedJourney.currentStage}</strong>
+              <div className="dashboard-pace-card" aria-label="Compass Pace Recommendation">
+                <span className="dashboard-pace-eyebrow">Compass Pace Recommendation</span>
+                <strong className="dashboard-pace-status">
+                  {paceRecommendation.status}
+                  <span
+                    className={`dashboard-pace-marker dashboard-pace-marker--${paceRecommendation.tone}`}
+                    aria-hidden="true"
+                  />
+                </strong>
+                <div className="dashboard-pace-details">
+                  <div>
+                    <span>Target timeline</span>
+                    <b>
+                      {timelineLabels[syncedJourney.targetTimeline ?? ""] ??
+                        syncedJourney.targetTimeline ??
+                        "Not selected"}
+                    </b>
+                  </div>
+                  <div>
+                    <span>Weekly time</span>
+                    <b>
+                      {weeklyCommitmentLabels[syncedJourney.weeklyCommitment ?? ""] ??
+                        syncedJourney.weeklyCommitment ??
+                        "Not selected"}
+                    </b>
+                  </div>
                 </div>
-                <div>
-                  <Flag size={18} />
-                  <span>Current Milestone</span>
-                  <strong>{dashboardData.nextWaypoint?.title ?? syncedJourney.nextStep}</strong>
-                </div>
-                <div>
-                  <span className="dashboard-next-number">2</span>
-                  <span>Next Waypoint</span>
-                  <strong>{dashboardData.nextWaypoint?.description ?? syncedJourney.nextStep}</strong>
-                </div>
+                <p>{paceRecommendation.message}</p>
               </div>
             </div>
 
@@ -588,15 +802,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 className="dashboard-primary-button"
-                onClick={() =>
-                  navigate("/roadmap", {
-                    state: {
-                      roadmap: syncedJourney,
-                      userType: syncedJourney.userType,
-                      userProfile,
-                    },
-                  })
-                }
+                onClick={openRoadmap}
               >
                 Continue My Roadmap
                 <span aria-hidden="true">→</span>
@@ -652,7 +858,7 @@ export default function DashboardPage() {
         </section>
 
         <section className="dashboard-main-grid">
-          <DashboardCard className="dashboard-today" title="Today's Compass" icon={<Compass size={22} />}>
+          <DashboardCard className="dashboard-today" title="Today's Compass Activity" icon={<Compass size={22} />}>
             <div className="dashboard-today-layout">
               <div>
                 <h2>{syncedJourney.nextStep}</h2>
@@ -660,12 +866,23 @@ export default function DashboardPage() {
                   This step will strengthen your positioning and highlight the skills
                   employers are looking for.
                 </p>
-                <div className="dashboard-card-actions">
-                  <button type="button" className="dashboard-primary-button">
+                <div className="dashboard-card-actions dashboard-card-actions--today">
+                  <button
+                    type="button"
+                    className="dashboard-primary-button"
+                    onClick={openRoadmap}
+                  >
                     <Play size={15} fill="currentColor" />
                     Start This Step
                   </button>
-                  <button type="button" className="dashboard-secondary-button">View Resources</button>
+                  <button
+                    type="button"
+                    className="dashboard-secondary-button"
+                    onClick={openRoadmap}
+                  >
+                    <BookOpen size={16} />
+                    View Resources
+                  </button>
                   <button
                     type="button"
                     className={todayComplete ? "dashboard-complete-button active" : "dashboard-complete-button"}
@@ -701,31 +918,150 @@ export default function DashboardPage() {
         </section>
 
         <section className="dashboard-lower-grid">
-          <DashboardCard id="opportunities" className="dashboard-opportunities" title="Recommended Opportunities" icon={<BriefcaseBusiness size={22} />} action={<button type="button">View all</button>}>
-            {dashboardData.opportunities.map((opportunity, index) => (
-              <article className="dashboard-opportunity" key={opportunity.title}>
-                <div>
-                  <span>{opportunity.type}</span>
-                  <h3>{opportunity.title}</h3>
-                  <p>{opportunity.reason}</p>
-                </div>
-                <ProgressRing value={opportunity.match} label="Match" size="sm" />
+          <DashboardCard
+            id="opportunities"
+            className={`dashboard-opportunities dashboard-future-you ${
+              futureYouExpanded ? "dashboard-future-you--expanded" : ""
+            }`}
+            title="Future You Opportunities"
+            icon={<BriefcaseBusiness size={22} />}
+            action={
+              futureYou && hasMoreFutureYou ? (
                 <button
                   type="button"
-                  className={savedOpportunities[index] ? "active" : ""}
-                  onClick={() =>
-                    setSavedOpportunities((current) =>
-                      current.map((saved, savedIndex) =>
-                        savedIndex === index ? !saved : saved,
-                      ),
-                    )
-                  }
+                  onClick={() => setFutureYouExpanded((expanded) => !expanded)}
                 >
-                  {savedOpportunities[index] ? "Saved" : "Save"}
+                  {futureYouExpanded ? "Show less" : "View all"}
                 </button>
-                <button type="button">Details</button>
-              </article>
-            ))}
+              ) : undefined
+            }
+          >
+            {futureYou ? (
+              <>
+                <header className="future-you-header">
+                  <span>Future You</span>
+                  <h3>{futureYou.title}</h3>
+                  <p>{futureYou.summary}</p>
+                </header>
+
+                <section className="future-you-section" aria-labelledby="future-you-roles">
+                  <h4 id="future-you-roles">Roles to Explore</h4>
+                  <div className="future-you-role-list">
+                    {previewRoles.map((role) => (
+                      <span key={role}>
+                        <UsersRound size={15} />
+                        {role}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="future-you-section" aria-labelledby="future-you-companies">
+                  <h4 id="future-you-companies">Companies to Explore</h4>
+                  <div className="future-you-item-list">
+                    {previewCompanies.map((company) => {
+                      const opportunityId = getOpportunityId("company", company.name);
+                      const isSaved = savedOpportunityIds.has(opportunityId);
+
+                      return (
+                        <article className="dashboard-opportunity" key={opportunityId}>
+                          <div>
+                            <span>Company to Explore</span>
+                            <h3>{company.name}</h3>
+                            <p>{company.reason}</p>
+                          </div>
+                          <button
+                            type="button"
+                            className={isSaved ? "active" : ""}
+                            aria-pressed={isSaved}
+                            onClick={() =>
+                              setSavedOpportunityIds((current) => {
+                                const next = new Set(current);
+
+                                if (next.has(opportunityId)) {
+                                  next.delete(opportunityId);
+                                } else {
+                                  next.add(opportunityId);
+                                }
+
+                                return next;
+                              })
+                            }
+                          >
+                            {isSaved ? "Saved" : "Save"}
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section className="future-you-section" aria-labelledby="future-you-experiences">
+                  <h4 id="future-you-experiences">Experience-Building Opportunities</h4>
+                  <div className="future-you-item-list">
+                    {previewOpportunities.map((opportunity) => {
+                      const opportunityId = getOpportunityId("experience", opportunity.title);
+                      const isSaved = savedOpportunityIds.has(opportunityId);
+
+                      return (
+                        <article className="dashboard-opportunity" key={opportunityId}>
+                          <div>
+                            <span>Experience Builder</span>
+                            <h3>{opportunity.title}</h3>
+                            <p>{opportunity.reason}</p>
+                          </div>
+                          <button
+                            type="button"
+                            className={isSaved ? "active" : ""}
+                            aria-pressed={isSaved}
+                            onClick={() =>
+                              setSavedOpportunityIds((current) => {
+                                const next = new Set(current);
+
+                                if (next.has(opportunityId)) {
+                                  next.delete(opportunityId);
+                                } else {
+                                  next.add(opportunityId);
+                                }
+
+                                return next;
+                              })
+                            }
+                          >
+                            {isSaved ? "Saved" : "Save"}
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section className="future-you-next" aria-labelledby="future-you-next">
+                  <h4 id="future-you-next">Your Next Opportunity</h4>
+                  <p>{futureYou.nextOpportunity}</p>
+                </section>
+
+                {!futureYouExpanded && hasMoreFutureYou ? (
+                  <span className="future-you-more-cue" aria-label="More Future You opportunities available">
+                    ...
+                  </span>
+                ) : null}
+
+                {futureYouExpanded ? (
+                  <p className="future-you-disclaimer">
+                    Career exploration recommendations are based on your Compass journey and are not verified job openings.
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <div className="future-you-empty">
+                <span>Future You</span>
+                <h3>{syncedJourney.destination}</h3>
+                <p>
+                  Generate or refresh your Compass journey to receive personalized Future You opportunities.
+                </p>
+              </div>
+            )}
           </DashboardCard>
 
           <DashboardCard className="dashboard-skills" title="Skill Snapshot" icon={<Target size={22} />}>
@@ -766,11 +1102,11 @@ export default function DashboardPage() {
             ))}
           </DashboardCard>
 
-          <DashboardCard className="dashboard-reward" title="Reward Progress" icon={<Gift size={22} />}>
-            <div className="dashboard-gift-orb">
-              <span className="dashboard-gift-box" />
+          <DashboardCard className="dashboard-reward" title="Reward Progress">
+            <div className="dashboard-gift-card-visual">
+              <img src={giftCardImage} alt="Gift card reward" />
             </div>
-            <h3>{rewardUnlocked ? "You're halfway there! 🎉" : "You're making great progress!"}</h3>
+            <h3>{rewardUnlocked ? "Reward unlocked" : "Reward progress"}</h3>
             <p>
               {rewardUnlocked
                 ? "Your employee-sponsored reward is now unlocked."
