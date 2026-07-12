@@ -50,11 +50,11 @@ The goal is to remove uncertainty and provide learners with a clear, achievable 
 
 # 👥 Target Users
 
-The MVP supports three learner types:
+The MVP (minimum vaiable product) supports three learner types:
 
 * **Prospective Learner** — Individuals exploring technology careers or preparing to begin learning.
 * **Current Learner** — Students actively developing technical skills.
-* **Alumna** — Program graduates seeking continued growth, portfolio development, and career advancement.
+* **Alumna (or alumnus)** — Program graduates seeking continued growth, portfolio development, and career advancement.
 
 ---
 
@@ -253,7 +253,7 @@ The project follows a modular component-based architecture to promote maintainab
 
 ---
 
-# 🚀 Current MVP Features
+# 🚀 Current MVP (Minimum Vaiable Product) Features
 
 * AI-powered personalized career roadmaps
 * Interactive roadmap visualization
