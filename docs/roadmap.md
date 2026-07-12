@@ -10,9 +10,9 @@ Our vision is to create a connected ecosystem where AI transforms learner data i
 
 ---
 
-# 🚀 Phase 1 — AI Career Navigation (MVP) ✅
+# 🚀 Phase 1 — AI Career Navigation ✅
 
-The current Compass MVP establishes the foundation by providing:
+The current Compass MVP (minimum viable product) establishes the foundation by providing:
 
 - 🧠 AI-generated personalized career roadmaps
 - 🗺️ Interactive roadmap visualization
