@@ -10,6 +10,7 @@ import {
   Sparkles,
   UserRound,
 } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import type { UserProfile } from "../../types/journey";
 import type { RoadmapData } from "../../types/roadmap";
 
@@ -73,10 +74,13 @@ function RoadmapSidebar({ roadmap, userProfile }: RoadmapSidebarProps) {
       </div>
 
       <nav className="roadmap-navigation">
-        <a href="/dashboard">
+        <NavLink
+          to="/dashboard"
+          state={{ journey: roadmap, userProfile }}
+        >
           <LayoutDashboard size={20} />
           Dashboard
-        </a>
+        </NavLink>
 
         <a href="/roadmap" className="active">
           <Map size={20} />

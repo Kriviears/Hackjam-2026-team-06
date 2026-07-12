@@ -1,4 +1,5 @@
 import {
+    Gift,
     List,
     PartyPopper,
 } from "lucide-react";
@@ -69,6 +70,7 @@ function RoadmapCanvas({
     const personalizedDestination = getPersonalizedDestination(roadmap.userType);
     const firstName = userProfile?.firstName.trim();
     const journeyProgressPercent = roadmap.progressPercent;
+    const shouldShowRewardBanner = journeyProgressPercent >= 50;
     const roadProgressPercent = travelerPosition.roadProgressPercent;
     const travelerStyle = {
         "--traveler-left": travelerPosition.left,
@@ -205,6 +207,23 @@ function RoadmapCanvas({
                     <div className="roadmap-start-banner">
                         Your Future Starts Here!
                     </div>
+
+                    {shouldShowRewardBanner && (
+                        <div className="roadmap-reward-banner">
+                            <span className="roadmap-reward-icon">
+                                <Gift size={20} />
+                            </span>
+
+                            <div>
+                                <strong>You are halfway there!</strong>
+                                <span>You've unlocked a gift.</span>
+                                <button type="button">
+                                    Claim my gift
+                                    <span aria-hidden="true">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="roadmap-destination-badge">
                         <span className="roadmap-destination-icon">

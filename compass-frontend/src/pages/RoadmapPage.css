@@ -643,21 +643,64 @@ body:has(.roadmap-page) {
 }
 
 .roadmap-waypoint--completed .roadmap-waypoint-card {
-  border-color: rgba(8, 114, 79, 0.42);
-  background: rgba(239, 255, 248, 0.95);
-  box-shadow: 0 10px 28px rgba(8, 114, 79, 0.18);
+  border-color: rgba(117, 141, 166, 0.34);
+  background: rgba(238, 244, 249, 0.78);
+  color: #52677f;
+  box-shadow: 0 8px 18px rgba(29, 63, 96, 0.1);
+  opacity: 0.72;
+  filter: saturate(0.55);
 }
 
 .roadmap-waypoint--completed .roadmap-node {
   background:
-    radial-gradient(circle at 35% 30%, #86ffd0 0 18%, #0aaa73 56%, #07553d 100%);
+    radial-gradient(circle at 35% 30%, #e8eef5 0 18%, #9fb0c2 56%, #536b84 100%);
+  border-color: rgba(255, 255, 255, 0.78);
+  color: #f7fbff;
   box-shadow:
-    0 5px 18px rgba(4, 93, 66, 0.28),
-    0 0 0 8px rgba(32, 197, 142, 0.18);
+    0 5px 14px rgba(37, 61, 84, 0.18),
+    0 0 0 7px rgba(173, 190, 207, 0.18);
+  opacity: 0.78;
+  filter: saturate(0.6);
+}
+
+.roadmap-waypoint--completed .roadmap-waypoint-copy > span {
+  color: #60758d;
+}
+
+.roadmap-waypoint--completed .waypoint-status--complete {
+  background: rgba(222, 230, 239, 0.92);
+  color: #435970;
+}
+
+.roadmap-waypoint--completed.roadmap-waypoint--selected .roadmap-waypoint-card {
+  opacity: 0.88;
+  filter: saturate(0.78);
+}
+
+.roadmap-waypoint--completed.roadmap-waypoint--selected .roadmap-node {
+  opacity: 0.9;
+  filter: saturate(0.78);
 }
 
 .roadmap-waypoint--locked .roadmap-waypoint-card {
   opacity: 0.9;
+}
+
+.roadmap-waypoint--locked.roadmap-waypoint--highlight-preview .roadmap-waypoint-card {
+  border: 3px solid #ef4444;
+  box-shadow:
+    0 12px 34px rgba(153, 27, 27, 0.24),
+    0 0 0 6px rgba(255, 255, 255, 0.58),
+    0 0 0 11px rgba(239, 68, 68, 0.24);
+}
+
+.roadmap-waypoint--locked.roadmap-waypoint--highlight-preview .roadmap-node {
+  background:
+    radial-gradient(circle at 35% 30%, #fff1f2 0 14%, #fb7185 38%, #ef4444 72%, #991b1b 100%);
+  box-shadow:
+    0 8px 22px rgba(153, 27, 27, 0.3),
+    0 0 0 8px rgba(255, 255, 255, 0.72),
+    0 0 0 14px rgba(239, 68, 68, 0.28);
 }
 
 .roadmap-waypoint--final {
@@ -685,6 +728,7 @@ body:has(.roadmap-page) {
 
 .roadmap-waypoint-copy strong {
   font-size: 1rem;
+  text-align: center;
 }
 
 .roadmap-waypoint-copy > span {
@@ -727,7 +771,7 @@ body:has(.roadmap-page) {
   left: var(--traveler-left, 33%);
   bottom: var(--traveler-bottom, 5rem);
   z-index: 30;
-  width: clamp(170px, 15vw, 245px);
+  width: clamp(135px, 12.25vw, 200px);
   transform: translateX(-50%);
   pointer-events: none;
   transition:
@@ -752,7 +796,7 @@ body:has(.roadmap-page) {
 .roadmap-start-banner {
   position: absolute;
   left: 33%;
-  bottom: 6%;
+  bottom: 4.8%;
   z-index: 6;
   max-width: 190px;
   padding: 0.85rem 1rem;
@@ -781,6 +825,89 @@ body:has(.roadmap-page) {
   border-radius: inherit;
   border: 1px solid rgba(87, 221, 255, 0.35);
   opacity: 0.72;
+}
+
+.roadmap-reward-banner {
+  position: absolute;
+  left: 39%;
+  bottom: 53%;
+  z-index: 7;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.7rem;
+  align-items: center;
+  width: 285px;
+  min-height: 112px;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(133, 220, 255, 0.7);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(5, 38, 85, 0.9), rgba(8, 118, 165, 0.84)),
+    rgba(255, 255, 255, 0.86);
+  color: white;
+  box-shadow:
+    0 16px 34px rgba(5, 52, 112, 0.24),
+    0 0 28px rgba(74, 222, 128, 0.2);
+  backdrop-filter: blur(12px);
+  transform: translate(-50%, 50%);
+}
+
+.roadmap-reward-banner::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border-radius: inherit;
+  border: 1px solid rgba(87, 221, 255, 0.35);
+  opacity: 0.72;
+}
+
+.roadmap-reward-icon {
+  grid-row: span 3;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(74, 222, 128, 0.18);
+  color: #9dffbf;
+  box-shadow: inset 0 0 0 1px rgba(157, 255, 191, 0.5);
+}
+
+.roadmap-reward-banner div {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.roadmap-reward-banner strong {
+  font-size: 1.05rem;
+  line-height: 1.08;
+  white-space: nowrap;
+}
+
+.roadmap-reward-banner span:not(.roadmap-reward-icon) {
+  color: #baf7ff;
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.roadmap-reward-banner button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  justify-self: start;
+  margin-top: 0.15rem;
+  border: 1px solid rgba(179, 255, 206, 0.5);
+  border-radius: 9px;
+  padding: 0.4rem 0.62rem;
+  background: linear-gradient(135deg, #43d37d, #18a95c);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 850;
+  line-height: 1.2;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    0 8px 16px rgba(0, 92, 59, 0.2);
 }
 
 .roadmap-destination-badge {

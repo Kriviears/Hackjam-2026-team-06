@@ -60,7 +60,6 @@ function RoadmapWaypoint({
       >
         <span className="roadmap-waypoint-copy">
           <strong>{waypoint.title}</strong>
-          <span>{waypoint.description}</span>
 
           {waypoint.status === "completed" && (
             <small className="waypoint-status waypoint-status--complete">
