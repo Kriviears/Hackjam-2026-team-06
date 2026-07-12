@@ -22,7 +22,7 @@ interface RoadmapCanvasProps {
     userProfile?: UserProfile;
     selectedWaypointId: number | null;
     highlightedWaypointId: number | null;
-    highlightTone: "current" | "preview" | null;
+    highlightTone: "current" | "preview" | "locked" | null;
     travelerPosition: RoadmapPosition;
     onSelectWaypoint: (id: number | null) => void;
     onHoverWaypoint: (id: number | null) => void;

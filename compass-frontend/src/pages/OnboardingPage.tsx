@@ -7,6 +7,7 @@ import {
     Check,
     ClipboardCheck,
     GraduationCap,
+    Home,
     ShieldCheck,
     Target,
     UserRound,
@@ -284,6 +285,13 @@ function OnboardingPage() {
         ), url(${techLandscape})`,
             }}
         >
+            <nav className="onboarding-top-nav" aria-label="Onboarding navigation">
+                <button type="button" onClick={() => navigate("/")}>
+                    <Home size={16} />
+                    <span>Home</span>
+                </button>
+            </nav>
+
             <div className="onboarding-layout">
                 <aside className="onboarding-intro" aria-label="Onboarding introduction">
                     <div className="intro-content">
@@ -705,33 +713,6 @@ function OnboardingPage() {
                     </form>
                 </section>
             </div>
-
-            <footer className="onboarding-footer">
-                <div className="footer-brand">
-                    <div>
-                        <strong>COMPASS</strong>
-                        <span>Find Your Direction in Tech</span>
-                    </div>
-                </div>
-
-                <FooterFeature
-                    icon="✦"
-                    title="Personalized Roadmaps"
-                    text="AI creates a path unique to you."
-                />
-
-                <FooterFeature
-                    icon="⌖"
-                    title="Know Where You Stand"
-                    text="Understand your current skills."
-                />
-
-                <FooterFeature
-                    icon="↗"
-                    title="Reach Your Destination"
-                    text="Track milestones to your goal."
-                />
-            </footer>
         </main>
     );
 }
@@ -841,25 +822,6 @@ function CheckboxGroup({
                 })}
             </div>
         </fieldset>
-    );
-}
-
-type FooterFeatureProps = {
-    icon: string;
-    title: string;
-    text: string;
-};
-
-function FooterFeature({ icon, title, text }: FooterFeatureProps) {
-    return (
-        <div className="footer-feature">
-            <span className="footer-feature-icon">{icon}</span>
-
-            <div>
-                <strong>{title}</strong>
-                <p>{text}</p>
-            </div>
-        </div>
     );
 }
 

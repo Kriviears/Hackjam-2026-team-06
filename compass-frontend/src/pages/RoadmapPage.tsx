@@ -500,11 +500,17 @@ function RoadmapPage() {
         )) ??
     roadmap.waypoints[0];
   const highlightedWaypointId = hoveredWaypointId ?? selectedWaypointId;
+  const highlightedWaypoint =
+    highlightedWaypointId === null
+      ? null
+      : roadmap.waypoints.find((waypoint) => waypoint.id === highlightedWaypointId);
   const currentWaypointId = getCurrentWaypointId(roadmap);
   const highlightTone =
     highlightedWaypointId === null
       ? null
-      : highlightedWaypointId === currentWaypointId
+      : highlightedWaypoint?.status === "locked"
+        ? "locked"
+        : highlightedWaypointId === currentWaypointId
         ? "current"
         : "preview";
   const travelerPosition = getAvatarPosition(roadmap.waypoints);

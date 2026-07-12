@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  ArrowRight,
+  ArrowLeft,
   BrainCircuit,
   BriefcaseBusiness,
   Check,
@@ -502,7 +502,7 @@ export default function GeneratePathwayPage() {
 
             <button type="button" onClick={() => navigate("/onboarding")}>
               <span>Restart My Journey</span>
-              <ArrowRight size={16} />
+              <ArrowLeft size={16} />
             </button>
           </nav>
         </header>

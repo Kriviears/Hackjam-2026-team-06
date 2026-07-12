@@ -6,7 +6,7 @@ import type { RoadmapWaypoint as RoadmapWaypointType } from "../../types/roadmap
 
 interface RoadmapWaypointProps {
   waypoint: RoadmapWaypointType;
-  highlightTone?: "current" | "preview" | null;
+  highlightTone?: "current" | "preview" | "locked" | null;
   isFinal?: boolean;
   onSelect: () => void;
   onHoverChange?: (isHovered: boolean) => void;

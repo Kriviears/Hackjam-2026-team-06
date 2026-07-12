@@ -17,7 +17,7 @@ interface WaypointDetailsProps {
   waypoint: RoadmapWaypoint;
   totalWaypoints: number;
   highlightedWaypointId: number | null;
-  highlightTone: "current" | "preview" | null;
+  highlightTone: "current" | "preview" | "locked" | null;
   onToggleTask: (waypointId: number, taskIndex: number) => void;
 }
 

@@ -1,11 +1,22 @@
 .generate-shell {
+  width: min(1440px, 100vw);
+  max-width: 1440px;
   min-height: 100vh;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
   color: #082b66;
+  background-color: #eaf6ff;
   background-position: center bottom;
   background-size: cover;
   overflow-x: hidden;
+}
+
+body:has(.generate-shell) {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% 68%, rgba(23, 132, 224, 0.24), transparent 34rem),
+    linear-gradient(90deg, #eaf5ff 0%, #cfe8ff 50%, #eaf5ff 100%);
 }
 
 .generate-sidebar {
@@ -113,7 +124,7 @@
   position: relative;
   min-width: 0;
   min-height: 100vh;
-  padding: 34px 36px 18px;
+  padding: clamp(18px, 2.2vw, 28px) clamp(22px, 3vw, 42px) 18px;
   overflow-x: hidden;
 }
 
@@ -167,7 +178,7 @@
   justify-content: flex-end;
   align-items: center;
   gap: 18px;
-  min-height: 52px;
+  min-height: 40px;
 }
 
 .generate-top-nav {
@@ -271,8 +282,8 @@
 }
 
 .generate-intro {
-  width: min(100%, 1180px);
-  margin-top: -28px;
+  width: min(100%, 1240px);
+  margin: -12px auto 0;
 }
 
 .generate-eyebrow,
@@ -288,52 +299,54 @@
 }
 
 .generate-intro h1 {
-  margin: 0 0 12px;
-  font-size: clamp(2.45rem, 3.35vw, 3.25rem);
-  line-height: 1.04;
+  max-width: 760px;
+  margin: 0 0 8px;
+  font-size: clamp(2rem, 3vw, 2.95rem);
+  line-height: 1.03;
   letter-spacing: 0;
   color: #082b73;
 }
 
 .generate-intro > p:last-child {
-  max-width: 530px;
+  max-width: 620px;
   margin: 0;
   color: #173f78;
-  font-size: 1rem;
-  line-height: 1.52;
+  font-size: 0.95rem;
+  line-height: 1.45;
 }
 
 .generate-workspace {
-  width: min(100%, 1210px);
-  margin: 30px auto 0;
+  width: min(100%, 1240px);
+  margin: 18px auto 0;
   display: grid;
   grid-template-columns:
-    minmax(204px, 254px)
-    minmax(360px, 548px)
-    minmax(204px, 254px);
+    minmax(210px, 274px)
+    minmax(320px, 470px)
+    minmax(210px, 274px);
   align-items: center;
   justify-content: center;
-  gap: clamp(20px, 2.8vw, 40px);
+  gap: clamp(14px, 2vw, 28px);
 }
 
 .generate-steps {
   display: grid;
-  gap: 18px;
+  gap: 10px;
 }
 
 .generation-step-card {
   position: relative;
-  min-height: 108px;
-  padding: 17px;
+  min-height: 88px;
+  padding: 13px;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 13px;
+  gap: 10px;
   border: 1px solid rgba(101, 168, 219, 0.26);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.88);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(236, 248, 255, 0.82));
   box-shadow:
-    0 20px 48px rgba(31, 96, 155, 0.13),
+    0 14px 34px rgba(31, 96, 155, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(16px);
   transition:
@@ -347,25 +360,25 @@
   content: "";
   position: absolute;
   top: 50%;
-  width: 36px;
+  width: 26px;
   height: 2px;
   background: linear-gradient(90deg, rgba(13, 154, 220, 0.08), rgba(13, 154, 220, 0.42));
 }
 
 .generate-steps:first-child .generation-step-card::after {
-  right: -37px;
+  right: -27px;
 }
 
 .generate-steps:last-child .generation-step-card::after {
-  left: -37px;
+  left: -27px;
   transform: rotate(180deg);
 }
 
 .generation-step-active {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: rgba(5, 134, 208, 0.72);
   box-shadow:
-    0 22px 52px rgba(5, 115, 189, 0.22),
+    0 18px 40px rgba(5, 115, 189, 0.2),
     0 0 0 4px rgba(15, 153, 224, 0.08);
 }
 
@@ -378,8 +391,8 @@
 }
 
 .generation-step-icon {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -395,20 +408,20 @@
 .generation-step-content h2 {
   margin: 0;
   color: #082b66;
-  font-size: 0.92rem;
-  line-height: 1.35;
+  font-size: 0.86rem;
+  line-height: 1.25;
 }
 
 .generation-step-content p {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   color: #174579;
-  font-size: 0.74rem;
-  line-height: 1.5;
+  font-size: 0.7rem;
+  line-height: 1.35;
 }
 
 .generation-step-indicator {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   display: grid;
   place-items: center;
   border: 2px solid currentColor;
@@ -431,7 +444,8 @@
 }
 
 .generate-center {
-  min-height: 474px;
+  min-height: 392px;
+  padding: 6px 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -441,7 +455,7 @@
 .compass-animation {
   --compass-visual-center-y: 42%;
   position: relative;
-  width: 545px;
+  width: min(455px, 100%);
   max-width: 100%;
   min-width: 0;
   aspect-ratio: 3 / 2;
@@ -453,7 +467,7 @@
 .compass-animation::before {
   content: "";
   position: absolute;
-  inset: -56px 10px -30px;
+  inset: -32px 18px -14px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.96) 0 42%, rgba(114, 202, 247, 0.1) 58%, transparent 80%);
   animation: compassGlow 2.6s ease-in-out infinite;
@@ -463,8 +477,8 @@
   position: absolute;
   left: 50%;
   top: var(--compass-visual-center-y);
-  width: 392px;
-  height: 392px;
+  width: 318px;
+  height: 318px;
   border-radius: 50%;
   border: 1px solid rgba(107, 203, 249, 0.08);
   transform: translate(-50%, -50%);
@@ -479,8 +493,8 @@
 }
 
 .compass-ring-middle {
-  width: 362px;
-  height: 362px;
+  width: 292px;
+  height: 292px;
   border-color: rgba(255, 255, 255, 0.34);
   box-shadow:
     0 0 0 8px rgba(80, 190, 245, 0.05),
@@ -488,8 +502,8 @@
 }
 
 .compass-ring-inner {
-  width: 324px;
-  height: 324px;
+  width: 254px;
+  height: 254px;
   border-style: dashed;
   border-color: rgba(56, 169, 232, 0.14);
   opacity: 0.2;
@@ -539,23 +553,25 @@
 }
 
 .generate-current-status {
-  margin: -4px 0 0;
+  margin: -10px 0 0;
   color: #082b66;
+  font-size: 0.92rem;
   font-weight: 850;
+  text-align: center;
 }
 
 .generate-progress-number {
   display: block;
-  margin-top: 7px;
+  margin-top: 5px;
   color: #087bcf;
-  font-size: 2.72rem;
+  font-size: 2.28rem;
   line-height: 1;
 }
 
 .generate-progress-track {
-  width: min(362px, 100%);
-  height: 13px;
-  margin-top: 13px;
+  width: min(330px, 100%);
+  height: 11px;
+  margin-top: 10px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(106, 141, 171, 0.22);
@@ -579,15 +595,17 @@
 }
 
 .generate-status-message {
-  margin: 11px 0 0;
+  max-width: 360px;
+  margin: 8px 0 0;
   color: #163f78;
-  font-size: 0.9rem;
+  font-size: 0.84rem;
+  line-height: 1.35;
   text-align: center;
 }
 
 .generate-roadmap-button {
-  margin-top: 21px;
-  padding: 13px 22px;
+  margin-top: 14px;
+  padding: 12px 20px;
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -651,40 +669,41 @@
 .generate-lower-grid {
   position: relative;
   z-index: 1;
-  width: min(100%, 1210px);
-  margin: 2px auto 0;
+  width: min(100%, 1240px);
+  margin: 12px auto 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
-  align-items: end;
-  gap: 32px;
-  min-height: 286px;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 390px);
+  align-items: stretch;
+  gap: 20px;
+  min-height: 0;
 }
 
 .generate-lower-left {
   position: relative;
-  min-height: 252px;
+  min-height: 146px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0 22px 22px;
+  padding: 0;
 }
 
 .generate-road-visual {
   position: absolute;
-  left: 22%;
-  right: 2%;
-  bottom: 112px;
-  height: 230px;
+  left: 20%;
+  right: 4%;
+  bottom: 42px;
+  height: 126px;
   z-index: 1;
   pointer-events: none;
   overflow: visible;
+  opacity: 0.72;
 }
 
 .road-pin {
   position: absolute;
-  width: 34px;
-  height: 34px;
-  border: 7px solid #ffffff;
+  width: 26px;
+  height: 26px;
+  border: 5px solid #ffffff;
   border-radius: 50% 50% 50% 0;
   background: #2788ff;
   box-shadow:
@@ -697,7 +716,7 @@
 .road-pin::after {
   content: "";
   position: absolute;
-  inset: 6px;
+  inset: 5px;
   border-radius: 50%;
   background: #ffffff;
 }
@@ -709,19 +728,19 @@
 
 .road-pin-2 {
   left: 24%;
-  bottom: 92px;
+  bottom: 48px;
   animation-delay: 180ms;
 }
 
 .road-pin-3 {
   left: 47%;
-  bottom: 78px;
+  bottom: 38px;
   animation-delay: 360ms;
 }
 
 .road-pin-4 {
   left: 69%;
-  bottom: 168px;
+  bottom: 86px;
   animation-delay: 540ms;
 }
 .waypoint-preview-section {
@@ -729,9 +748,9 @@
   z-index: 3;
   grid-column: 2;
   justify-self: end;
-  align-self: end;
-  width: 420px;
-  padding: 20px 22px 22px;
+  align-self: stretch;
+  width: 100%;
+  padding: 16px 18px;
   border: 1px solid rgba(80, 154, 213, 0.28);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.9);
@@ -742,14 +761,14 @@
 .waypoint-preview-label {
   color: #082b73;
   text-transform: none;
-  font-size: 0.9rem;
+  font-size: 0.84rem;
 }
 
 .waypoint-timeline {
   position: relative;
-  margin-top: 22px;
+  margin-top: 14px;
   display: grid;
-  gap: 17px;
+  gap: 12px;
 }
 
 .waypoint-timeline::before {
@@ -767,8 +786,8 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 40px 1fr;
-  gap: 18px;
+  grid-template-columns: 34px 1fr;
+  gap: 13px;
   transition:
     opacity 400ms ease,
     transform 400ms ease;
@@ -783,8 +802,8 @@
 }
 
 .waypoint-preview-number {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   border: 4px solid #ffffff;
@@ -812,21 +831,26 @@
 
 .waypoint-discovered-label {
   color: #078dc3;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 800;
 }
 
 .waypoint-preview-card h3 {
-  margin-top: 5px;
+  margin-top: 3px;
   color: #082b66;
-  font-size: 0.92rem;
+  font-size: 0.85rem;
+  line-height: 1.2;
 }
 
 .waypoint-preview-description {
-  margin-top: 6px;
+  display: -webkit-box;
+  margin-top: 4px;
+  overflow: hidden;
   color: #174579;
-  font-size: 0.77rem;
-  line-height: 1.45;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .generate-error {
@@ -858,7 +882,7 @@
   z-index: 2;
   width: min(680px, 100%);
   margin: 0;
-  padding: 12px 18px;
+  padding: 10px 14px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -866,7 +890,7 @@
   border: 1px solid rgba(80, 154, 213, 0.2);
   border-radius: 8px;
   color: #163f78;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
 }
@@ -1048,13 +1072,13 @@
   }
 
   .generate-workspace {
-    grid-template-columns: 1fr 1fr;
-    max-width: 920px;
+    grid-template-columns: minmax(190px, 252px) minmax(300px, 430px) minmax(190px, 252px);
+    max-width: 1080px;
   }
 
   .generate-center {
-    grid-column: 1 / -1;
-    grid-row: 1;
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .generation-step-card::after {
@@ -1062,23 +1086,87 @@
   }
 
   .compass-animation {
-    width: min(560px, 88vw);
+    width: min(420px, 100%);
     min-width: 0;
   }
 
   .generate-lower-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+    max-width: 1080px;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
   }
 
   .generate-lower-left {
-    min-height: 230px;
+    min-height: 136px;
   }
 
   .generate-road-visual {
     left: 20%;
     right: 2%;
-    bottom: 96px;
-    height: 190px;
+    bottom: 40px;
+    height: 112px;
+  }
+}
+
+@media (max-height: 820px) and (min-width: 960px) {
+  .generate-page {
+    padding-top: 16px;
+  }
+
+  .generate-top-nav button {
+    min-height: 32px;
+  }
+
+  .generate-intro h1 {
+    font-size: clamp(1.9rem, 2.8vw, 2.55rem);
+  }
+
+  .generate-workspace {
+    margin-top: 12px;
+  }
+
+  .generation-step-card {
+    min-height: 78px;
+    padding: 10px 12px;
+  }
+
+  .generation-step-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .generation-step-content p {
+    display: none;
+  }
+
+  .generate-center {
+    min-height: 338px;
+  }
+
+  .compass-animation {
+    width: min(382px, 100%);
+  }
+
+  .compass-ring {
+    width: 270px;
+    height: 270px;
+  }
+
+  .compass-ring-middle {
+    width: 246px;
+    height: 246px;
+  }
+
+  .compass-ring-inner {
+    width: 216px;
+    height: 216px;
+  }
+
+  .generate-lower-grid {
+    margin-top: 8px;
+  }
+
+  .waypoint-preview-description {
+    -webkit-line-clamp: 1;
   }
 }
 
@@ -1106,6 +1194,10 @@
   .generate-lower-grid {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+
+  .generate-workspace {
+    max-width: 520px;
   }
 
   .generate-center {
