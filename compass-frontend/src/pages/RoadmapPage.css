@@ -21,7 +21,7 @@ body:has(.roadmap-page) {
 .roadmap-page::before {
   content: "";
   position: absolute;
-  inset: 0 0 0 292px;
+  inset: 0;
   z-index: -1;
   background:
     linear-gradient(
@@ -1378,10 +1378,6 @@ body:has(.roadmap-page) {
     grid-template-columns: 250px minmax(620px, 1fr) 255px;
   }
 
-  .roadmap-page::before {
-    left: 250px;
-  }
-
   .roadmap-sidebar {
     padding-inline: 0.75rem;
   }
@@ -1404,10 +1400,6 @@ body:has(.roadmap-page) {
     height: auto;
     overflow: visible;
     grid-template-columns: 1fr;
-  }
-
-  .roadmap-page::before {
-    left: 0;
   }
 
   .roadmap-sidebar,
@@ -1450,4 +1442,21 @@ body:has(.roadmap-page) {
     width: 40px;
     height: 40px;
   }
+}
+
+/* Wide-screen lock: keep the roadmap composition intact beyond 1440px. */
+html:has(.roadmap-page),
+body:has(.roadmap-page),
+#root:has(.roadmap-page) {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.roadmap-page {
+  width: min(100dvw, 1440px);
+  inline-size: min(100dvw, 1440px);
+  max-width: 1440px;
+  max-inline-size: 1440px;
+  margin-inline: auto;
 }

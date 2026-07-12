@@ -102,6 +102,14 @@ export function saveJourneyProgress(journey: ProgressJourney) {
   );
 }
 
+export function clearJourneyProgress(journey: Pick<ProgressJourney, "id" | "destination" | "currentStage" | "nextStep">) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(getJourneyProgressStorageKey(journey));
+}
+
 export function applyStoredJourneyProgress<TJourney extends ProgressJourney>(journey: TJourney): TJourney {
   const stored = readJourneyProgress(journey);
 

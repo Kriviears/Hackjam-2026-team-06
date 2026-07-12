@@ -1288,7 +1288,7 @@ body:has(.generate-shell) {
 
   .generate-workspace {
     width: min(100%, 1300px);
-    margin-top: 12px;
+    margin-top: clamp(28px, 5vh, 58px);
     grid-template-columns:
       minmax(245px, 318px)
       minmax(380px, 500px)

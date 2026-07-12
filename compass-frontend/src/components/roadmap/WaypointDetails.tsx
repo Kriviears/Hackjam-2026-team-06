@@ -54,6 +54,24 @@ function getResourceIcon(type: LearningResource["type"]) {
   }
 }
 
+function getExternalResourceUrl(url?: string) {
+  if (!url?.trim()) {
+    return undefined;
+  }
+
+  const trimmedUrl = url.trim();
+
+  if (/^https?:\/\//i.test(trimmedUrl)) {
+    return trimmedUrl;
+  }
+
+  if (/^(www\.|[a-z0-9-]+(\.[a-z0-9-]+)+)(\/|$)/i.test(trimmedUrl)) {
+    return `https://${trimmedUrl}`;
+  }
+
+  return undefined;
+}
+
 function WaypointDetails({
   roadmap,
   waypoint,
@@ -210,17 +228,22 @@ function WaypointDetails({
         <div className="resource-list">
           {recommendedResources.length > 0 ? recommendedResources.map((resource, resourceIndex) => {
             const ResourceIcon = getResourceIcon(resource.type);
-            const resourceHref = resource.url ?? "#";
-            const opensExternalResource = Boolean(resource.url);
+            const resourceHref = getExternalResourceUrl(resource.url);
+            const opensExternalResource = Boolean(resourceHref);
 
             return (
               <a
-                href={resourceHref}
+                href={resourceHref ?? "#"}
                 key={`${resource.title}-${resourceIndex}`}
                 target={opensExternalResource ? "_blank" : undefined}
-                rel={opensExternalResource ? "noreferrer" : undefined}
+                rel={opensExternalResource ? "noopener noreferrer" : undefined}
                 title={`${resource.title}: ${resource.reason}`}
                 aria-label={`Open ${resource.title}. ${resource.reason}`}
+                onClick={(event) => {
+                  if (!resourceHref) {
+                    event.preventDefault();
+                  }
+                }}
               >
                 <ResourceIcon size={22} />
                 <span>

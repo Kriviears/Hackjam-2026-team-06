@@ -24,6 +24,7 @@ import type {
 } from "../types/journey";
 import techLandscape from "../assets/tech-landscape.png";
 import pathwayCompass from "../assets/pathwaycompass.png";
+import { clearJourneyProgress } from "../utils/journeyProgressStorage";
 
 import "./GeneratePathwayPage.css";
 
@@ -80,6 +81,9 @@ const generationSteps: GenerationStep[] = [
 
 const JOURNEY_GENERATE_ENDPOINT = "http://localhost:8000/journey/generate";
 const MIN_GENERATION_TIME_MS = 7000;
+const SIMULATED_PROGRESS_START = 4;
+const SIMULATED_PROGRESS_CAP = 92;
+const SIMULATED_PROGRESS_EASING_MS = 12000;
 const roadmapRequestCache = new Map<string, Promise<JourneyResponse>>();
 
 type RawWaypoint = {
@@ -163,6 +167,24 @@ function normalizeResourceType(type: unknown): LearningResource["type"] {
   }
 
   return "website";
+}
+
+function normalizeResourceUrl(url: unknown) {
+  if (typeof url !== "string" || !url.trim()) {
+    return undefined;
+  }
+
+  const trimmedUrl = url.trim();
+
+  if (/^https?:\/\//i.test(trimmedUrl)) {
+    return trimmedUrl;
+  }
+
+  if (/^(www\.|[a-z0-9-]+(\.[a-z0-9-]+)+)(\/|$)/i.test(trimmedUrl)) {
+    return `https://${trimmedUrl}`;
+  }
+
+  return undefined;
 }
 
 function normalizeWaypointStatus(
@@ -346,8 +368,10 @@ function normalizeResources(
         reason,
       };
 
-      if (typeof resource.url === "string" && resource.url.trim()) {
-        normalizedResource.url = resource.url.trim();
+      const normalizedUrl = normalizeResourceUrl(resource.url);
+
+      if (normalizedUrl) {
+        normalizedResource.url = normalizedUrl;
       }
 
       return normalizedResource;
@@ -561,7 +585,7 @@ export default function GeneratePathwayPage() {
   const firstName = userProfile?.firstName.trim();
   const possessiveName = firstName ? `${firstName}'s` : "Your";
 
-  const [progress, setProgress] = useState(4);
+  const [progress, setProgress] = useState(SIMULATED_PROGRESS_START);
   const [activeStep, setActiveStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [visibleWaypoints, setVisibleWaypoints] = useState(0);
@@ -597,6 +621,7 @@ export default function GeneratePathwayPage() {
           return;
         }
 
+        clearJourneyProgress(generatedRoadmap);
         setRoadmap(generatedRoadmap);
         setCompletedSteps(generationSteps.map((step) => step.id));
         setActiveStep(generationSteps.length);
@@ -632,23 +657,22 @@ export default function GeneratePathwayPage() {
       return;
     }
 
+    const progressStartedAt = Date.now();
     const progressInterval = window.setInterval(() => {
+      const elapsed = Date.now() - progressStartedAt;
+      const easedProgress = 1 - Math.exp(-elapsed / SIMULATED_PROGRESS_EASING_MS);
+      const nextProgress = Math.min(
+        SIMULATED_PROGRESS_CAP,
+        Math.round(
+          SIMULATED_PROGRESS_START +
+            easedProgress * (SIMULATED_PROGRESS_CAP - SIMULATED_PROGRESS_START),
+        ),
+      );
+
       setProgress((currentProgress) => {
-        if (currentProgress >= 92) {
-          return 92;
-        }
-
-        if (currentProgress < 35) {
-          return Math.min(currentProgress + 3, 92);
-        }
-
-        if (currentProgress < 70) {
-          return Math.min(currentProgress + 2, 92);
-        }
-
-        return Math.min(currentProgress + 1, 92);
+        return Math.max(currentProgress, nextProgress);
       });
-    }, 350);
+    }, 500);
 
     return () => {
       window.clearInterval(progressInterval);
@@ -1036,5 +1060,9 @@ function getStatusMessage(
     return "Building your personalized sequence of milestones...";
   }
 
-  return "Connecting your final recommendations and resources...";
+  if (progress < SIMULATED_PROGRESS_CAP) {
+    return "Connecting your final recommendations and resources...";
+  }
+
+  return "Finalizing your roadmap with the latest recommendations...";
 }

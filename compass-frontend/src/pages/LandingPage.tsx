@@ -42,9 +42,12 @@ function LandingPage() {
       </div>
 
       <nav className="landing-top-nav" aria-label="Landing page navigation">
-        <button type="button" className="landing-home-link" onClick={() => navigate("/")}>
+        <button type="button" className="landing-top-button" onClick={() => navigate("/")}>
           <Home size={16} />
           <span>Home</span>
+        </button>
+        <button type="button" className="landing-top-button" onClick={startJourney}>
+          <span>Start Your Journey</span>
         </button>
       </nav>
 
