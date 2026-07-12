@@ -33,9 +33,12 @@ import {
   readJourneyProgress,
 } from "../utils/journeyProgressStorage";
 import compassLogo from "../assets/compass-landing-logo.png";
+import erniePhoto from "../assets/Ernie.jpeg";
 import giftCardImage from "../assets/actualGiftcard.png";
+import keokiPhoto from "../assets/Keoki.jpg";
 import missionIcon from "../assets/missionIcon.png";
 import roboCompass from "../assets/roboCompass.png";
+import stephaniePhoto from "../assets/Stephanie.png";
 import stepsGraphic from "../assets/stepsNoBackground.png";
 import techLandscape from "../assets/tech-landscape.png";
 
@@ -56,6 +59,39 @@ const assistantOptions = [
   "Prepare me for interviews",
   "Show networking ideas",
   "Find learning resources",
+];
+
+const connectionProfiles = [
+  {
+    title: "Per Scholas Alumni Mentor",
+    reason: "Learn from someone who has navigated a similar path.",
+    name: "Stephanie A.",
+    role: "Front-End Engineer",
+    organization: "Per Scholas Alumna",
+    focus: "Portfolio polish, interview stories, and first tech role strategy.",
+    match: "A strong match for learners building confidence around project-based experience.",
+    photo: stephaniePhoto,
+  },
+  {
+    title: "Career Development Coach",
+    reason: "Get support with resumes, interviews, and readiness.",
+    name: "Ernie J.",
+    role: "Career Readiness Coach",
+    organization: "Compass Partner Network",
+    focus: "Resume positioning, mock interviews, and job-search planning.",
+    match: "Helpful when you are turning roadmap progress into career-ready materials.",
+    photo: erniePhoto,
+  },
+  {
+    title: "Peer Study Partner",
+    reason: "Stay accountable with someone working toward a related goal.",
+    name: "Compass Peer Circle",
+    role: "Weekly Accountability Group",
+    organization: "Learner Community",
+    focus: "Study sessions, milestone check-ins, and shared resource swaps.",
+    match: "Best for staying consistent while completing current roadmap tasks.",
+    photo: keokiPhoto,
+  },
 ];
 
 const timelineLabels: Record<string, string> = {
@@ -918,7 +954,7 @@ export default function DashboardPage() {
             className={`dashboard-opportunities dashboard-future-you ${
               futureYouExpanded ? "dashboard-future-you--expanded" : ""
             }`}
-            title="Future You Opportunities"
+            title="Explore Opportunities Now for the Future You"
             icon={<BriefcaseBusiness size={22} />}
             action={
               futureYou && hasMoreFutureYou ? (
@@ -934,7 +970,6 @@ export default function DashboardPage() {
             {futureYou ? (
               <>
                 <header className="future-you-header">
-                  <span>Future You</span>
                   <h3>{futureYou.title}</h3>
                   <p>{futureYou.summary}</p>
                 </header>
@@ -1050,7 +1085,6 @@ export default function DashboardPage() {
               </>
             ) : (
               <div className="future-you-empty">
-                <span>Future You</span>
                 <h3>{syncedJourney.destination}</h3>
                 <p>
                   Generate or refresh your Compass journey to receive personalized Future You opportunities.
@@ -1070,15 +1104,11 @@ export default function DashboardPage() {
           </DashboardCard>
 
           <DashboardCard id="connections" className="dashboard-connections" title="Suggested Connections" icon={<Handshake size={22} />} action={<button type="button">View all</button>}>
-            {[
-              ["Per Scholas Alumni Mentor", "Learn from someone who has navigated a similar path."],
-              ["Career Development Coach", "Get support with resumes, interviews, and readiness."],
-              ["Peer Study Partner", "Stay accountable with someone working toward a related goal."],
-            ].map(([title, reason], index) => (
-              <article key={title}>
+            {connectionProfiles.map((connection, index) => (
+              <article key={connection.title} tabIndex={0}>
                 <div>
-                  <h3>{title}</h3>
-                  <p>{reason}</p>
+                  <h3>{connection.title}</h3>
+                  <p>{connection.reason}</p>
                 </div>
                 <button
                   type="button"
@@ -1093,6 +1123,16 @@ export default function DashboardPage() {
                 >
                   {connections[index] ? "Request Sent" : "Connect"}
                 </button>
+                <aside className="dashboard-connection-profile" aria-label={`${connection.name} connection details`}>
+                  <img src={connection.photo} alt="" />
+                  <div>
+                    <span>{connection.organization}</span>
+                    <h3>{connection.name}</h3>
+                    <strong>{connection.role}</strong>
+                    <p>{connection.focus}</p>
+                    <small>{connection.match}</small>
+                  </div>
+                </aside>
               </article>
             ))}
           </DashboardCard>

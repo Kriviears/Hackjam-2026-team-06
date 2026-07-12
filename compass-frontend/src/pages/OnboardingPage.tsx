@@ -515,6 +515,7 @@ function OnboardingPage() {
                                     <CheckboxGroup
                                         title="What are you most interested in learning?"
                                         helperText="Select up to 3"
+                                        className="interest-checkbox-section"
                                         options={interestOptions}
                                         selectedValues={formData.learningInterests}
                                         onToggle={(value) => {
@@ -775,6 +776,7 @@ function FormField({
 type CheckboxGroupProps = {
     title: string;
     helperText: string;
+    className?: string;
     options: string[];
     selectedValues: string[];
     onToggle: (value: string) => void;
@@ -783,12 +785,13 @@ type CheckboxGroupProps = {
 function CheckboxGroup({
     title,
     helperText,
+    className = "",
     options,
     selectedValues,
     onToggle,
 }: CheckboxGroupProps) {
     return (
-        <fieldset className="checkbox-section">
+        <fieldset className={`checkbox-section ${className}`}>
             <legend>{title}</legend>
             <p className="field-helper">{helperText}</p>
 
