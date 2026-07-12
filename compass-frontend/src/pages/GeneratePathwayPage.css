@@ -689,14 +689,14 @@ body:has(.generate-shell) {
 
 .generate-road-visual {
   position: absolute;
-  left: clamp(220px, 26vw, 420px);
-  right: clamp(430px, 37vw, 600px);
-  bottom: clamp(18px, 3.4vh, 38px);
-  height: 84px;
+  left: clamp(180px, 20vw, 320px);
+  right: clamp(360px, 31vw, 520px);
+  bottom: clamp(58px, 8vh, 96px);
+  height: 190px;
   z-index: 2;
   pointer-events: none;
   overflow: visible;
-  opacity: 0.78;
+  opacity: 0.72;
 }
 
 .road-pin {
@@ -722,25 +722,25 @@ body:has(.generate-shell) {
 }
 
 .road-pin-1 {
-  left: 2%;
-  bottom: 4px;
+  left: 3%;
+  bottom: 8px;
 }
 
 .road-pin-2 {
-  left: 25%;
-  bottom: 16px;
+  left: 29%;
+  bottom: 92px;
   animation-delay: 180ms;
 }
 
 .road-pin-3 {
-  left: 50%;
-  bottom: 29px;
+  left: 52%;
+  bottom: 48px;
   animation-delay: 360ms;
 }
 
 .road-pin-4 {
-  left: 75%;
-  bottom: 42px;
+  left: 82%;
+  bottom: 142px;
   animation-delay: 540ms;
 }
 .waypoint-preview-section {
@@ -1101,10 +1101,10 @@ body:has(.generate-shell) {
   }
 
   .generate-road-visual {
-    left: 20%;
-    right: 2%;
-    bottom: 40px;
-    height: 112px;
+    left: 15%;
+    right: 27%;
+    bottom: 68px;
+    height: 188px;
   }
 }
 
@@ -1222,6 +1222,26 @@ body:has(.generate-shell) {
     right: 14%;
     bottom: 18px;
     height: 92px;
+  }
+
+  .road-pin-1 {
+    left: 4%;
+    bottom: 4px;
+  }
+
+  .road-pin-2 {
+    left: 33%;
+    bottom: 48px;
+  }
+
+  .road-pin-3 {
+    left: 57%;
+    bottom: 22px;
+  }
+
+  .road-pin-4 {
+    left: 82%;
+    bottom: 66px;
   }
 
   .waypoint-preview-section {
@@ -1344,26 +1364,30 @@ body:has(.generate-shell) {
   }
 
   .generate-road-visual {
-    left: clamp(220px, 25vw, 390px);
-    right: clamp(410px, 36vw, 560px);
-    bottom: clamp(16px, 3vh, 32px);
-    height: 78px;
+    left: clamp(170px, 19vw, 300px);
+    right: clamp(350px, 30vw, 500px);
+    bottom: clamp(54px, 7.2vh, 88px);
+    height: 178px;
   }
 
   .road-pin-1 {
-    bottom: 3px;
+    left: 4%;
+    bottom: 6px;
   }
 
   .road-pin-2 {
-    bottom: 13px;
+    left: 31%;
+    bottom: 86px;
   }
 
   .road-pin-3 {
-    bottom: 24px;
+    left: 54%;
+    bottom: 44px;
   }
 
   .road-pin-4 {
-    bottom: 34px;
+    left: 82%;
+    bottom: 132px;
   }
 
   .waypoint-preview-section {

@@ -8,9 +8,9 @@
   --compass-muted: #173f78;
   position: relative;
   display: grid;
-  grid-template-columns: 172px minmax(0, 1fr);
-  width: min(1440px, 100vw);
-  max-width: 1440px;
+  grid-template-columns: 248px minmax(0, 1fr);
+  width: 100vw;
+  max-width: none;
   min-height: 100vh;
   margin: 0 auto;
   overflow: hidden;
@@ -150,7 +150,7 @@ body:has(.dashboard-page) {
 
 .dashboard-shell {
   min-width: 0;
-  padding: 1.35rem 1.65rem 1.35rem;
+  padding: 1.35rem 1.65rem 1.35rem 1.15rem;
 }
 
 .dashboard-topbar {
@@ -609,7 +609,6 @@ body:has(.dashboard-page) {
   accent-color: var(--compass-teal);
 }
 
-.dashboard-weekly-bar,
 .dashboard-reward-bar,
 .dashboard-skill div {
   height: 9px;
@@ -618,11 +617,6 @@ body:has(.dashboard-page) {
   overflow: hidden;
 }
 
-.dashboard-weekly-bar {
-  margin: 0.9rem 0 0;
-}
-
-.dashboard-weekly-bar span,
 .dashboard-reward-bar span,
 .dashboard-skill div span {
   display: block;
@@ -642,61 +636,14 @@ body:has(.dashboard-page) {
   line-height: 1.42;
 }
 
-.dashboard-momentum-city {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  align-items: end;
-  gap: 0.72rem;
-  height: 72px;
-  margin: 0.65rem 0 0.55rem;
-  padding: 0 0.35rem;
+.dashboard-steps-graphic {
+  margin-top: 0.85rem;
 }
 
-.dashboard-momentum-city span {
-  position: relative;
+.dashboard-steps-graphic img {
   display: block;
-  height: 42px;
-  border-radius: 5px 5px 2px 2px;
-  background:
-    linear-gradient(90deg, transparent 42%, rgba(255, 255, 255, 0.38) 42% 58%, transparent 58%),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.64) 0 4px, transparent 4px 12px),
-    rgba(159, 190, 220, 0.42);
-  box-shadow: inset 0 -7px 0 rgba(159, 190, 220, 0.34);
-}
-
-.dashboard-momentum-city span:nth-child(2),
-.dashboard-momentum-city span:nth-child(4) {
-  height: 58px;
-}
-
-.dashboard-momentum-city span:nth-child(3) {
-  height: 66px;
-}
-
-.dashboard-momentum-city span.active {
-  background:
-    linear-gradient(90deg, transparent 42%, rgba(255, 255, 255, 0.44) 42% 58%, transparent 58%),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.74) 0 4px, transparent 4px 12px),
-    #3d8df5;
-  box-shadow:
-    inset 0 -7px 0 #0d64d8,
-    0 10px 18px rgba(13, 100, 216, 0.2);
-}
-
-.dashboard-momentum-city span::after {
-  content: "";
-  position: absolute;
-  left: -5px;
-  right: -5px;
-  bottom: -8px;
-  height: 8px;
-  border-radius: 999px;
-  background: currentColor;
-  color: rgba(159, 190, 220, 0.5);
-}
-
-.dashboard-momentum-city span.active::after {
-  color: #0d64d8;
+  width: 100%;
+  height: auto;
 }
 
 .dashboard-today {
@@ -724,14 +671,21 @@ body:has(.dashboard-page) {
   width: 145px;
   height: 160px;
   margin: 0 auto;
-  border: 1px solid rgba(133, 220, 255, 0.56);
+  border: 0;
   border-radius: 10px;
-  background: linear-gradient(165deg, rgba(22, 118, 234, 0.9), rgba(72, 180, 255, 0.68));
+  background: transparent;
   color: white;
-  box-shadow:
-    0 20px 32px rgba(13, 100, 216, 0.24),
-    0 0 34px rgba(87, 221, 255, 0.28);
+  box-shadow: none;
   transform: perspective(600px) rotateY(-8deg) rotateZ(-3deg);
+}
+
+.dashboard-resume-visual img {
+  display: block;
+  width: 148px;
+  height: auto;
+  object-fit: contain;
+  opacity: 0.86;
+  filter: brightness(1.08);
 }
 
 .dashboard-resume-visual::after {
@@ -744,23 +698,6 @@ body:has(.dashboard-page) {
   border-radius: 50%;
   background: radial-gradient(ellipse, rgba(47, 196, 255, 0.58), transparent 68%);
   transform: translateX(-50%);
-}
-
-.dashboard-resume-visual svg {
-  margin-bottom: 0.7rem;
-}
-
-.dashboard-resume-visual span {
-  display: block;
-  width: 74px;
-  height: 6px;
-  margin-top: 0.42rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.68);
-}
-
-.dashboard-resume-visual span:last-child {
-  width: 48px;
 }
 
 .dashboard-insight-grid {
@@ -1029,12 +966,10 @@ body:has(.dashboard-page) {
   width: min(190px, 100%);
   aspect-ratio: 1.72;
   margin: 0 auto 0.62rem;
-  border-radius: 12px;
-  overflow: hidden;
+  border-radius: 0;
+  overflow: visible;
   background: transparent;
-  box-shadow:
-    0 16px 28px rgba(13, 100, 216, 0.16),
-    0 0 26px rgba(214, 170, 47, 0.14);
+  box-shadow: none;
 }
 
 .dashboard-gift-card-visual img {
@@ -1356,7 +1291,7 @@ body:has(.dashboard-page) {
 
 @media (max-width: 1180px) {
   .dashboard-page {
-    grid-template-columns: 152px minmax(0, 1fr);
+    grid-template-columns: 204px minmax(0, 1fr);
   }
 
   .dashboard-shell {
@@ -1455,7 +1390,7 @@ body:has(.dashboard-page) {
 /* Dashboard mockup rendering pass */
 @media (min-width: 1181px) {
   .dashboard-page {
-    grid-template-columns: 172px minmax(0, 1fr);
+    grid-template-columns: 248px minmax(0, 1fr);
     min-height: 100vh;
     background-position: center 48%;
     background-size: cover;
@@ -1499,7 +1434,7 @@ body:has(.dashboard-page) {
   }
 
   .dashboard-shell {
-    padding: 1.35rem 1.72rem 1.45rem;
+    padding: 1.35rem 1.72rem 1.45rem 1.05rem;
   }
 
   .dashboard-topbar {
@@ -1649,15 +1584,6 @@ body:has(.dashboard-page) {
 
   .dashboard-weekly-list label {
     font-size: 0.78rem;
-  }
-
-  .dashboard-momentum-city {
-    height: 64px;
-    margin: 0.44rem 0 0.35rem;
-  }
-
-  .dashboard-weekly p {
-    margin-bottom: 0;
   }
 
   .dashboard-today {
@@ -1827,14 +1753,14 @@ body:has(.dashboard-page) {
 
   .dashboard-shell {
     overflow: hidden;
-    background: linear-gradient(180deg, transparent 0 34%, rgba(219, 239, 255, 0.62) 58%, #e8f6ff 100%);
+    background: transparent;
   }
 
   .dashboard-shell::before,
   .dashboard-shell::after {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: 0 1.72rem 0 0;
     pointer-events: none;
   }
 
@@ -1849,6 +1775,7 @@ body:has(.dashboard-page) {
   .dashboard-shell::after {
     z-index: -1;
     background:
+      linear-gradient(180deg, transparent 0 34%, rgba(219, 239, 255, 0.62) 58%, #e8f6ff 100%),
       linear-gradient(180deg, transparent 0 42%, rgba(214, 237, 255, 0.24) 62%, rgba(231, 246, 255, 0.86) 100%),
       radial-gradient(ellipse at 50% 24%, transparent 0 45%, rgba(255, 255, 255, 0.08) 72%, rgba(232, 246, 255, 0.38) 100%),
       linear-gradient(90deg, rgba(250, 253, 255, 0.42) 0%, rgba(250, 253, 255, 0.08) 18%, transparent 36%, transparent 66%, rgba(245, 252, 255, 0.14) 100%),

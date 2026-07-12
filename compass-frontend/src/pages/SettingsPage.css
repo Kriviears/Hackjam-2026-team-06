@@ -8,8 +8,36 @@ body:has(.settings-page) {
   background: #f6fbff;
 }
 
-.settings-page img {
+.settings-mockup-frame {
+  position: relative;
+}
+
+.settings-mockup-frame img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.settings-dashboard-hotspot {
+  position: absolute;
+  left: 34.2%;
+  top: 22.35%;
+  width: 18.1%;
+  height: 2.45%;
+  border-radius: 8px;
+}
+
+.settings-roadmap-hotspot {
+  position: absolute;
+  left: 54.35%;
+  top: 22.35%;
+  width: 16.8%;
+  height: 2.45%;
+  border-radius: 8px;
+}
+
+.settings-dashboard-hotspot:focus-visible,
+.settings-roadmap-hotspot:focus-visible {
+  outline: 3px solid rgba(24, 166, 231, 0.72);
+  outline-offset: 3px;
 }

@@ -6,7 +6,6 @@ import {
   ChevronDown,
   Code2,
   Compass,
-  FileText,
   Gift,
   Handshake,
   LayoutDashboard,
@@ -17,6 +16,8 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  Settings,
+  UserRound,
   UsersRound,
 } from "lucide-react";
 import type { CSSProperties } from "react";
@@ -33,7 +34,9 @@ import {
 } from "../utils/journeyProgressStorage";
 import compassLogo from "../assets/compass-landing-logo.png";
 import giftCardImage from "../assets/actualGiftcard.png";
+import missionIcon from "../assets/missionIcon.png";
 import roboCompass from "../assets/roboCompass.png";
+import stepsGraphic from "../assets/stepsNoBackground.png";
 import techLandscape from "../assets/tech-landscape.png";
 
 import "./DashboardPage.css";
@@ -711,22 +714,15 @@ export default function DashboardPage() {
             state={{ roadmap: syncedJourney, userType: syncedJourney.userType, userProfile }}
           >
             <Map size={19} />
-            Roadmap
+            My Roadmap
           </NavLink>
-          <a href="#opportunities">
-            <BriefcaseBusiness size={19} />
-            Opportunities
-          </a>
-          <a href="#connections">
-            <UsersRound size={19} />
-            Connections
-          </a>
-          <NavLink
-            to="/roadmap"
-            state={{ roadmap: syncedJourney, userType: syncedJourney.userType, userProfile }}
-          >
-            <BookOpen size={19} />
-            Resources
+          <NavLink to="/profile">
+            <UserRound size={19} />
+            Profile
+          </NavLink>
+          <NavLink to="/settings">
+            <Settings size={19} />
+            Settings
           </NavLink>
         </nav>
 
@@ -853,18 +849,9 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            <div className="dashboard-weekly-bar">
-              <span style={{ width: `${dashboardData.weeklyPercent}%` }} />
+            <div className="dashboard-steps-graphic">
+              <img src={stepsGraphic} alt="" />
             </div>
-            <div className="dashboard-momentum-city" aria-hidden="true">
-              {[0, 1, 2, 3, 4].map((item) => (
-                <span
-                  key={item}
-                  className={item < dashboardData.completedWeekly ? "active" : ""}
-                />
-              ))}
-            </div>
-            <p>Small steps today. Big impact tomorrow.</p>
           </DashboardCard>
         </section>
 
@@ -906,10 +893,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="dashboard-resume-visual" aria-hidden="true">
-                <FileText size={54} />
-                <span />
-                <span />
-                <span />
+                <img src={missionIcon} alt="" />
               </div>
             </div>
           </DashboardCard>

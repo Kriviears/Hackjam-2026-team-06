@@ -13,6 +13,11 @@ function ProfilePage() {
           to="/dashboard"
           aria-label="Return to dashboard"
         />
+        <Link
+          className="profile-roadmap-hotspot"
+          to="/roadmap"
+          aria-label="Explore roadmap"
+        />
       </div>
     </main>
   );

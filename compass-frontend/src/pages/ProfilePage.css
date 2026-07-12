@@ -27,7 +27,17 @@ body:has(.profile-page) {
   border-radius: 8px;
 }
 
-.profile-dashboard-hotspot:focus-visible {
+.profile-roadmap-hotspot {
+  position: absolute;
+  left: 73.1%;
+  top: 14.6%;
+  width: 15.2%;
+  height: 2.15%;
+  border-radius: 8px;
+}
+
+.profile-dashboard-hotspot:focus-visible,
+.profile-roadmap-hotspot:focus-visible {
   outline: 3px solid rgba(24, 166, 231, 0.72);
   outline-offset: 3px;
 }
