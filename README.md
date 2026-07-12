@@ -1,3 +1,19 @@
+# Compass can create a plan for you to learn more job skills
+
+Compass can prepare you to get admitted into Per Scholas, a nonprofit organization that provides courses in technology, for free or at low cost. "Per Scholas" is Latin for "through schools."
+
+# How do I run Compass?
+
+- Download the Compass repository.
+- Install node.js on your operating system.
+- Open a command-line window. (The directions below show directories in the convention of UNIX or GNU/Linux.)
+- Go inside the Compass repository.
+- Go inside ```compass-backend/```. Type ```npm install```.
+- Go inside ```compass-frontend/```. Type ```npm install```.
+- Go inside ```compass-backend/```. Type ```node server.cjs```.
+- Go inside ```compass-frontend/```. Type ```npm run dev```.
+- In a browser, go to ```http://localhost:5173/```,
+
 # 🚀 Hack Jam 2026 - Team 06
 
 Welcome to your team's official Hack Jam 2026 project repository. This is where your team will plan, build, document, and deliver your **Tech Futures: Illuminate Your Path** application prototype.
