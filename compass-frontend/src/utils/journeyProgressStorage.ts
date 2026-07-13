@@ -1,39 +1,8 @@
-interface ProgressTask {
-  title: string;
-  completed: boolean;
-}
-
-interface ProgressWaypoint {
-  title: string;
-  description?: string;
-  category?: string;
-  status: string;
-  tasks: ProgressTask[];
-}
-
-interface ProgressJourney {
-  id?: string;
-  destination: string;
-  currentStage: string;
-  nextStep?: string;
-  progressPercent: number;
-  waypoints: ProgressWaypoint[];
-}
-
-export interface JourneyProgressChart {
-  progressPercent: number;
-  completedWaypoints: number;
-  totalWaypoints: number;
-  currentWaypointTitle: string | null;
-  nextWaypointTitle: string | null;
-  waypoints: ProgressWaypoint[];
-}
-
-interface StoredJourneyProgress {
-  waypoints: ProgressWaypoint[];
-  progressPercent: number;
-  chart?: JourneyProgressChart;
-}
+import type {
+  JourneyProgressChart,
+  ProgressJourney,
+  StoredJourneyProgress,
+} from "../types/journeyProgress";
 
 function getJourneyProgressStorageKey(journey: Pick<ProgressJourney, "id" | "destination" | "currentStage" | "nextStep">) {
   const identity = journey.id || `${journey.destination}-${journey.currentStage}-${journey.nextStep ?? ""}`;

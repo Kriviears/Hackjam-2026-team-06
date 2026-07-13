@@ -11,30 +11,17 @@ import type {
   RoadmapWaypoint,
   WaypointStatus,
 } from "../types/roadmap";
-import type { UserProfile } from "../types/journey";
+import type {
+  Point,
+  RoadmapLandingPosition,
+  RoadmapLocationState,
+} from "../types/roadmapPage";
 import {
   applyStoredJourneyProgress,
   saveJourneyProgress,
 } from "../utils/journeyProgressStorage";
 
 import "./RoadmapPage.css";
-
-interface RoadmapLocationState {
-  roadmap?: JourneyResponse;
-  userType?: JourneyResponse["userType"];
-  userProfile?: UserProfile;
-}
-
-interface Point {
-  x: number;
-  y: number;
-}
-
-interface RoadmapLandingPosition {
-  leftPercent: number;
-  bottomPercent: number;
-  roadProgressPercent: number;
-}
 
 const startLandingPosition: RoadmapLandingPosition = {
   leftPercent: 33,

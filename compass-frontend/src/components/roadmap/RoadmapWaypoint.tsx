@@ -2,16 +2,7 @@ import {
   Check,
   Lock,
 } from "lucide-react";
-import type { RoadmapWaypoint as RoadmapWaypointType } from "../../types/roadmap";
-
-interface RoadmapWaypointProps {
-  waypoint: RoadmapWaypointType;
-  highlightTone?: "current" | "preview" | "locked" | null;
-  isFinal?: boolean;
-  onSelect: () => void;
-  onHoverChange?: (isHovered: boolean) => void;
-  cardRef?: (element: HTMLButtonElement | null) => void;
-}
+import type { RoadmapWaypointProps } from "../../types/roadmapComponents";
 
 function RoadmapWaypoint({
   waypoint,

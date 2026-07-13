@@ -1,23 +1,10 @@
-import type { UserProfile, JourneyResponse } from "../types/journey";
-import type { JourneyProgressChart } from "../utils/journeyProgressStorage";
+import type { AskCompassRequest, AskCompassResponse } from "../types/askCompass";
 
 const ASK_COMPASS_ENDPOINT = "http://localhost:8000/assistant/ask";
 
 // Payload sent from the Dashboard when a user clicks one Ask Compass option.
 // We send both the full journey and the progress chart so the LLM can answer
 // from the same state the Roadmap/Dashboard are displaying.
-interface AskCompassRequest {
-  question: string;
-  journey: JourneyResponse;
-  userProfile: UserProfile;
-  journeyProgressChart: JourneyProgressChart;
-}
-
-interface AskCompassResponse {
-  answer?: unknown;
-  error?: unknown;
-}
-
 // Small API wrapper for Ask Compass.
 // Keeping fetch logic here keeps DashboardPage focused on UI state and rendering.
 export async function askCompass({

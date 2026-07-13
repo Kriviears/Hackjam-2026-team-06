@@ -5,27 +5,10 @@ import {
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 import roadmapAvatar from "../../assets/roadmap-avatar1.png";
-import type { UserProfile } from "../../types/journey";
 import type { RoadmapData } from "../../types/roadmap";
+import type { RoadmapCanvasProps } from "../../types/roadmapComponents";
 import RoadmapControls from "./RoadmapControls";
 import RoadmapWaypoint from "./RoadmapWaypoint";
-
-interface RoadmapPosition {
-    left: string;
-    bottom: string;
-    roadProgressPercent: number;
-}
-
-interface RoadmapCanvasProps {
-    roadmap: RoadmapData;
-    userProfile?: UserProfile;
-    selectedWaypointId: number | null;
-    highlightedWaypointId: number | null;
-    highlightTone: "current" | "preview" | "locked" | null;
-    travelerPosition: RoadmapPosition;
-    onSelectWaypoint: (id: number | null) => void;
-    onHoverWaypoint: (id: number | null) => void;
-}
 
 function getDestinationMessage(userType: RoadmapData["userType"]) {
     if (userType === "alumna") {

@@ -6,13 +6,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import type { UserProfile } from "../../types/journey";
-import type { RoadmapData } from "../../types/roadmap";
-
-interface RoadmapSidebarProps {
-  roadmap: RoadmapData;
-  userProfile?: UserProfile;
-}
+import type { RoadmapSidebarProps } from "../../types/roadmapComponents";
 
 const userTypeLabels: Record<string, string> = {
   prospectiveLearner: "Prospective Learner",

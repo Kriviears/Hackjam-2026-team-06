@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import techLandscape from "../assets/tech-landscape.png";
 import {
@@ -15,6 +15,11 @@ import {
 
 
 import type { JourneyRequest } from "../types/journey";
+import type {
+    CheckboxGroupProps,
+    FormFieldProps,
+    StepItemProps,
+} from "../types/onboarding";
 import "./OnboardingPage.css";
 
 const skillOptions = [
@@ -710,14 +715,6 @@ function OnboardingPage() {
     );
 }
 
-type StepItemProps = {
-    number: number;
-    title: string;
-    icon: ReactNode;
-    active?: boolean;
-    completed?: boolean;
-};
-
 function StepItem({
     number,
     title,
@@ -744,14 +741,6 @@ function StepItem({
     );
 }
 
-type FormFieldProps = {
-    label?: string;
-    htmlFor: string;
-    optional?: boolean;
-    fullWidth?: boolean;
-    children: ReactNode;
-};
-
 function FormField({
     label,
     htmlFor,
@@ -772,15 +761,6 @@ function FormField({
         </div>
     );
 }
-
-type CheckboxGroupProps = {
-    title: string;
-    helperText: string;
-    className?: string;
-    options: string[];
-    selectedValues: string[];
-    onToggle: (value: string) => void;
-};
 
 function CheckboxGroup({
     title,

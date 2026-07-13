@@ -15,18 +15,8 @@ import {
 } from "lucide-react";
 import type {
   LearningResource,
-  RoadmapData,
-  RoadmapWaypoint,
 } from "../../types/roadmap";
-
-interface WaypointDetailsProps {
-  roadmap: RoadmapData;
-  waypoint: RoadmapWaypoint;
-  totalWaypoints: number;
-  highlightedWaypointId: number | null;
-  highlightTone: "current" | "preview" | "locked" | null;
-  onToggleTask: (waypointId: number, taskIndex: number) => void;
-}
+import type { WaypointDetailsProps } from "../../types/roadmapComponents";
 
 const resourceTypeLabels: Record<LearningResource["type"], string> = {
   book: "Book",

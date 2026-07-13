@@ -4,13 +4,7 @@ import {
   PlusCircle,
   RefreshCw,
 } from "lucide-react";
-
-interface RoadmapControlsProps {
-  onZoomOut: () => void;
-  onZoomIn: () => void;
-  onCenter: () => void;
-  onRecalculate: () => void;
-}
+import type { RoadmapControlsProps } from "../../types/roadmapComponents";
 
 function RoadmapControls({
   onZoomOut,

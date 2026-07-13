@@ -1,13 +1,4 @@
-import type { ReactNode } from "react";
-
-interface DashboardCardProps {
-  children: ReactNode;
-  className?: string;
-  id?: string;
-  title?: string;
-  icon?: ReactNode;
-  action?: ReactNode;
-}
+import type { DashboardCardProps } from "../../types/dashboardComponents";
 
 function DashboardCard({
   children,

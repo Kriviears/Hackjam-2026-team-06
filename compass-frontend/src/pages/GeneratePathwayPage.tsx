@@ -20,25 +20,25 @@ import type {
   JourneyRequest,
   JourneyResponse,
   Waypoint,
-  UserProfile,
 } from "../types/journey";
+import type {
+  ApiErrorResponse,
+  GeneratingLocationState,
+  GenerationStep,
+  GenerationStepCardProps,
+  RawFutureYou,
+  RawFutureYouCompany,
+  RawFutureYouOpportunity,
+  RawJourneyResponse,
+  RawLearningResource,
+  RawWaypoint,
+  RawWaypointTask,
+} from "../types/generatePathway";
 import techLandscape from "../assets/tech-landscape.png";
 import pathwayCompass from "../assets/pathwaycompass.png";
 import { clearJourneyProgress } from "../utils/journeyProgressStorage";
 
 import "./GeneratePathwayPage.css";
-
-interface GeneratingLocationState {
-  formData?: JourneyRequest;
-  userProfile?: UserProfile;
-}
-
-interface GenerationStep {
-  id: number;
-  title: string;
-  description: string;
-  icon: typeof BrainCircuit;
-}
 
 const generationSteps: GenerationStep[] = [
   {
@@ -85,56 +85,6 @@ const SIMULATED_PROGRESS_START = 4;
 const SIMULATED_PROGRESS_CAP = 92;
 const SIMULATED_PROGRESS_EASING_MS = 12000;
 const roadmapRequestCache = new Map<string, Promise<JourneyResponse>>();
-
-type RawWaypoint = {
-  title?: unknown;
-  description?: unknown;
-  category?: unknown;
-  status?: unknown;
-  tasks?: unknown;
-};
-
-type RawWaypointTask = {
-  title?: unknown;
-  completed?: unknown;
-};
-
-type RawLearningResource = {
-  title?: unknown;
-  type?: unknown;
-  url?: unknown;
-  reason?: unknown;
-};
-
-type RawFutureYouCompany = {
-  name?: unknown;
-  reason?: unknown;
-};
-
-type RawFutureYouOpportunity = {
-  title?: unknown;
-  reason?: unknown;
-};
-
-type RawFutureYou = {
-  title?: unknown;
-  summary?: unknown;
-  roles?: unknown;
-  companies?: unknown;
-  opportunityTypes?: unknown;
-  networkingActions?: unknown;
-  nextOpportunity?: unknown;
-};
-
-type RawJourneyResponse = Partial<Omit<JourneyResponse, "waypoints" | "resources">> & {
-  waypoints?: unknown;
-  resources?: unknown;
-  futureYou?: unknown;
-};
-
-type ApiErrorResponse = {
-  error?: unknown;
-};
 
 function getRoadmapRequestCacheKey(formData: JourneyRequest) {
   return JSON.stringify({
@@ -987,12 +937,6 @@ export default function GeneratePathwayPage() {
       </main>
     </div>
   );
-}
-
-interface GenerationStepCardProps {
-  step: GenerationStep;
-  activeStep: number;
-  completedSteps: number[];
 }
 
 function GenerationStepCard({

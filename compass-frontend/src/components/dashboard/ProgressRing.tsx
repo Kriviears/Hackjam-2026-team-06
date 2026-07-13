@@ -1,9 +1,4 @@
-interface ProgressRingProps {
-  value: number;
-  label?: string;
-  size?: "sm" | "lg";
-  displayValue?: string;
-}
+import type { ProgressRingProps } from "../../types/dashboardComponents";
 
 function ProgressRing({ value, label, size = "lg", displayValue }: ProgressRingProps) {
   const clampedValue = Math.max(0, Math.min(100, value));
