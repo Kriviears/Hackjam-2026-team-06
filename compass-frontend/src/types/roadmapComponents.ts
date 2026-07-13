@@ -1,3 +1,4 @@
+// Prop and helper types for roadmap-specific components.
 import type { UserProfile } from "./journey";
 import type {
   RoadmapData,

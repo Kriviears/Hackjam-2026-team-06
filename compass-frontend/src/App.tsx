@@ -9,6 +9,7 @@ import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 
 
+// Defines the page routes available in the Compass single-page app.
 function App() {
   return (
     <Routes>

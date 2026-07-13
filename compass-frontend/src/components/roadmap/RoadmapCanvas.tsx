@@ -10,6 +10,7 @@ import type { RoadmapCanvasProps } from "../../types/roadmapComponents";
 import RoadmapControls from "./RoadmapControls";
 import RoadmapWaypoint from "./RoadmapWaypoint";
 
+// Selects the destination milestone label based on the learner's profile type.
 function getDestinationMessage(userType: RoadmapData["userType"]) {
     if (userType === "alumna") {
         return "You're Hired!";
@@ -22,6 +23,7 @@ function getDestinationMessage(userType: RoadmapData["userType"]) {
     return "You're Admitted!";
 }
 
+// Converts the learner type into a readable destination phrase for the header.
 function getPersonalizedDestination(userType: RoadmapData["userType"]) {
     if (userType === "alumna") {
         return "getting your dream job";
@@ -34,6 +36,7 @@ function getPersonalizedDestination(userType: RoadmapData["userType"]) {
     return "becoming a Per Scholian";
 }
 
+// Renders the interactive roadmap scene, traveler, waypoints, and map controls.
 function RoadmapCanvas({
     roadmap,
     userProfile,

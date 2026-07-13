@@ -1,5 +1,6 @@
 import type { ProgressRingProps } from "../../types/dashboardComponents";
 
+// Renders a circular progress indicator used by dashboard summary widgets.
 function ProgressRing({ value, label, size = "lg", displayValue }: ProgressRingProps) {
   const clampedValue = Math.max(0, Math.min(100, value));
 

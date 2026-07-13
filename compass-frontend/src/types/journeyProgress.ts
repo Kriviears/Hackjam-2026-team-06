@@ -1,3 +1,4 @@
+// Types for persisting and summarizing roadmap task progress.
 export interface ProgressTask {
   title: string;
   completed: boolean;

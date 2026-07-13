@@ -27,6 +27,7 @@ const resourceTypeLabels: Record<LearningResource["type"], string> = {
   website: "Website",
 };
 
+// Chooses a familiar icon for each recommended resource type.
 function getResourceIcon(type: LearningResource["type"]) {
   switch (type) {
     case "book":
@@ -44,6 +45,7 @@ function getResourceIcon(type: LearningResource["type"]) {
   }
 }
 
+// Converts API-provided resource URLs into external links when possible.
 function getExternalResourceUrl(url?: string) {
   if (!url?.trim()) {
     return undefined;
@@ -62,6 +64,7 @@ function getExternalResourceUrl(url?: string) {
   return undefined;
 }
 
+// Shows the selected waypoint's checklist, resources, and coach guidance.
 function WaypointDetails({
   roadmap,
   waypoint,

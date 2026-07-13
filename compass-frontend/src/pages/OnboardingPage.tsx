@@ -86,9 +86,9 @@ const onboardingSteps = [
     },
 ];
 
+// Collects learner goals, background, and constraints before generation.
 function OnboardingPage() {
 
-    console.log("OnboardingPage rendered");
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState<JourneyRequest>({
@@ -105,7 +105,6 @@ function OnboardingPage() {
         additionalNotes: "",
     });
 
-    console.log("Form Data:", formData);
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [validationMessage, setValidationMessage] = useState("");
 
@@ -715,6 +714,7 @@ function OnboardingPage() {
     );
 }
 
+// Renders a single sidebar step in the onboarding progress list.
 function StepItem({
     number,
     title,
@@ -741,6 +741,7 @@ function StepItem({
     );
 }
 
+// Wraps one form control with consistent label and optional/full-width styling.
 function FormField({
     label,
     htmlFor,
@@ -762,6 +763,7 @@ function FormField({
     );
 }
 
+// Renders selectable checkbox cards for skills and interests.
 function CheckboxGroup({
     title,
     helperText,

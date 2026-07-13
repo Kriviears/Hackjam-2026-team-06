@@ -3,6 +3,7 @@ import profile404Mockup from "../assets/profile404Mockup.png";
 
 import "./ProfilePage.css";
 
+// Displays the placeholder profile page while account features are unfinished.
 function ProfilePage() {
   return (
     <main className="profile-page" aria-label="Profile page mockup">

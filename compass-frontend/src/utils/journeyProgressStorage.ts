@@ -4,11 +4,13 @@ import type {
   StoredJourneyProgress,
 } from "../types/journeyProgress";
 
+// Builds the localStorage key that separates progress for distinct journeys.
 function getJourneyProgressStorageKey(journey: Pick<ProgressJourney, "id" | "destination" | "currentStage" | "nextStep">) {
   const identity = journey.id || `${journey.destination}-${journey.currentStage}-${journey.nextStep ?? ""}`;
   return `compass-journey-progress-${encodeURIComponent(identity.toLowerCase())}`;
 }
 
+// Reads any saved progress snapshot for the supplied journey identity.
 export function readJourneyProgress(journey: Pick<ProgressJourney, "id" | "destination" | "currentStage" | "nextStep">) {
   if (typeof window === "undefined") {
     return null;
@@ -22,6 +24,7 @@ export function readJourneyProgress(journey: Pick<ProgressJourney, "id" | "desti
   }
 }
 
+// Summarizes waypoint/task completion into the chart data shown across the app.
 export function buildJourneyProgressChart(journey: ProgressJourney): JourneyProgressChart {
   const completedWaypoints = journey.waypoints.filter(
     (waypoint) => waypoint.status === "completed",
@@ -53,6 +56,7 @@ export function buildJourneyProgressChart(journey: ProgressJourney): JourneyProg
   };
 }
 
+// Persists the current roadmap progress so Dashboard and Roadmap stay in sync.
 export function saveJourneyProgress(journey: ProgressJourney) {
   if (typeof window === "undefined") {
     return;
@@ -71,6 +75,7 @@ export function saveJourneyProgress(journey: ProgressJourney) {
   );
 }
 
+// Removes saved progress for a newly generated journey so it starts fresh.
 export function clearJourneyProgress(journey: Pick<ProgressJourney, "id" | "destination" | "currentStage" | "nextStep">) {
   if (typeof window === "undefined") {
     return;
@@ -79,6 +84,7 @@ export function clearJourneyProgress(journey: Pick<ProgressJourney, "id" | "dest
   window.localStorage.removeItem(getJourneyProgressStorageKey(journey));
 }
 
+// Merges stored task and waypoint state back into a generated journey.
 export function applyStoredJourneyProgress<TJourney extends ProgressJourney>(journey: TJourney): TJourney {
   const stored = readJourneyProgress(journey);
 

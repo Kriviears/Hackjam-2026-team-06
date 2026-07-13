@@ -1,3 +1,4 @@
+// Types for generation page state and backend response normalization.
 import type { LucideIcon } from "lucide-react";
 import type { JourneyRequest, JourneyResponse, UserProfile } from "./journey";
 

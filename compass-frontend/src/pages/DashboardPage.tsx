@@ -20,12 +20,13 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
+
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import DashboardCard from "../components/dashboard/DashboardCard";
 import ProgressRing from "../components/dashboard/ProgressRing";
-import { askCompass } from "../services/askCompassApi";
+import { useAskCompass } from "../hooks/useAskCompass";
 import type { FutureYou, JourneyResponse, UserProfile, Waypoint } from "../types/journey";
 import {
   applyStoredJourneyProgress,
@@ -121,6 +122,7 @@ const paceMessages = {
     "Add your target timeline and weekly availability to receive a personalized pace recommendation.",
 };
 
+// Interprets the learner's timeline and weekly availability into a pacing note.
 function getCompassPaceRecommendation(targetTimeline?: string, weeklyCommitment?: string) {
   if (!targetTimeline || !weeklyCommitment) {
     return {
@@ -176,10 +178,7 @@ function getCompassPaceRecommendation(targetTimeline?: string, weeklyCommitment?
   };
 }
 
-function getAssistantGreeting(firstName: string, destination: string) {
-  return `Hi ${firstName}! I've been keeping track of your journey toward becoming a ${destination}.\n\nI can help you decide what to work on next.`;
-}
-
+// Picks a friendly greeting based on the user's current local time.
 function getTimeOfDayGreeting() {
   const hour = new Date().getHours();
 
@@ -317,6 +316,7 @@ const mockupJourney: JourneyResponse = {
   },
 };
 
+// Reads a persisted boolean array and pads/trims it to the expected length.
 function getStoredArray(key: string, length: number) {
   if (typeof window === "undefined") {
     return Array<boolean>(length).fill(false);
@@ -330,6 +330,7 @@ function getStoredArray(key: string, length: number) {
   }
 }
 
+// Builds stable IDs for all Future You opportunity cards.
 function getFutureYouOpportunityIds(futureYou?: FutureYou) {
   if (!futureYou) {
     return [];
@@ -343,6 +344,7 @@ function getFutureYouOpportunityIds(futureYou?: FutureYou) {
   ];
 }
 
+// Reads saved opportunity IDs while preserving older localStorage data.
 function getStoredSavedOpportunityIds(key: string, legacyOpportunityIds: string[] = []) {
   if (typeof window === "undefined") {
     return new Set<string>();
@@ -367,6 +369,7 @@ function getStoredSavedOpportunityIds(key: string, legacyOpportunityIds: string[
   return new Set<string>();
 }
 
+// Calculates waypoint-level completion for dashboard readiness summaries.
 function getWaypointProgress(waypoints: Waypoint[]) {
   if (waypoints.length === 0) {
     return 0;
@@ -376,6 +379,7 @@ function getWaypointProgress(waypoints: Waypoint[]) {
   return Math.round((completed / waypoints.length) * 100);
 }
 
+// Finds the current or next actionable waypoint for dashboard summaries.
 function getNextWaypoint(waypoints: Waypoint[]) {
   return (
     waypoints.find((waypoint) => waypoint.status === "in-progress") ??
@@ -384,6 +388,7 @@ function getNextWaypoint(waypoints: Waypoint[]) {
   );
 }
 
+// Builds the compact skill snapshot shown in the lower dashboard grid.
 function buildSkillSnapshot(journey: JourneyResponse) {
   const waypointProgress = Math.max(getWaypointProgress(journey.waypoints), journey.progressPercent ?? 0);
   const categories = journey.waypoints.map((waypoint) => waypoint.category.toLowerCase());
@@ -405,6 +410,7 @@ function buildSkillSnapshot(journey: JourneyResponse) {
   ].map((skill) => ({ ...skill, value: Math.min(95, skill.value) }));
 }
 
+// Derives contextual insight cards from generated journey categories and pace.
 function buildInsights(journey: JourneyResponse) {
   const categories = journey.waypoints.map((waypoint) => waypoint.category).filter(Boolean);
   const categoryText = categories[0] ?? journey.currentStage;
@@ -431,14 +437,17 @@ function buildInsights(journey: JourneyResponse) {
   ];
 }
 
+// Returns Future You data when the backend included career opportunity guidance.
 function getFutureYou(journey: JourneyResponse): FutureYou | undefined {
   return journey.futureYou;
 }
 
+// Produces a normalized ID for locally saving opportunity actions.
 function getOpportunityId(kind: string, title: string) {
   return `${kind}:${title.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 }
 
+// Renders the learner dashboard and synchronizes roadmap-derived progress.
 export default function DashboardPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -465,16 +474,6 @@ export default function DashboardPage() {
   const [connections, setConnections] = useState([false, false, false]);
   const [progressSyncVersion, setProgressSyncVersion] = useState(0);
 
-  // Ask Compass UI state:
-  // ready controls the delayed greeting, expanded reveals the question buttons,
-  // typedLength powers the typewriter intro, and answer/error/loading handle LLM replies.
-  const [assistantReady, setAssistantReady] = useState(false);
-  const [assistantExpanded, setAssistantExpanded] = useState(false);
-  const [assistantTypedLength, setAssistantTypedLength] = useState(0);
-  const [assistantAnswer, setAssistantAnswer] = useState("");
-  const [assistantError, setAssistantError] = useState("");
-  const [assistantLoadingQuestion, setAssistantLoadingQuestion] = useState("");
-
   // Pull in the latest Roadmap-owned progress so Ask Compass answers from
   // the same journey state shown by the Dashboard progress chart.
   const syncedJourney = useMemo(
@@ -493,6 +492,22 @@ export default function DashboardPage() {
       ),
     [syncedJourney.targetTimeline, syncedJourney.weeklyCommitment],
   );
+  const {
+    answer: assistantAnswer,
+    askQuestion: handleAskCompassQuestion,
+    error: assistantError,
+    expanded: assistantExpanded,
+    greeting: assistantGreeting,
+    loadingQuestion: assistantLoadingQuestion,
+    ready: assistantReady,
+    setExpanded: setAssistantExpanded,
+    typedLength: assistantTypedLength,
+  } = useAskCompass({
+    firstName,
+    journey: syncedJourney,
+    journeyProgressChart,
+    userProfile,
+  });
   const openRoadmap = () =>
     navigate("/roadmap", {
       state: {
@@ -512,42 +527,6 @@ export default function DashboardPage() {
       JSON.stringify(Array.from(savedOpportunityIds)),
     );
   }, [savedOpportunityIds]);
-
-  useEffect(() => {
-    // The assistant starts with typing bubbles, then switches to the greeting.
-    const greetingTimer = window.setTimeout(() => {
-      setAssistantReady(true);
-    }, 2400);
-
-    return () => window.clearTimeout(greetingTimer);
-  }, []);
-
-  const assistantGreeting = useMemo(
-    () => getAssistantGreeting(firstName, syncedJourney.destination),
-    [firstName, syncedJourney.destination],
-  );
-
-  useEffect(() => {
-    // Once the greeting is ready, reveal it one character at a time.
-    if (!assistantReady) {
-      setAssistantTypedLength(0);
-      return;
-    }
-
-    setAssistantTypedLength(0);
-    const typingTimer = window.setInterval(() => {
-      setAssistantTypedLength((length) => {
-        if (length >= assistantGreeting.length) {
-          window.clearInterval(typingTimer);
-          return length;
-        }
-
-        return length + 1;
-      });
-    }, 18);
-
-    return () => window.clearInterval(typingTimer);
-  }, [assistantGreeting, assistantReady]);
 
   useEffect(() => {
     const syncJourneyProgress = () => setProgressSyncVersion((version) => version + 1);
@@ -620,34 +599,6 @@ export default function DashboardPage() {
       futureYou!.companies.length > 1 ||
       futureYou!.opportunityTypes.length > 1);
 
-  // Called when a user clicks one of the suggested Ask Compass questions.
-  // It sends the selected question plus the current journey/progress context
-  // to the backend LLM route, then renders the returned answer in the panel.
-  const handleAskCompassQuestion = async (question: string) => {
-    setAssistantExpanded(true);
-    setAssistantAnswer("");
-    setAssistantError("");
-    setAssistantLoadingQuestion(question);
-
-    try {
-      const answer = await askCompass({
-        question,
-        journey: syncedJourney,
-        userProfile,
-        journeyProgressChart,
-      });
-
-      setAssistantAnswer(answer);
-    } catch (error) {
-      setAssistantError(
-        error instanceof Error
-          ? error.message
-          : "Ask Compass could not answer right now.",
-      );
-    } finally {
-      setAssistantLoadingQuestion("");
-    }
-  };
   const askCompassPanel = (
     <section id="assistant" className="dashboard-robo-assistant" aria-label="roboCompass assistant">
       <div

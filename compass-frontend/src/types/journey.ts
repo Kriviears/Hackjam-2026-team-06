@@ -1,4 +1,4 @@
-// Request interface for initiating a new journey
+// Core journey request/response types shared across onboarding, generation, and dashboard.
 export interface UserProfile {
   firstName: string;
   lastName: string;

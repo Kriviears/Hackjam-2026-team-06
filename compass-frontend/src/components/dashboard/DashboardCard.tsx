@@ -1,5 +1,6 @@
 import type { DashboardCardProps } from "../../types/dashboardComponents";
 
+// Shared dashboard card shell with optional heading, icon, and action slot.
 function DashboardCard({
   children,
   className = "",

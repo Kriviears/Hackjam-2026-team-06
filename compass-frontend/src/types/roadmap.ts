@@ -1,3 +1,4 @@
+// Core roadmap display types used by the roadmap page and components.
 export type WaypointStatus =
   | "completed"
   | "in-progress"

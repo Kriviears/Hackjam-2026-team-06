@@ -1,3 +1,4 @@
+// Prop types for small helper components inside the onboarding form.
 import type { ReactNode } from "react";
 
 export interface StepItemProps {

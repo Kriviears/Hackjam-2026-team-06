@@ -3,6 +3,7 @@ import settings404Mockup from "../assets/settings404Mockup.png";
 
 import "./SettingsPage.css";
 
+// Displays the placeholder settings page while preferences are unfinished.
 function SettingsPage() {
   return (
     <main className="settings-page" aria-label="Settings page mockup">

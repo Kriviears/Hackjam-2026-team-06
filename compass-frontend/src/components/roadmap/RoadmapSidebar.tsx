@@ -16,6 +16,7 @@ const userTypeLabels: Record<string, string> = {
   alumna: "Alumna",
 };
 
+// Displays persistent journey context and navigation beside the roadmap.
 function RoadmapSidebar({ roadmap, userProfile }: RoadmapSidebarProps) {
   const currentStageIndex = roadmap.waypoints.findIndex(
     (waypoint) =>

@@ -1,3 +1,4 @@
+// Page-local types for roadmap route state and road geometry helpers.
 import type { JourneyResponse } from "./roadmap";
 import type { UserProfile } from "./journey";
 

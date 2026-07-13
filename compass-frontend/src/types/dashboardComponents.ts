@@ -1,3 +1,4 @@
+// Prop types shared by dashboard presentation components.
 import type { ReactNode } from "react";
 
 export interface DashboardCardProps {

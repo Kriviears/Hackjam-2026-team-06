@@ -28,6 +28,7 @@ const previewSteps = [
   },
 ];
 
+// Presents the public landing page and routes learners into onboarding.
 function LandingPage() {
   const navigate = useNavigate();
 

@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import type { RoadmapControlsProps } from "../../types/roadmapComponents";
 
+// Provides map controls for zooming, centering, and recalculating the path.
 function RoadmapControls({
   onZoomOut,
   onZoomIn,

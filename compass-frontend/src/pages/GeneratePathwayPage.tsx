@@ -15,27 +15,18 @@ import {
 } from "lucide-react";
 
 import type {
-  FutureYou,
-  LearningResource,
   JourneyRequest,
   JourneyResponse,
-  Waypoint,
 } from "../types/journey";
 import type {
-  ApiErrorResponse,
   GeneratingLocationState,
   GenerationStep,
   GenerationStepCardProps,
-  RawFutureYou,
-  RawFutureYouCompany,
-  RawFutureYouOpportunity,
-  RawJourneyResponse,
-  RawLearningResource,
-  RawWaypoint,
-  RawWaypointTask,
 } from "../types/generatePathway";
 import techLandscape from "../assets/tech-landscape.png";
 import pathwayCompass from "../assets/pathwaycompass.png";
+import { generateJourney } from "../services/journeyApi";
+import { normalizeGeneratedRoadmap } from "../utils/generateRoadmapNormalizer";
 import { clearJourneyProgress } from "../utils/journeyProgressStorage";
 
 import "./GeneratePathwayPage.css";
@@ -79,13 +70,13 @@ const generationSteps: GenerationStep[] = [
   },
 ];
 
-const JOURNEY_GENERATE_ENDPOINT = "http://localhost:8000/journey/generate";
 const MIN_GENERATION_TIME_MS = 7000;
 const SIMULATED_PROGRESS_START = 4;
 const SIMULATED_PROGRESS_CAP = 92;
 const SIMULATED_PROGRESS_EASING_MS = 12000;
 const roadmapRequestCache = new Map<string, Promise<JourneyResponse>>();
 
+// Creates a deterministic cache key for identical generation requests.
 function getRoadmapRequestCacheKey(formData: JourneyRequest) {
   return JSON.stringify({
     userType: formData.userType,
@@ -100,371 +91,7 @@ function getRoadmapRequestCacheKey(formData: JourneyRequest) {
   });
 }
 
-function asText(value: unknown, fallback: string) {
-  return typeof value === "string" && value.trim() ? value.trim() : fallback;
-}
-
-function normalizeResourceType(type: unknown): LearningResource["type"] {
-  if (
-    type === "book" ||
-    type === "video" ||
-    type === "course" ||
-    type === "documentation" ||
-    type === "worksheet" ||
-    type === "website"
-  ) {
-    return type;
-  }
-
-  return "website";
-}
-
-function normalizeResourceUrl(url: unknown) {
-  if (typeof url !== "string" || !url.trim()) {
-    return undefined;
-  }
-
-  const trimmedUrl = url.trim();
-
-  if (/^https?:\/\//i.test(trimmedUrl)) {
-    return trimmedUrl;
-  }
-
-  if (/^(www\.|[a-z0-9-]+(\.[a-z0-9-]+)+)(\/|$)/i.test(trimmedUrl)) {
-    return `https://${trimmedUrl}`;
-  }
-
-  return undefined;
-}
-
-function normalizeWaypointStatus(
-  status: unknown,
-  index: number
-): Waypoint["status"] {
-  if (status === "completed" || status === "in-progress") {
-    return status;
-  }
-
-  if (status === "not-started" || status === "locked") {
-    return status;
-  }
-
-  if (status === "pending") {
-    return index === 0 ? "in-progress" : "locked";
-  }
-
-  return index === 0 ? "in-progress" : "locked";
-}
-
-function normalizeTaskCompletion(completed: unknown, waypointStatus: Waypoint["status"]) {
-  if (typeof completed === "boolean") {
-    return completed;
-  }
-
-  if (typeof completed === "string") {
-    return completed.toLowerCase() === "true";
-  }
-
-  return waypointStatus === "completed";
-}
-
-function createFallbackTasks(waypointTitle: string, waypointStatus: Waypoint["status"]) {
-  return [
-    {
-      title: `Review requirements for ${waypointTitle}`,
-      completed: waypointStatus === "completed" || waypointStatus === "in-progress",
-    },
-    {
-      title: `Complete the main action for ${waypointTitle}`,
-      completed: waypointStatus === "completed",
-    },
-    {
-      title: `Document progress for ${waypointTitle}`,
-      completed: waypointStatus === "completed",
-    },
-  ];
-}
-
-function normalizeWaypointTasks(
-  rawTasks: unknown,
-  waypointTitle: string,
-  waypointStatus: Waypoint["status"]
-) {
-  if (!Array.isArray(rawTasks) || rawTasks.length === 0) {
-    return createFallbackTasks(waypointTitle, waypointStatus);
-  }
-
-  const normalizedTasks = rawTasks.slice(0, 6).map((rawTask, index) => {
-    const task =
-      rawTask && typeof rawTask === "object"
-        ? (rawTask as RawWaypointTask)
-        : {};
-
-    return {
-      title: asText(task.title, `${waypointTitle} task ${index + 1}`),
-      completed: normalizeTaskCompletion(task.completed, waypointStatus),
-    };
-  });
-
-  if (normalizedTasks.length >= 3) {
-    return normalizedTasks;
-  }
-
-  return [
-    ...normalizedTasks,
-    ...createFallbackTasks(waypointTitle, waypointStatus).slice(
-      normalizedTasks.length,
-      3
-    ),
-  ];
-}
-
-function normalizeWaypoints(rawWaypoints: unknown, formData: JourneyRequest) {
-  const waypointArray = Array.isArray(rawWaypoints)
-    ? rawWaypoints.slice(0, 6)
-    : [];
-  const fallbackCategory =
-    formData.learningInterests[0] ?? formData.careerGoal ?? "Career Skills";
-
-  if (waypointArray.length === 0) {
-    const status = "in-progress" as const;
-    const title = "Start Your Learning Path";
-
-    return [
-      {
-        title,
-        description: `Begin building the skills needed for ${formData.careerGoal || "your target career"}.`,
-        category: fallbackCategory,
-        status,
-        tasks: createFallbackTasks(title, status),
-      },
-    ];
-  }
-
-  return waypointArray.map((rawWaypoint, index) => {
-    const waypoint =
-      rawWaypoint && typeof rawWaypoint === "object"
-        ? (rawWaypoint as RawWaypoint)
-        : {};
-
-    const title = asText(waypoint.title, `Waypoint ${index + 1}`);
-    const status = normalizeWaypointStatus(waypoint.status, index);
-
-    return {
-      title,
-      description: asText(
-        waypoint.description,
-        "Complete this milestone to keep moving toward your career goal."
-      ),
-      category: asText(waypoint.category, fallbackCategory),
-      status,
-      tasks: normalizeWaypointTasks(waypoint.tasks, title, status),
-    };
-  });
-}
-
-function createFallbackResources(formData: JourneyRequest): LearningResource[] {
-  const careerGoal = formData.careerGoal || "your target career";
-
-  return [
-    {
-      title: "Per Scholas Course Catalog",
-      type: "website",
-      url: "https://perscholas.org/courses/",
-      reason: `Use this to compare current Per Scholas training options that align with ${careerGoal}.`,
-    },
-    {
-      title: "Per Scholas Admissions",
-      type: "website",
-      url: "https://perscholas.org/apply/",
-      reason:
-        "This supports the immediate next step of checking eligibility, requirements, and application details.",
-    },
-    {
-      title: "MDN Learn Web Development",
-      type: "documentation",
-      url: "https://developer.mozilla.org/en-US/docs/Learn",
-      reason:
-        "This provides beginner-friendly technical practice for learners building core web and software foundations.",
-    },
-  ];
-}
-
-function normalizeResources(
-  rawResources: unknown,
-  formData: JourneyRequest
-): LearningResource[] {
-  if (!Array.isArray(rawResources) || rawResources.length === 0) {
-    return createFallbackResources(formData);
-  }
-
-  const normalizedResources = rawResources
-    .slice(0, 5)
-    .map((rawResource) => {
-      const resource =
-        rawResource && typeof rawResource === "object"
-          ? (rawResource as RawLearningResource)
-          : {};
-      const title = asText(resource.title, "");
-      const reason = asText(resource.reason, "");
-
-      if (!title || !reason) {
-        return null;
-      }
-
-      const normalizedResource: LearningResource = {
-        title,
-        type: normalizeResourceType(resource.type),
-        reason,
-      };
-
-      const normalizedUrl = normalizeResourceUrl(resource.url);
-
-      if (normalizedUrl) {
-        normalizedResource.url = normalizedUrl;
-      }
-
-      return normalizedResource;
-    })
-    .filter((resource): resource is LearningResource => Boolean(resource));
-
-  if (normalizedResources.length >= 3) {
-    return normalizedResources;
-  }
-
-  return [
-    ...normalizedResources,
-    ...createFallbackResources(formData).slice(normalizedResources.length, 3),
-  ];
-}
-
-function normalizeStringList(rawList: unknown, limit: number) {
-  if (!Array.isArray(rawList)) {
-    return [];
-  }
-
-  return rawList
-    .map((item) => asText(item, ""))
-    .filter(Boolean)
-    .slice(0, limit);
-}
-
-function normalizeFutureYou(rawFutureYou: unknown): FutureYou | undefined {
-  if (!rawFutureYou || typeof rawFutureYou !== "object" || Array.isArray(rawFutureYou)) {
-    return undefined;
-  }
-
-  const futureYou = rawFutureYou as RawFutureYou;
-  const title = asText(futureYou.title, "");
-  const summary = asText(futureYou.summary, "");
-  const nextOpportunity = asText(futureYou.nextOpportunity, "");
-
-  if (!title || !summary || !nextOpportunity) {
-    return undefined;
-  }
-
-  const roles = normalizeStringList(futureYou.roles, 3);
-  const networkingActions = normalizeStringList(futureYou.networkingActions, 3);
-  const companies = Array.isArray(futureYou.companies)
-    ? futureYou.companies
-        .map((rawCompany) => {
-          const company =
-            rawCompany && typeof rawCompany === "object"
-              ? (rawCompany as RawFutureYouCompany)
-              : {};
-          const name = asText(company.name, "");
-          const reason = asText(company.reason, "");
-
-          return name && reason ? { name, reason } : null;
-        })
-        .filter((company): company is FutureYou["companies"][number] => Boolean(company))
-        .slice(0, 3)
-    : [];
-  const opportunityTypes = Array.isArray(futureYou.opportunityTypes)
-    ? futureYou.opportunityTypes
-        .map((rawOpportunity) => {
-          const opportunity =
-            rawOpportunity && typeof rawOpportunity === "object"
-              ? (rawOpportunity as RawFutureYouOpportunity)
-              : {};
-          const opportunityTitle = asText(opportunity.title, "");
-          const reason = asText(opportunity.reason, "");
-
-          return opportunityTitle && reason
-            ? { title: opportunityTitle, reason }
-            : null;
-        })
-        .filter(
-          (opportunity): opportunity is FutureYou["opportunityTypes"][number] =>
-            Boolean(opportunity),
-        )
-        .slice(0, 3)
-    : [];
-
-  if (
-    roles.length === 0 ||
-    companies.length === 0 ||
-    opportunityTypes.length === 0 ||
-    networkingActions.length === 0
-  ) {
-    return undefined;
-  }
-
-  return {
-    title,
-    summary,
-    roles,
-    companies,
-    opportunityTypes,
-    networkingActions,
-    nextOpportunity,
-  };
-}
-
-function calculateJourneyProgress(waypoints: Waypoint[]) {
-  const taskTotals = waypoints.reduce(
-    (totals, waypoint) => {
-      totals.total += waypoint.tasks.length;
-      totals.completed += waypoint.tasks.filter((task) => task.completed).length;
-      return totals;
-    },
-    { completed: 0, total: 0 }
-  );
-
-  if (taskTotals.total === 0) {
-    return 0;
-  }
-
-  return Math.round((taskTotals.completed / taskTotals.total) * 100);
-}
-
-function normalizeGeneratedRoadmap(
-  rawRoadmap: RawJourneyResponse,
-  formData: JourneyRequest
-): JourneyResponse {
-  const waypoints = normalizeWaypoints(rawRoadmap.waypoints, formData);
-  const resources = normalizeResources(rawRoadmap.resources, formData);
-  const futureYou = normalizeFutureYou(rawRoadmap.futureYou);
-  const currentWaypoint =
-    waypoints.find((waypoint) => waypoint.status === "in-progress") ??
-    waypoints.find((waypoint) => waypoint.status !== "completed") ??
-    waypoints[0];
-
-  return {
-    id: asText(rawRoadmap.id, `roadmap-${Date.now()}`),
-    destination: asText(rawRoadmap.destination, formData.careerGoal),
-    currentStage: asText(rawRoadmap.currentStage, currentWaypoint.title),
-    progressPercent: calculateJourneyProgress(waypoints),
-    nextStep: asText(rawRoadmap.nextStep, currentWaypoint.title),
-    userType: formData.userType,
-    weeklyCommitment: formData.weeklyTimeCommitment,
-    targetTimeline: formData.targetTimeline,
-    waypoints,
-    resources,
-    futureYou,
-  };
-}
-
+// Caches identical in-flight roadmap requests so React remounts do not duplicate calls.
 async function requestRoadmap(
   formData: JourneyRequest
 ): Promise<JourneyResponse> {
@@ -486,38 +113,16 @@ async function requestRoadmap(
   }
 }
 
+// Calls the journey API service and normalizes the response for this page.
 async function fetchRoadmap(
   formData: JourneyRequest
 ): Promise<JourneyResponse> {
-  const response = await fetch(JOURNEY_GENERATE_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(formData),
-  });
-
-  if (!response.ok) {
-    let message = `Request failed with status ${response.status}`;
-
-    try {
-      const errorBody = (await response.json()) as ApiErrorResponse;
-
-      if (typeof errorBody.error === "string" && errorBody.error.trim()) {
-        message = errorBody.error.trim();
-      }
-    } catch {
-      // If the server did not send JSON, keep the status-based fallback.
-    }
-
-    throw new Error(message);
-  }
-
-  const rawRoadmap = (await response.json()) as RawJourneyResponse;
+  const rawRoadmap = await generateJourney(formData);
 
   return normalizeGeneratedRoadmap(rawRoadmap, formData);
 }
 
+// Shows generation progress while the backend builds a personalized roadmap.
 export default function GeneratePathwayPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -939,6 +544,7 @@ export default function GeneratePathwayPage() {
   );
 }
 
+// Renders one animated generation step card around the central compass.
 function GenerationStepCard({
   step,
   activeStep,
@@ -984,6 +590,7 @@ function GenerationStepCard({
   );
 }
 
+// Chooses the progress status message shown below the generation meter.
 function getStatusMessage(
   progress: number,
   isComplete: boolean

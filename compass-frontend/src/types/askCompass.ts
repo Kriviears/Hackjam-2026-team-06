@@ -1,3 +1,4 @@
+// Types for the Ask Compass assistant request/response contract.
 import type { JourneyProgressChart } from "./journeyProgress";
 import type { JourneyResponse, UserProfile } from "./journey";
 

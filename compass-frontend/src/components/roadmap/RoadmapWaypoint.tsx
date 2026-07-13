@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import type { RoadmapWaypointProps } from "../../types/roadmapComponents";
 
+// Draws an interactive waypoint marker and label on the roadmap canvas.
 function RoadmapWaypoint({
   waypoint,
   highlightTone = null,

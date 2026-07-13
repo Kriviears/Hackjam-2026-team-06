@@ -7,6 +7,7 @@ const ASK_COMPASS_ENDPOINT = "http://localhost:8000/assistant/ask";
 // from the same state the Roadmap/Dashboard are displaying.
 // Small API wrapper for Ask Compass.
 // Keeping fetch logic here keeps DashboardPage focused on UI state and rendering.
+// Sends one suggested question plus the current learner and journey state to the backend.
 export async function askCompass({
   question,
   journey,

@@ -1,11 +1,16 @@
-// Import the necessary types for the journey request and response
-import type { JourneyRequest, JourneyResponse } from "../types/journey";
+import type { JourneyRequest } from "../types/journey";
+import type {
+  ApiErrorResponse,
+  RawJourneyResponse,
+} from "../types/generatePathway";
 
-// Function to generate a journey based on the provided request data
+const JOURNEY_GENERATE_ENDPOINT = "http://localhost:8000/journey/generate";
+
+// Sends onboarding data to the backend and returns the unnormalized roadmap payload.
 export async function generateJourney(
   data: JourneyRequest
-): Promise<JourneyResponse> {
-  const response = await fetch("http://localhost:8000/journey/generate", {
+): Promise<RawJourneyResponse> {
+  const response = await fetch(JOURNEY_GENERATE_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -14,8 +19,20 @@ export async function generateJourney(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to generate journey");
+    let message = `Request failed with status ${response.status}`;
+
+    try {
+      const errorBody = (await response.json()) as ApiErrorResponse;
+
+      if (typeof errorBody.error === "string" && errorBody.error.trim()) {
+        message = errorBody.error.trim();
+      }
+    } catch {
+      // If the server did not send JSON, keep the status-based fallback.
+    }
+
+    throw new Error(message);
   }
 
-  return response.json();
+  return (await response.json()) as RawJourneyResponse;
 }
