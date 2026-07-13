@@ -213,7 +213,7 @@ app.post("/journey/generate", async (req, res) => {
 
       // Too many requests.
       return res.status(429).json({
-        error: `Our Path Roadmap Generator is temporarily unavailable. Please try again in ${waitSeconds} seconds`,
+        error: `Our Roadmap Generator is temporarily unavailable. Please try again in ${waitSeconds} seconds`,
         retryAfterSeconds: waitSeconds
       });
     }
